@@ -19,7 +19,7 @@
 
 ## 我的收藏
 
-- [[notes/health/静息心率越慢通常与寿命更长相关|静息心率越慢通常与寿命更长相关]]
+- [[notes/health/静息心率越慢通常与寿命更长相关|静息心率越慢通常与寿命更长相关]] (verified: false, checked: 2026-07-03)
 - [[notes/obsidian/Obsidian最小配置是打开vault装Git插件|Obsidian最小配置是打开vault装Git插件]]
 - [[notes/obsidian/Obsidian用Git插件同步GitHub再经iCloud即可手机查看|Obsidian用Git插件同步GitHub再经iCloud即可手机查看]]
 - [[notes/obsidian/Obsidian默认附件存放位置改成notes-assets|Obsidian默认附件存放位置改成notes-assets]]

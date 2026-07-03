@@ -13,4 +13,4 @@ checkable: false
 - Obsidian Git 是社区插件,可设定时自动 pull/push
 - 本条为 notes/ 的格式示例:只有用户说「记下来」时才新增这类笔记
 
-相关:[[pitfalls/git仓库放iCloud目录可能因大量小文件同步冲突]]、[[decisions/记忆库用纯Markdown加Git不绑定任何AI工具]]
+相关:[[pitfalls/git仓库放iCloud目录可能因大量小文件同步冲突]]、[[decisions/记忆库用纯Markdown加Git不绑定任何AI工具]]、[[notes/obsidian/Obsidian最小配置是打开vault装Git插件]]

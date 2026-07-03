@@ -41,7 +41,12 @@ for dirname, title in SECTIONS:
         meta = frontmatter(f)
         extras = [
             f"{label}: {meta[key]}"
-            for key, label in (("confidence", "confidence"), ("last-verified", "verified"))
+            for key, label in (
+                ("confidence", "confidence"),
+                ("last-verified", "verified"),
+                ("verified", "verified"),
+                ("last-checked", "checked"),
+            )
             if meta.get(key)
         ]
         suffix = f" ({', '.join(extras)})" if extras else ""

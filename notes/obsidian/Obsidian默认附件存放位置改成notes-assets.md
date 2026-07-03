@@ -15,4 +15,4 @@ checkable: false
 
 配合记忆库的图片存储约定——截图等附件统一存进 `notes/assets/`,与笔记正文里的 `![说明](assets/文件名)` 引用路径对齐,避免 Obsidian 默认把图片存到笔记同级目录或根目录导致路径混乱。
 
-相关:[[notes/obsidian/Obsidian最小配置是打开vault装Git插件]]
+相关:[[notes/obsidian/Obsidian最小配置是打开vault装Git插件]]、[[notes/obsidian/Obsidian用Git插件同步GitHub再经iCloud即可手机查看]]
