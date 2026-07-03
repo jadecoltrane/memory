@@ -7,6 +7,7 @@
 - [[decisions/Gemini网页版只能读快照不能写入故暂不整合Gemini|Gemini网页版只能读快照不能写入故暂不整合Gemini]] (verified: 2026-07-03)
 - [[decisions/claude仓库长期只保留claude-main和gh-pages两个分支|claude仓库长期只保留claude-main和gh-pages两个分支]] (verified: 2026-07-03)
 - [[decisions/不往记忆库写grep能查到的事实|不往记忆库写grep能查到的事实]] (verified: 2026-07-03)
+- [[decisions/写笔记时双链内嵌正文概念处而非只列末尾相关|写笔记时双链内嵌正文概念处而非只列末尾相关]] (verified: 2026-07-03)
 - [[decisions/记忆库用纯Markdown加Git不绑定任何AI工具|记忆库用纯Markdown加Git不绑定任何AI工具]] (verified: 2026-07-03)
 
 ## 踩坑记录
@@ -31,4 +32,4 @@
 - [[notes/社会认知/人设的反作用|人设的反作用]]
 - [[notes/社会认知/工作可能并不能带你真正认知社会|工作可能并不能带你真正认知社会]]
 
-共 17 条记忆。
+共 18 条记忆。
