@@ -10,7 +10,7 @@ SECTIONS = [
     ("pitfalls", "踩坑记录"),
     ("insights", "判断与洞察"),
     ("questions", "未解问题"),
-    ("notes", "知识笔记"),
+    ("notes", "我的收藏"),
 ]
 
 
@@ -33,7 +33,7 @@ lines = [
 ]
 total = 0
 for dirname, title in SECTIONS:
-    files = sorted((ROOT / dirname).glob("*.md")) if (ROOT / dirname).exists() else []
+    files = sorted((ROOT / dirname).rglob("*.md")) if (ROOT / dirname).exists() else []
     if not files:
         continue
     lines += [f"## {title}", ""]
@@ -45,7 +45,8 @@ for dirname, title in SECTIONS:
             if meta.get(key)
         ]
         suffix = f" ({', '.join(extras)})" if extras else ""
-        lines.append(f"- [[{dirname}/{f.stem}|{f.stem}]]{suffix}")
+        rel = f.relative_to(ROOT).with_suffix("").as_posix()
+        lines.append(f"- [[{rel}|{f.stem}]]{suffix}")
         total += 1
     lines.append("")
 lines.append(f"共 {total} 条记忆。")
