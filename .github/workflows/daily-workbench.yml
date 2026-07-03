@@ -1,0 +1,39 @@
+# 每天北京时间 05:00 在云端生成新一期工作台,不依赖任何本地设备开机。
+# 需要仓库 secret:CLAUDE_CODE_OAUTH_TOKEN(本地终端跑 `claude setup-token` 生成)。
+name: 工作台日更
+
+on:
+  schedule:
+    - cron: "0 21 * * *" # UTC 21:00 = 北京时间次日 05:00
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude 生成今日工作台
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            当前目录就是个人记忆库仓库(jadecoltane/memory)。读根目录 CLAUDE.md 的「工作台(每日生成)」一节,严格按那一节的规则更新 工作台.md 的三个 AI 板块(🎴 今日抽卡 / 🌱 今日延伸 / ❓ 今天的问题):
+
+            - 生成前先处理上一期 ❓ 区块里用户写的回答(✍️ 引用块内):无条件归档到 notes/问答/YYYY-MM 工作台问答.md,有价值的沉淀进相关概念页,并在新一期 🎴 上方用一两句话回应
+            - 🌱 延伸写完后同步追加进对应概念页的延伸区(标注 [事实]/[推论]/[观点],注明未联网核查,禁止编造引用链接)
+            - 改动了 concepts/ 或 notes/ 就运行 python3 scripts/build_memory_index.py 重建索引
+            - 控制成本:只读 index.md 和选中的少数文件;抽卡不与最近几期重复(用 git log -p -- 工作台.md 查历史)
+            - frontmatter、顶部 dataviewjs 横幅统计块、📥 最近输入、👻 幽灵概念、callout 卡片语法全部原样保留
+
+            完成后提交推送:
+            git config user.name "workbench-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add -A && git commit -m "工作台日更:$(date -u -d '+8 hours' +%F)" && git push
+          claude_args: |
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
