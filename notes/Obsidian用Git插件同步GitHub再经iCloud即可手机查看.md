@@ -2,6 +2,7 @@
 type: note
 created: 2026-07-03
 source: 2026-07-03 讨论记忆库如何在多设备查看时确认的方案
+checkable: false
 ---
 
 # 内容

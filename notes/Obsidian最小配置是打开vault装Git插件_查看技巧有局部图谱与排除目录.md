@@ -2,6 +2,7 @@
 type: note
 created: 2026-07-03
 source: 2026-07-03 与 Claude 讨论如何在 Obsidian 里查看记忆库,用户点名收藏
+checkable: false
 ---
 
 # 内容
