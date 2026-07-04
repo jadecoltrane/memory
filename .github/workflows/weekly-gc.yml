@@ -29,8 +29,9 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            当前目录就是个人记忆库仓库(jadecoltane/memory)。读根目录 CLAUDE.md 的「Memory GC(垃圾回收,约每周一次)」一节,严格按那一节列出的 1-8 步执行本周 GC。要点提醒:
+            当前目录就是个人记忆库仓库(jadecoltane/memory)。读根目录 CLAUDE.md 的「Memory GC(垃圾回收,约每周一次)」一节,严格按那一节列出的每一步执行本周 GC(含步骤 4a)。要点提醒:
 
+            - 步骤 4a 很容易被漏掉但很重要:用户经常直接在 Obsidian 里手写/粘贴内容,格式随意,甚至会散落在仓库根目录、不在任何 notes/ 子文件夹里,内容也可能混了好几个不相关主题。`git log` 比对时不要只看 notes/ 目录,要扫全仓库找出七个分类目录(profile/concepts/decisions/pitfalls/insights/questions/notes)之外新增的 .md 文件。发现了要按实际主题拆分、改名、移动归位、补 frontmatter 和双链——这一步允许直接改写原文,不是只在文件末尾追加标注,具体授权见 decisions/整理手写笔记允许改写原文而不仅是追加复核记录.md
             - notes 复核只处理 checkable 内容,引用必须来自 WebSearch/WebFetch 当次返回的真实 URL,查不到就写"未找到可靠来源"
             - 需要用户裁决的条目(存疑复核结果、180 天双空缺的 note、张力扫描发现的矛盾)不要自行处置:除了写进 commit message 正文,还要用 gh issue create 在本仓库开一个 issue(标题如「每周 GC:N 项待裁决」,正文逐条列出条目、理由和建议选项)——issue 会触发 GitHub 邮件通知,这是用户唯一的主动提醒渠道。没有待裁决事项就不开 issue,保持沉默
             - 改动记忆文件后运行 python3 scripts/build_memory_index.py 重建索引;检查 SUMMARY.md 是否有该新起或更新的条目
