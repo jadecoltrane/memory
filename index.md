@@ -25,6 +25,7 @@
 - [[decisions/claude仓库长期只保留claude-main和gh-pages两个分支|claude仓库长期只保留claude-main和gh-pages两个分支]] (verified: 2026-07-03)
 - [[decisions/不往记忆库写grep能查到的事实|不往记忆库写grep能查到的事实]] (verified: 2026-07-03)
 - [[decisions/双链优先指向概念页而非笔记之间直接互链|双链优先指向概念页而非笔记之间直接互链]] (verified: 2026-07-04)
+- [[decisions/回答用户默认一律用中文除非用户指明用其他语言|回答用户默认一律用中文除非用户指明用其他语言]] (verified: 2026-07-05)
 - [[decisions/工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件|工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件]] (verified: 2026-07-05)
 - [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
 - [[decisions/整理手写笔记允许改写原文而不仅是追加复核记录|整理手写笔记允许改写原文而不仅是追加复核记录]] (verified: 2026-07-04)
@@ -55,4 +56,4 @@
 - [[notes/社会认知/人设的反作用|人设的反作用]]
 - [[notes/社会认知/工作可能并不能带你真正认知社会|工作可能并不能带你真正认知社会]]
 
-共 35 条记忆。
+共 36 条记忆。
