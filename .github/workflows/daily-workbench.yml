@@ -30,7 +30,7 @@ jobs:
             - 🌱 延伸写完后同步追加进对应概念页的延伸区(标注 [事实]/[推论]/[观点],注明未联网核查,禁止编造引用链接)
             - 改动了 concepts/ 或 notes/ 就运行 python3 scripts/build_memory_index.py 重建索引
             - 控制成本:只读 index.md 和选中的少数文件;抽卡不与最近几期重复(用 git log -p -- 工作台.md 查历史)
-            - 所有 dataviewjs 区块(横幅统计、快捷入口、概念枢纽等,含心跳报警)、📥 最近输入、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses,但必须把 generated 更新为当天日期(北京时间)——横幅靠它判断每日任务是否还活着,漏更会误报;工作台不展示幽灵概念清单,不要把它加回去
+            - 所有 dataviewjs 区块(横幅统计、快捷入口等,含心跳报警)、📥 最近输入、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses,但必须把 generated 更新为当天日期(北京时间)——横幅靠它判断每日任务是否还活着,漏更会误报;工作台不展示幽灵概念清单,不要把它加回去
 
             完成后提交推送:
             git config user.name "workbench-bot"
