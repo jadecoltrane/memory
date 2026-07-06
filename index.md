@@ -29,6 +29,7 @@
 - [[decisions/任务分支改完可直接合并进main不用每次确认|任务分支改完可直接合并进main不用每次确认]] (verified: 2026-07-06)
 - [[decisions/双链优先指向概念页而非笔记之间直接互链|双链优先指向概念页而非笔记之间直接互链]] (verified: 2026-07-04)
 - [[decisions/回答用户默认一律用中文除非用户指明用其他语言|回答用户默认一律用中文除非用户指明用其他语言]] (verified: 2026-07-05)
+- [[decisions/工作台UI精简迭代历史|工作台UI精简迭代历史]] (verified: 2026-07-06)
 - [[decisions/工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件|工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件]] (verified: 2026-07-05)
 - [[decisions/工作台每日画作按真实比例显示不再固定裁切成横条banner|工作台每日画作按真实比例显示不再固定裁切成横条banner]] (verified: 2026-07-06)
 - [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
@@ -64,4 +65,4 @@
 - [[notes/社会认知/工作可能并不能带你真正认知社会|工作可能并不能带你真正认知社会]]
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 44 条记忆。
+共 45 条记忆。
