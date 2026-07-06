@@ -31,6 +31,8 @@ git status     # 确认恢复正常
 
 # 预防(降低复发概率,而非根治)
 
+**⚠️ 2026-07-06 晚本节已过时**:用户当晚改变主意,Mac 端 vault 已整体迁出 iCloud 到 `~/Documents/Obsidian/memory`,只用 git 同步(见 decisions/记忆库vault已迁出iCloud到本地只用git同步.md),Mac 端此坑不再适用;手机端方案待落地。以下保留当天早些时候的原始记录:
+
 2026-07-06 用户明确选择**暂不改动架构**(继续用 iCloud 同步 vault + 两台设备都装 Obsidian Git 插件),原因是备选方案(把 `.git` 用 `.nosync` 排除出 iCloud 同步、仓库搬出 iCloud 改用 Working Copy 桥接、换 Obsidian Sync 付费同步)都要么手机端需要额外用终端 App(如 a-Shell)重新认领 git 历史、要么要多装一个 App/掏订阅费,复杂度/成本超过当前问题的实际烦扰程度。日常靠这几条习惯把风险压低:
 
 - **AI/远程会话刚 push 完,别立刻在手机上打开 App 就操作**:等个一两分钟再打开,给手机上的 iCloud 一点时间把新的 `.git` 内部文件真正下载下来,再触发 pull

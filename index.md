@@ -37,6 +37,7 @@
 - [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
 - [[decisions/整理手写笔记允许改写原文而不仅是追加复核记录|整理手写笔记允许改写原文而不仅是追加复核记录]] (verified: 2026-07-04)
 - [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案|自动化与文档设计优先选省token不影响效果的轻量方案]] (verified: 2026-07-04)
+- [[decisions/记忆库vault已迁出iCloud到本地只用git同步|记忆库vault已迁出iCloud到本地只用git同步]] (verified: 2026-07-06)
 
 ## 踩坑记录
 
@@ -68,4 +69,4 @@
 - [[notes/社区学/自我重养育：用含情注视代替KPI式自我审判|自我重养育：用含情注视代替KPI式自我审判]]
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 48 条记忆。
+共 49 条记忆。
