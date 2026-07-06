@@ -1,10 +1,11 @@
-# 每周一北京时间 09:00 在云端做 Memory GC + 指针巡检,不依赖任何本地设备开机。
+# 每周一北京时间 09:00 在云端做 Memory GC,不依赖任何本地设备开机。
 # 需要仓库 secret:CLAUDE_CODE_OAUTH_TOKEN(与工作台日更共用)。
-# 指针巡检需要额外的 secret:REPO_PATROL_PAT(对用户名下仓库有写权限的 PAT),没配则自动跳过巡检、只做 GC。
+# 2026-07-06 起不再做跨仓库指针巡检(见 decisions/下线跨仓库指针巡检改为用户手动接入记忆库.md),
+# 不再需要 REPO_PATROL_PAT。
 # 省成本闸门:如果自上次 GC 以来仓库没有任何实质性新提交(排除工作台日更),
-# 就跳过本次 Claude 调用,不付整份 CLAUDE.md 的读取成本。代价:指针巡检、
-# 60 天 insight 降级这类按时间触发、与"本周有没有新内容"无关的维护,也会
-# 在安静周被一起顺延到下次真正有新提交的那周(用户 2026-07-04 明确接受这个取舍)。
+# 就跳过本次 Claude 调用,不付整份 CLAUDE.md 的读取成本。代价:60 天 insight
+# 降级这类按时间触发、与"本周有没有新内容"无关的维护,也会在安静周被一起
+# 顺延到下次真正有新提交的那周(用户 2026-07-04 明确接受这个取舍)。
 name: 每周 Memory GC
 
 on:
@@ -44,11 +45,10 @@ jobs:
             fi
           fi
 
-      - name: Claude 执行每周 GC 与指针巡检
+      - name: Claude 执行每周 GC
         if: steps.check.outputs.skip != 'true'
         uses: anthropics/claude-code-action@v1
         env:
-          REPO_PATROL_PAT: ${{ secrets.REPO_PATROL_PAT }}
           GH_TOKEN: ${{ github.token }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -61,8 +61,6 @@ jobs:
             - 需要用户裁决的条目(存疑复核结果、180 天双空缺的 note、张力扫描发现的矛盾)不要自行处置:除了写进 commit message 正文,还要用 gh issue create 在本仓库开一个 issue(标题如「每周 GC:N 项待裁决」,正文逐条列出条目、理由和建议选项)——issue 会触发 GitHub 邮件通知,这是用户唯一的主动提醒渠道。没有待裁决事项就不开 issue,保持沉默
             - 改动记忆文件后运行 python3 scripts/build_memory_index.py 重建索引;检查 SUMMARY.md 是否有该新起或更新的条目
             - 无事可做就不要制造改动,允许本次没有提交
-
-            GC 之后做指针巡检:若环境变量 REPO_PATROL_PAT 非空,用它作为 GitHub 凭据(GH_TOKEN)列出用户名下所有仓库,给缺少记忆指针的仓库按 CLAUDE.md「在新仓库安装记忆指针」一节补装 templates/repo-pointer.md(不能直接推默认分支就开 PR);若为空,跳过巡检并在输出里注明"未配置 REPO_PATROL_PAT,本周跳过指针巡检"。
 
             有改动时提交推送:
             git config user.name "memory-gc-bot"
