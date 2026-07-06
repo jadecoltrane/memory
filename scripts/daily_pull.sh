@@ -18,6 +18,22 @@ notify() {
 {
   echo "=== $(date '+%F %T') ==="
   cd "$VAULT" || { notify "找不到 vault 目录,pull 没跑"; echo "cd failed"; exit 1; }
+
+  # 清理 iCloud 冲突副本(手机和 Mac 两端 git 共用 iCloud 里同一个
+  # .git,两边同时写就会产出 "index 2" 这类带数字后缀的副本,git 只认
+  # 原名文件,副本留着只会越积越多)。只删"原名文件还在"的顶层副本,
+  # 拿不准的一律不动;删了会发通知,让人知道冲突发生过——出现频繁
+  # 说明两端 Obsidian 经常同时开着,得调整使用习惯,不能只靠这里擦屁股
+  cleaned=""
+  for f in "$VAULT/.git/"* ; do
+    name=$(basename "$f")
+    base="${name% [0-9]*}"
+    if [[ "$name" =~ \ [0-9]+$ ]] && [ -e "$VAULT/.git/$base" ]; then
+      rm -rf "$f" && cleaned="$cleaned $name"
+    fi
+  done
+  [ -n "$cleaned" ] && { echo "cleaned conflict copies:$cleaned"; notify "清理了 .git 冲突副本:$cleaned(两端同时写导致,别同时开两端 Obsidian)"; }
+
   export GIT_TERMINAL_PROMPT=0
   if git pull --no-rebase; then
     echo "pull ok"
