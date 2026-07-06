@@ -1,6 +1,6 @@
 # 记忆索引
 
-> 自动生成于 2026-07-06,勿手改;运行 `python3 scripts/build_memory_index.py` 更新。
+> 自动生成于 2026-07-07,勿手改;运行 `python3 scripts/build_memory_index.py` 更新。
 
 ## 用户画像
 
@@ -38,7 +38,7 @@
 - [[decisions/工作台UI精简迭代历史|工作台UI精简迭代历史]] (verified: 2026-07-06)
 - [[decisions/工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件|工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件]] (verified: 2026-07-05)
 - [[decisions/工作台每日画作按真实比例显示不再固定裁切成横条banner|工作台每日画作按真实比例显示不再固定裁切成横条banner]] (verified: 2026-07-06)
-- [[decisions/手机与Mac共用iCloud内同一git目录并加launchd每日拉取兜底|手机与Mac共用iCloud内同一git目录并加launchd每日拉取兜底]] (verified: 2026-07-07)
+- [[decisions/手机与Mac共用iCloud内同一git目录靠插件自动拉取|手机与Mac共用iCloud内同一git目录靠插件自动拉取]] (verified: 2026-07-07)
 - [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
 - [[decisions/整理手写笔记允许改写原文而不仅是追加复核记录|整理手写笔记允许改写原文而不仅是追加复核记录]] (verified: 2026-07-04)
 - [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案|自动化与文档设计优先选省token不影响效果的轻量方案]] (verified: 2026-07-04)
