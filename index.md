@@ -27,6 +27,7 @@
 - [[decisions/双链优先指向概念页而非笔记之间直接互链|双链优先指向概念页而非笔记之间直接互链]] (verified: 2026-07-04)
 - [[decisions/回答用户默认一律用中文除非用户指明用其他语言|回答用户默认一律用中文除非用户指明用其他语言]] (verified: 2026-07-05)
 - [[decisions/工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件|工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件]] (verified: 2026-07-05)
+- [[decisions/工作台每日画作按真实比例显示不再固定裁切成横条banner|工作台每日画作按真实比例显示不再固定裁切成横条banner]] (verified: 2026-07-06)
 - [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
 - [[decisions/整理手写笔记允许改写原文而不仅是追加复核记录|整理手写笔记允许改写原文而不仅是追加复核记录]] (verified: 2026-07-04)
 - [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案|自动化与文档设计优先选省token不影响效果的轻量方案]] (verified: 2026-07-04)
@@ -36,6 +37,7 @@
 - [[pitfalls/git仓库放iCloud目录可能因大量小文件同步冲突|git仓库放iCloud目录可能因大量小文件同步冲突]] (verified: 2026-07-03)
 - [[pitfalls/macOS文件名NFDNFC不一致会让git把整个中文笔记文件夹误判成已删除|macOS文件名NFDNFC不一致会让git把整个中文笔记文件夹误判成已删除]] (verified: 2026-07-04)
 - [[pitfalls/工作台dataviewjs用裸setInterval会在切页返回后叠加计时器拖垮渲染|工作台dataviewjs用裸setInterval会在切页返回后叠加计时器拖垮渲染]] (verified: 2026-07-05)
+- [[pitfalls/工作台旋转动画挂在hover伪类上手机点击会来回摆动|工作台旋转动画挂在hover伪类上手机点击会来回摆动]] (verified: 2026-07-06)
 - [[pitfalls/工作台没更新先检查本地是否拉取了远端而不是怀疑云端日更挂了|工作台没更新先检查本地是否拉取了远端而不是怀疑云端日更挂了]] (verified: 2026-07-06)
 - [[pitfalls/记忆库仓库曾默认公开导致隐私内容对外暴露|记忆库仓库曾默认公开导致隐私内容对外暴露]] (verified: 2026-07-04)
 
@@ -59,4 +61,4 @@
 - [[notes/社会认知/工作可能并不能带你真正认知社会|工作可能并不能带你真正认知社会]]
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 39 条记忆。
+共 41 条记忆。
