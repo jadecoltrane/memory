@@ -29,19 +29,10 @@ git status     # 确认恢复正常
 
 真实数据不受影响——vault 的真身在 GitHub(`jadecoltrane/memory`),`.git/index` 只是本地暂存区状态,坏了顶多丢一点还没提交推送的改动。
 
-# 预防(降低复发概率,而非根治)
+# 预防(已根治,Mac 端)
 
-**⚠️ 2026-07-06 晚本节已过时**:用户当晚改变主意,Mac 端 vault 已整体迁出 iCloud 到 `~/Documents/Obsidian/memory`,只用 git 同步(见 decisions/记忆库vault已迁出iCloud到本地只用git同步.md),Mac 端此坑不再适用;手机端方案待落地。以下保留当天早些时候的原始记录:
+**2026-07-06 晚最终方案**:vault 留在 iCloud(中途短暂尝试整体迁出本地,因一次 Finder 后台拷贝任务在会话期间静默完成、覆盖了本地副本而放弃,过程见 decisions/记忆库vault已迁出iCloud到本地只用git同步.md 与 decisions/vault保留iCloud仅用nosync隔离git内部文件.md),改用**方案 1**根治:`.git` 改名 `.git.nosync` + 建同名 symlink `.git -> .git.nosync`,iCloud 认这个后缀约定,完全不碰 `.git.nosync/` 里的内容,普通 git 命令通过 symlink 照常工作。`.gitignore` 里加了 `.git.nosync/` 防止被 git 自己误当成未追踪内容纳入。
 
-2026-07-06 用户明确选择**暂不改动架构**(继续用 iCloud 同步 vault + 两台设备都装 Obsidian Git 插件),原因是备选方案(把 `.git` 用 `.nosync` 排除出 iCloud 同步、仓库搬出 iCloud 改用 Working Copy 桥接、换 Obsidian Sync 付费同步)都要么手机端需要额外用终端 App(如 a-Shell)重新认领 git 历史、要么要多装一个 App/掏订阅费,复杂度/成本超过当前问题的实际烦扰程度。日常靠这几条习惯把风险压低:
+配套决定:**Obsidian 的「Git」社区插件整个关掉**(不是只在手机上关——`.obsidian/community-plugins.json` 本身跟着 vault 走 iCloud 同步,任一设备关闭都会同步到所有设备)。以后 git 的 add/commit/push/pull 只通过终端或 Claude Code 手动执行,不再有任何设备在后台自动跑 git 操作去碰 `.git`,从根上消除"两边同时读写 .git 内部文件"的场景。笔记本身的手动编辑不受影响,仍会被 git 正常识别为工作区改动,只是不再有人自动帮你提交推送。
 
-- **AI/远程会话刚 push 完,别立刻在手机上打开 App 就操作**:等个一两分钟再打开,给手机上的 iCloud 一点时间把新的 `.git` 内部文件真正下载下来,再触发 pull
-- 第一次 pull 失败报 index 相关错误时,**先别慌,退出 App 等一会再进去重试一次**——如果是占位文件未下载完导致的,重试往往能自愈,不一定要马上跑修复命令
-- 尽快 commit + push,减少本地未提交改动的暴露时间,即使 index 又坏,损失也小
-
-**如果以后想彻底根治**,评估过的方案在这里,不用重新分析:
-1. `.git` 改名 `.git.nosync` + 建 symlink,让 iCloud 完全不碰 git 内部文件,手机端需要用 a-Shell 之类的终端 App 跑 `git init && git remote add origin ... && git fetch && git reset origin/main` 重新认领历史(不会覆盖已同步的笔记内容)——Mac 端简单,手机端这步没有实测验证过
-2. 仓库整体搬出 iCloud,手机端换 Working Copy 桥接 Obsidian 移动版
-3. 换用 Obsidian Sync(付费,约 4 美元/月)替代 iCloud 做笔记同步,git 只留作 GitHub 备份/自动化通道
-
-相关:[[decisions/数据层保持Markdown加Git但Obsidian插件放开用]]、[[pitfalls/macOS文件名NFDNFC不一致会让git把整个中文笔记文件夹误判成已删除]](iCloud 同步在这个仓库上踩出的另一个具体坑)
+相关:[[decisions/数据层保持Markdown加Git但Obsidian插件放开用]]、[[decisions/记忆库vault已迁出iCloud到本地只用git同步]]、[[pitfalls/macOS文件名NFDNFC不一致会让git把整个中文笔记文件夹误判成已删除]](iCloud 同步在这个仓库上踩出的另一个具体坑)

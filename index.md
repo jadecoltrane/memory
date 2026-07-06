@@ -26,6 +26,7 @@
 - [[decisions/CLAUDE.md应尽量精简优先拆分独立文件而非压缩措辞|CLAUDE.md应尽量精简优先拆分独立文件而非压缩措辞]] (verified: 2026-07-06)
 - [[decisions/Gemini网页版只能读快照不能写入故暂不整合Gemini|Gemini网页版只能读快照不能写入故暂不整合Gemini]] (verified: 2026-07-03)
 - [[decisions/claude仓库长期只保留claude-main和gh-pages两个分支|claude仓库长期只保留claude-main和gh-pages两个分支]] (verified: 2026-07-03)
+- [[decisions/vault保留iCloud仅用nosync隔离git内部文件|vault保留iCloud仅用nosync隔离git内部文件]] (verified: 2026-07-06)
 - [[decisions/下线跨仓库指针巡检改为用户手动接入记忆库|下线跨仓库指针巡检改为用户手动接入记忆库]] (verified: 2026-07-06)
 - [[decisions/不往记忆库写grep能查到的事实|不往记忆库写grep能查到的事实]] (verified: 2026-07-03)
 - [[decisions/任务分支改完可直接合并进main不用每次确认|任务分支改完可直接合并进main不用每次确认]] (verified: 2026-07-06)
@@ -69,4 +70,4 @@
 - [[notes/社区学/自我重养育：用含情注视代替KPI式自我审判|自我重养育：用含情注视代替KPI式自我审判]]
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 49 条记忆。
+共 50 条记忆。

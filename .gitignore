@@ -8,3 +8,6 @@ conv-*.jsonl
 
 # macOS 系统文件
 .DS_Store
+
+# git 内部数据本体(.git 是指向它的软链接),排除出 iCloud 同步和 git 自身追踪
+.git.nosync/
