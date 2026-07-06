@@ -1,7 +1,7 @@
 # 长期记忆库指针
 
-本用户的长期记忆库是独立仓库 **`jadecoltane/memory`**(纯 Markdown + Obsidian 双链)。
+本用户的长期记忆库是独立仓库 **`jadecoltrane/memory`**(纯 Markdown + Obsidian 双链)。
 
-- **开工时**:如果会话里已有该仓库,读其根目录 `index.md`,按需加载相关记忆;远程会话没有该仓库时,用 add_repo 工具添加(owner: `jadecoltane`, repo: `memory`)后再读
+- **开工时**:如果会话里已有该仓库,读其根目录 `index.md`,按需加载相关记忆;远程会话没有该仓库时,用 add_repo 工具添加(owner: `jadecoltrane`, repo: `memory`)后再读
 - **用户说「记下来」「存一下」「收藏这条」「写进记忆库」等触发词时**:按该仓库 `CLAUDE.md` 的规则提炼、写入、推送到其 main 分支。"记下来"永远指写进那个 git 仓库,不是会话内短期记忆,也不是任何 AI 产品自带的记忆功能
 - **收工时**:若本次会话产生了值得沉淀的决定/踩坑/判断,同样按其 `CLAUDE.md` 规则写入记忆库

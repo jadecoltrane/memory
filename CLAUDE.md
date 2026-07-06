@@ -1,6 +1,6 @@
 # CLAUDE.md — AI 协作与记忆库规则
 
-`jadecoltane/memory` 就是记忆库本身:数据层纯 Markdown + Git(可迁移,任何 AI 都能接入),使用层 Obsidian 插件随便用(Dataview、Git 等)。当前只接入 Claude。
+`jadecoltrane/memory` 就是记忆库本身:数据层纯 Markdown + Git(可迁移,任何 AI 都能接入),使用层 Obsidian 插件随便用(Dataview、Git 等)。当前只接入 Claude。
 
 **隐私边界**:含健康/心理/生活隐私,仓库必须保持 GitHub **private**,不得转公开、不得对外发布记忆内容,引用仅限用户本人会话(教训见 [[pitfalls/记忆库仓库曾默认公开导致隐私内容对外暴露]])。
 
@@ -51,7 +51,7 @@
   1. 提炼成一条笔记(不是全文粘贴)
   2. frontmatter 用 `type: note`,加一行 `source:`;可自由建子文件夹分类,索引脚本递归收录
   3. 写入本仓库、重跑索引、提交推送到 main。**"记下来"永远指写进这个 git 仓库**,不是会话内的短期记忆或任何 AI 产品自带的记忆功能
-  4. 当前会话没有本仓库时先获取(远程会话用 add_repo 添加 jadecoltane/memory;本地会话直接操作用户磁盘上的 clone),实在无法访问时把写好的内容整段输出给用户手动保存
+  4. 当前会话没有本仓库时先获取(远程会话用 add_repo 添加 jadecoltrane/memory;本地会话直接操作用户磁盘上的 clone),实在无法访问时把写好的内容整段输出给用户手动保存
 - **先判断是否"可查证"**:
   - **事实性/可查证**(数据、健康、历史、科学结论、他人转述的客观陈述等):走下面的 verified + 复核流程
   - **主观性/不可查证**(个人想法、感受、散文、创作、经历叙述、审美偏好):frontmatter 加 `checkable: false`,**不设 verified 字段,永远不进复核队列**——这类内容没有"对不对",原样留存即可

@@ -7,7 +7,7 @@ supersedes: 记忆库用纯Markdown加Git不绑定任何AI工具
 
 # 决定
 
-数据层不变:记忆的真身仍是 `jadecoltane/memory` 仓库里的纯 Markdown + Git,GitHub 仍是 AI 与用户之间的桥梁,保证任何工具将来都能接入。变的是使用层:**Obsidian 插件放开用**(Dataview、Obsidian Git、Claudian 等),AI 生成的页面(如根目录「工作台」)可以依赖插件渲染动态内容。
+数据层不变:记忆的真身仍是 `jadecoltrane/memory` 仓库里的纯 Markdown + Git,GitHub 仍是 AI 与用户之间的桥梁,保证任何工具将来都能接入。变的是使用层:**Obsidian 插件放开用**(Dataview、Obsidian Git、Claudian 等),AI 生成的页面(如根目录「工作台」)可以依赖插件渲染动态内容。
 
 # 为什么
 
