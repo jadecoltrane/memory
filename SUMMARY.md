@@ -14,9 +14,3 @@
 记忆只存代码/文件里查不到的东西(意图、被否决的方案、偏好、外部约束),这是准入门槛。给记忆库本身做设计(CLAUDE.md、GC/工作台 prompt、笔记结构)时,几种做法效果相当就选 token 成本更低的,但不能拿效果换省 token——这条标准反过来也约束了 GC 自身:weekly-gc.yml 加了零提交跳过闸门,安静周不读整份 CLAUDE.md,代价是按时间触发的维护(指针巡检、insight 降级)会顺延到下次有实质提交的周。用户手写/粘贴进 vault、结构和分类都乱掉的笔记,整理时 AI 可以实质性改写原文(拆分、改名、移动),这条不受"notes 复核不改原文"铁律约束——后者只管 checkable 内容的事实性复核,两者管的是不同阶段的不同风险。
 
 相关:[[decisions/不往记忆库写grep能查到的事实]]、[[decisions/自动化与文档设计优先选省token不影响效果的轻量方案]]、[[decisions/整理手写笔记允许改写原文而不仅是追加复核记录]]
-
-## 工作台开发实现现状与已知坑
-
-工作台并排卡片布局(统计卡+随机重逢、抽卡+延伸、问题1+问题2)靠本地 `workbench.css` 里的纯 CSS flex 方案实现,不是 Multi-Column Markdown 插件——插件在编辑模式会露出原始语法标记、两栏高度对不齐,纯 CSS 更省心也没有额外依赖。每日画作改成按真实比例显示(不再固定裁切成横条 banner),因为大多数名画是竖长或接近正方形构图,横条裁切会切掉大半画面;宽屏图文横排、窄屏图上文下,判断逻辑写在 工作台.md 的 dataviewjs 里(内联样式 + matchMedia),不依赖本地专属的 workbench.css,保证远程会话也能改。踩过一次坑:换视觉设计时如果偷懒复用旧 class 名,旧样式表里专为旧设计写的定位规则会接管新结构;以后凡是替换旧设计,新结构必须换新 class 名。另外两个技术坑:dataviewjs 里的计时器必须用 `dv.component.registerInterval(setInterval(...))` 包裹,裸 `setInterval` 在切页返回后不会被清理、会累积拖垮渲染;工作台"看起来没更新"时应先检查本地 iCloud vault 是否拉取了远端(Obsidian Git 插件只在 Obsidian 打开时自动拉取),而不是先怀疑云端 GitHub Actions 日更挂了。
-
-相关:[[decisions/工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件]]、[[decisions/工作台每日画作按真实比例显示不再固定裁切成横条banner]]、[[pitfalls/工作台dataviewjs用裸setInterval会在切页返回后叠加计时器拖垮渲染]]、[[pitfalls/工作台没更新先检查本地是否拉取了远端而不是怀疑云端日更挂了]]
