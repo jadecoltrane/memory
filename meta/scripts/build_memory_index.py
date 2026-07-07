@@ -4,7 +4,7 @@ import datetime
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 SECTIONS = [
     ("profile", "用户画像"),
     ("concepts", "概念"),
@@ -30,7 +30,7 @@ def frontmatter(path: Path) -> dict:
 lines = [
     "# 记忆索引",
     "",
-    f"> 自动生成于 {datetime.date.today()},勿手改;运行 `python3 scripts/build_memory_index.py` 更新。",
+    f"> 自动生成于 {datetime.date.today()},勿手改;运行 `python3 meta/scripts/build_memory_index.py` 更新。",
     "",
 ]
 total = 0

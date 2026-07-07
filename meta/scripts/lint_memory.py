@@ -15,7 +15,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 TIMELINE_DIRS = ["decisions", "pitfalls", "insights", "questions"]
 LINK_CHECK_FILES = ["meta/SUMMARY.md", "工作台.md"]  # CLAUDE/RESOLVER 里是示例链接,不查
 WIKILINK = re.compile(r"\[\[([^\]|#^]+)")

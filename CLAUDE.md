@@ -9,10 +9,10 @@
 **方案设计优先省 token**:几种做法效果相当时选更省 token(读/维护成本更低)的,但不能拿效果去换(见 [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案]])——本文件和下面提到的三个自动化 prompt 都按这个标准写,发现冗余可以精简,但不能牺牲可执行性。
 
 **四个自动化,不需要 AI 手动补**:
-- `rebuild-index.yml`:推送到 main 且改了记忆文件就自动重建 `meta/index.md`(AI 仍可手动跑 `scripts/build_memory_index.py` 提前核对)
+- `rebuild-index.yml`:推送到 main 且改了记忆文件就自动重建 `meta/index.md`(AI 仍可手动跑 `meta/scripts/build_memory_index.py` 提前核对)
 - `weekly-gc.yml`:每周一 09:00(北京时间)云端跑「Memory GC」一节的步骤。**自上次 GC 以来零实质性新提交就直接跳过整次调用**,省 token 但会顺延按时间触发的维护(见 [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案]])
 - `daily-workbench.yml`:每天 05:00(北京时间)云端生成新一期 `工作台.md`,规范单独在 `meta/WORKBENCH.md`(只在处理工作台相关任务时才需要读那份文件,平时聊天不用加载)
-- `lint.yml`:每次推送跑 `scripts/lint_memory.py` 查断链和 frontmatter 完整性,失败邮件通知(幽灵概念是设计允许的,不算断链)。AI 写完记忆建议本地先跑一遍
+- `lint.yml`:每次推送跑 `meta/scripts/lint_memory.py` 查断链和 frontmatter 完整性,失败邮件通知(幽灵概念是设计允许的,不算断链)。AI 写完记忆建议本地先跑一遍
 
 ## 开工时(必做)
 
@@ -27,7 +27,7 @@
 
 判断本次会话是否产生了值得沉淀的记忆。**该往哪个目录写、写不写,查 `meta/RESOLVER.md`**(判断逻辑单独维护在那,这里不重复)。
 
-写完后运行 `python3 scripts/build_memory_index.py` 重新生成索引;若新记忆和已有记忆同属一个主题(2 条以上),同步维护 `meta/SUMMARY.md`(见「结论速览」一节);记忆、索引、速览一起提交。
+写完后运行 `python3 meta/scripts/build_memory_index.py` 重新生成索引;若新记忆和已有记忆同属一个主题(2 条以上),同步维护 `meta/SUMMARY.md`(见「结论速览」一节);记忆、索引、速览一起提交。
 
 **写入必须告知**:任何时候写入或修改了记忆(自动沉淀或用户触发都一样),必须在给用户的回复末尾明确说出来,格式如:「🧠 已写入记忆:`decisions/xxx`」。禁止悄悄写入。
 
@@ -133,7 +133,7 @@ supersedes: 被本条取代的记忆文件名  # 可选
 
 ## 在新仓库安装记忆指针(自安装)
 
-用户在任何仓库说「接入记忆库」「装上记忆」时:把本仓库 `templates/repo-pointer.md` 的内容原样写成该仓库根目录的 `CLAUDE.md`(已存在则追加,不覆盖),提交推送;不能直接推默认分支就开 PR。
+用户在任何仓库说「接入记忆库」「装上记忆」时:把本仓库 `meta/templates/repo-pointer.md` 的内容原样写成该仓库根目录的 `CLAUDE.md`(已存在则追加,不覆盖),提交推送;不能直接推默认分支就开 PR。
 ## Memory GC(垃圾回收,约每周一次)
 
 完整步骤单独在 `meta/GC.md` 里,只在实际执行每周 GC 时才需要读——平时聊天不用加载。

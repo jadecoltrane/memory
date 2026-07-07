@@ -24,4 +24,4 @@
 
 **只有写 notes/ 时**才按 CLAUDE.md「概念层」规则在正文概念出现处挂 `[[concepts/xxx]]` 链接(概念页不存在也照写,幽灵节点零成本);笔记之间不直接互链。`concepts/` 不是录入目的地——概念页只在被第二篇笔记命中时才建。**AI 自动记忆(profile/decisions/pitfalls/insights/questions)不挂概念链、不做双链进图谱**,引用其他记忆用纯文本路径;图谱只属于用户的知识(notes + concepts)。
 
-写完之后:重跑 `python3 scripts/build_memory_index.py` 更新索引;若这条新记忆和已有 2 条以上记忆同属一个主题,同步更新 `SUMMARY.md`(见 CLAUDE.md「结论速览」一节);最后按 CLAUDE.md「写入必须告知」的格式告诉用户。
+写完之后:重跑 `python3 meta/scripts/build_memory_index.py` 更新索引;若这条新记忆和已有 2 条以上记忆同属一个主题,同步更新 `SUMMARY.md`(见 CLAUDE.md「结论速览」一节);最后按 CLAUDE.md「写入必须告知」的格式告诉用户。

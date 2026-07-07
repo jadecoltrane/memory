@@ -18,4 +18,4 @@ jobs:
           python-version: "3.x"
 
       - name: 断链与 frontmatter 检查
-        run: python3 scripts/lint_memory.py
+        run: python3 meta/scripts/lint_memory.py

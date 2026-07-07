@@ -15,5 +15,5 @@ last-verified: 2026-07-06
 # 适用范围/边界
 
 - 只在这个仓库里适用,是这个仓库的既有约定,不代表其他仓库也默认可以自动合并、也不代表可以跳过其他仓库通用的"合并前确认"规范
-- 合并前该做的检查照常做:先跑 `scripts/lint_memory.py`、确认 `index.md` 已重建;能 fast-forward 就 fast-forward,不用 `--force`
+- 合并前该做的检查照常做:先跑 `meta/scripts/lint_memory.py`、确认 `meta/index.md` 已重建;能 fast-forward 就 fast-forward,不用 `--force`
 - 如果分支改动和 `main` 有冲突需要人工取舍,或者改动本身有争议(比如涉及要不要保留某功能这类判断题),这类情况还是应该先问,不能因为这条决定就不假思索硬合
