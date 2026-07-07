@@ -5,6 +5,5 @@
     "quiet-notes",
     "claudian-ui"
   ],
-  "showRibbon": false,
-  "theme": "system"
+  "showRibbon": false
 }

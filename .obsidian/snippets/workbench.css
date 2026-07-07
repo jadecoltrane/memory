@@ -481,22 +481,6 @@
 .workbench .wb-daily-painting:active {
   background: rgba(255, 255, 255, 0.3);
 }
-/* 2026-07-07 深色模式反馈:名画横幅/随机重逢跟其余卡片(今日抽卡等,
-   用 --wb-card-bg,深色下是 rgba(255,255,255,0.07))站在一起看,明显
-   更浅更灰——因为这两张卡的半透明白底是写死的 0.35(浅色主题下调好的
-   数值),没有像其余卡片那样跟着 --wb-card-bg 在深色主题下降到 0.07。
-   直接复用 --wb-card-bg 的深色数值覆盖,让两张卡在深色模式下跟其余
-   卡片一样"黑";浅色主题不受影响,继续用上面写死的 0.35(浅色下从没人
-   反馈过发白,不需要改) */
-.theme-dark .workbench .wb-daily-painting {
-  background: rgba(255, 255, 255, 0.07);
-}
-.theme-dark .workbench .wb-daily-painting:hover {
-  background: rgba(255, 255, 255, 0.11);
-}
-.theme-dark .workbench .wb-daily-painting:active {
-  background: rgba(255, 255, 255, 0.05);
-}
 
 /* callout 卡片被页面渐变"染色"的真正根源(2026-07-05,第三次才定位对,
    grep Obsidian 自带样式确认):不是背景色透明,也不是层叠优先级——
@@ -573,17 +557,6 @@
 }
 .workbench .wb-reunion:active {
   background: rgba(255, 255, 255, 0.3);
-}
-/* 深色模式跟"名画横幅"同一处反馈、同一套修法,见上面 .wb-daily-painting
-   的深色覆盖注释 */
-.theme-dark .workbench .wb-reunion {
-  background: rgba(255, 255, 255, 0.07);
-}
-.theme-dark .workbench .wb-reunion:hover {
-  background: rgba(255, 255, 255, 0.11);
-}
-.theme-dark .workbench .wb-reunion:active {
-  background: rgba(255, 255, 255, 0.05);
 }
 .workbench .wb-reunion-head {
   display: flex;

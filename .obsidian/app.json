@@ -12,8 +12,7 @@
     "profile/",
     "notes/问答/",
     "工作台.md",
-    "claude.md",
-    "index.md"
+    "claude.md"
   ],
   "showUnsupportedFiles": true,
   "promptDelete": false
