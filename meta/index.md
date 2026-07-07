@@ -23,30 +23,9 @@
 
 ## 决策与约定
 
-- [[decisions/CLAUDE.md应尽量精简优先拆分独立文件而非压缩措辞|CLAUDE.md应尽量精简优先拆分独立文件而非压缩措辞]] (verified: 2026-07-06)
-- [[decisions/Gemini网页版只能读快照不能写入故暂不整合Gemini|Gemini网页版只能读快照不能写入故暂不整合Gemini]] (verified: 2026-07-03)
-- [[decisions/claude仓库长期只保留claude-main和gh-pages两个分支|claude仓库长期只保留claude-main和gh-pages两个分支]] (verified: 2026-07-03)
-- [[decisions/下线跨仓库指针巡检改为用户手动接入记忆库|下线跨仓库指针巡检改为用户手动接入记忆库]] (verified: 2026-07-06)
-- [[decisions/不往记忆库写grep能查到的事实|不往记忆库写grep能查到的事实]] (verified: 2026-07-03)
-- [[decisions/任务分支改完可直接合并进main不用每次确认|任务分支改完可直接合并进main不用每次确认]] (verified: 2026-07-06)
-- [[decisions/双链优先指向概念页而非笔记之间直接互链|双链优先指向概念页而非笔记之间直接互链]] (verified: 2026-07-04)
-- [[decisions/回答用户默认一律用中文除非用户指明用其他语言|回答用户默认一律用中文除非用户指明用其他语言]] (verified: 2026-07-05)
-- [[decisions/工作台UI精简迭代历史|工作台UI精简迭代历史]] (verified: 2026-07-07)
-- [[decisions/工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件|工作台并排卡片布局用CSS-flex而非Multi-Column-Markdown插件]] (verified: 2026-07-05)
-- [[decisions/工作台每日画作按真实比例显示不再固定裁切成横条banner|工作台每日画作按真实比例显示不再固定裁切成横条banner]] (verified: 2026-07-06)
-- [[decisions/手机与Mac共用iCloud内同一git目录靠插件自动拉取|手机与Mac共用iCloud内同一git目录靠插件自动拉取]] (verified: 2026-07-07)
-- [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
-- [[decisions/整理手写笔记允许改写原文而不仅是追加复核记录|整理手写笔记允许改写原文而不仅是追加复核记录]] (verified: 2026-07-04)
-- [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案|自动化与文档设计优先选省token不影响效果的轻量方案]] (verified: 2026-07-04)
 
 ## 踩坑记录
 
-- [[pitfalls/git仓库放iCloud目录可能因大量小文件同步冲突|git仓库放iCloud目录可能因大量小文件同步冲突]] (verified: 2026-07-06)
-- [[pitfalls/macOS文件名NFDNFC不一致会让git把整个中文笔记文件夹误判成已删除|macOS文件名NFDNFC不一致会让git把整个中文笔记文件夹误判成已删除]] (verified: 2026-07-04)
-- [[pitfalls/云端GitHub-Actions定时任务偶发因claude-code-action的OIDC鉴权bug失败|云端GitHub-Actions定时任务偶发因claude-code-action的OIDC鉴权bug失败]] (verified: 2026-07-06)
-- [[pitfalls/工作台dataviewjs用裸setInterval会在切页返回后叠加计时器拖垮渲染|工作台dataviewjs用裸setInterval会在切页返回后叠加计时器拖垮渲染]] (verified: 2026-07-05)
-- [[pitfalls/工作台没更新先检查本地是否拉取了远端而不是怀疑云端日更挂了|工作台没更新先检查本地是否拉取了远端而不是怀疑云端日更挂了]] (verified: 2026-07-06)
-- [[pitfalls/记忆库仓库曾默认公开导致隐私内容对外暴露|记忆库仓库曾默认公开导致隐私内容对外暴露]] (verified: 2026-07-04)
 
 ## 判断与洞察
 
@@ -69,4 +48,4 @@
 - [[notes/社区学/自我重养育：用含情注视代替KPI式自我审判|自我重养育：用含情注视代替KPI式自我审判]]
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 49 条记忆。
+
