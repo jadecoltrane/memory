@@ -25,15 +25,15 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: 重新生成 index.md
+      - name: 重新生成 meta/index.md
         run: python3 scripts/build_memory_index.py
 
       - name: 有变化就提交推送
         run: |
           git config user.name "memory-bot"
           git config user.email "actions@users.noreply.github.com"
-          if ! git diff --quiet -- index.md; then
-            git add index.md
+          if ! git diff --quiet -- meta/index.md; then
+            git add meta/index.md
             git commit -m "自动重建记忆索引"
             git push
           fi

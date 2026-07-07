@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""扫描仓库根目录的四类记忆,生成 index.md — 每条记忆一行,文件名即结论。"""
+"""扫描仓库根目录的四类记忆,生成 meta/index.md — 每条记忆一行,文件名即结论。"""
 import datetime
 import re
 from pathlib import Path
@@ -58,5 +58,5 @@ for dirname, title in SECTIONS:
     lines.append("")
 lines.append(f"共 {total} 条记忆。")
 
-(ROOT / "index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-print(f"index.md 已更新,共 {total} 条记忆")
+(ROOT / "meta" / "index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+print(f"meta/index.md 已更新,共 {total} 条记忆")
