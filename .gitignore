@@ -14,6 +14,13 @@
 # 从默认设置重新来,需要各自手动调一遍
 .obsidian/plugins/obsidian-git/data.json
 
+# 图谱视图的缩放/位置(2026-07-07):scale 这类纯视图状态几乎每次打开
+# 图谱都会变,两端一同步就冲突(2026-07-07 当晚已经因为这个冲突过一次)。
+# 过滤器/配色分组等"设计决定"也在这个文件里、跟缩放没法拆开单独同步,
+# 一并不再入库,两端各自的图谱外观独立维护——跟上面 workspace.json
+# 是同一类问题同一种处理方式
+.obsidian/graph.json
+
 # Claudian 插件的本地配置与会话缓存,不是记忆内容,不入库
 claudian-settings.json
 conv-*.json
