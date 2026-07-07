@@ -15,5 +15,6 @@
     "claude.md"
   ],
   "showUnsupportedFiles": true,
-  "promptDelete": false
+  "promptDelete": false,
+  "alwaysUpdateLinks": true
 }
