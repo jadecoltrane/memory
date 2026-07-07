@@ -23,7 +23,7 @@
 
 ## 踩坑记录
 
-- [[pitfalls/工作台跨dataviewjs块的横排靠has选择器和高度联动不可靠|工作台跨dataviewjs块的横排靠has选择器和高度联动不可靠]] (verified: 2026-07-07)
+- [[pitfalls/工作台cm-sizer套用阅读视图的flex网格会打散LivePreview原始文本|工作台cm-sizer套用阅读视图的flex网格会打散LivePreview原始文本]] (verified: 2026-07-07)
 
 ## 判断与洞察
 
