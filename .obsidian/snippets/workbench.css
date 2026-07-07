@@ -524,7 +524,6 @@
 .workbench .wb-reunion {
   display: flex;
   flex-direction: column;
-  gap: 5px;
   height: 100%;
   overflow: hidden;
   box-sizing: border-box;
@@ -568,6 +567,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 5px;
 }
 .workbench .wb-reunion-tag {
   font-size: 0.76em;
@@ -670,6 +670,13 @@
   font-size: 0.98em;
   font-weight: 700;
   color: var(--text-normal);
+  /* 2026-07-07 用户简化要求:不用把两张卡的标题强行对到同一条水平线
+     (那套 JS 实测 marginTop 的做法已撤销,连带撤销了它引入的高度错位
+     bug),只要"标题到正文"的间距在两张卡里一样就行——这里的 8px 直接
+     对应画作说明文字块里 titleEl 的 margin-bottom:8px(见 工作台.md),
+     两处手动保持同一个数值,不做成变量是因为两处分属 CSS 和内联样式,
+     没有共享变量的机制,后续如果要改,两处一起改 */
+  margin-bottom: 8px;
 }
 .workbench .wb-reunion-excerpt {
   font-size: 0.82em;
@@ -734,24 +741,18 @@
 }
 /* ➕ 新建笔记:2026-07-07 改回普通胶囊——第一版套用了"随机重逢"换一篇
    按钮的圆形玻璃拟物 CSS,用户反馈"还是要胶囊的样子",撤掉圆钮外观,
-   跟其他五颗共用 .wb-card 的胶囊底/圆角/阴影。
-   2026-07-07 二次调整:去掉了 margin-left:auto——那是想把它推到行最
-   右,但手机窄屏下 flex-wrap 换行决策不考虑 auto margin(margin 在
-   换行判定阶段按 0 算,换行之后才展开吃掉剩余空间),导致它跟"最近
-   编辑"挤在同一折行里、又被这份 auto margin 硬推向右边界,在窄屏上
-   直接被推出可视区、截断看不全。改回普通文档流本该就没事了,但实测
-   下来窄屏上"这颗到底跟最近编辑挤一行还是自己另起一行"仍然会因为
-   "本周新增"胶囊选中态(is-active,文字变色但理论上不该改变盒子宽度)
-   而摇摆不定,摇摆的确切原因没有再深挖(大概率是移动端渲染引擎在
-   临界宽度上的取整误差),与其继续猜像素,不如让结果变成确定的:窄屏
-   下这颗胶囊直接强制单独占一整行,不再跟任何邻居抢位置,自然也不会
-   再被挤出屏幕外 */
-@media (max-width: 520px) {
-  .workbench .wb-newnote {
-    flex: 1 1 100%;
-    justify-content: center;
-  }
-}
+   跟其他五颗共用 .wb-card 的胶囊底/圆角/阴影,不做任何强制换行/占满
+   一行的处理,就在普通文档流里跟在"最近编辑"后面,该不该跟它同一行
+   全交给 flex-wrap 按当前宽度自然决定。
+   之前怀疑过是 margin-left:auto 在窄屏换行边界上算错导致它被截断,
+   撤了 auto margin 后又观察到"点开/收起本周新增面板"会让它的位置在
+   同一行/换行之间跳动——一度以为是取整误差,试过强制它单独占一整行
+   规避,但用户反馈这也不是他们想要的效果(要求恢复"跟在最近编辑后面"
+   的默认流式布局)。真正的根因转移到了"本周新增"面板本身:那个面板
+   之前支持"展开全部"把列表撑得很长,页面总高度的剧烈变化很可能才是
+   触发那次跳动的真正原因,而不是这颗胶囊自己的样式问题——对应的修复
+   是 工作台.md 里把 weekPanel 也改成固定 8 条、不再支持展开,跟"最近
+   编辑"一致 */
 .workbench .wb-newnote-glyph {
   display: inline-block;
   transition: transform 0.4s var(--wb-ease);
@@ -859,21 +860,23 @@
 /* 笔记面板顶部那排分类小方卡(草图第一屏的方块,同一套样式也给概念
    面板的卡片用):跟嵌套 write/note 一个思路,用比面板更沉一档的
    secondary 底 + 浅阴影区分层级。
-   2026-07-07 从 flex-wrap 改成 CSS Grid:用户反馈卡片"离最外边的间距
-   不一致、歪着"——flex-wrap 下每张卡宽度由自身文字内容撑出来(概念名
-   有长有短),同一行几张卡拼起来的总宽度参差不齐,而 flex-start 默认
-   靠左对齐,行末就会留一截长短不一的空白,看起来就是"歪"。改成
-   grid-template-columns 用 auto-fill + minmax 分固定列:同一行里每张卡
-   宽度相等(短文字的卡会被拉伸到跟同行最宽的卡一样宽,文字居中,不会
-   显得局促),整行贴着容器左右边缘对齐,不会再有参差不齐的留白 */
+   2026-07-07 用户反馈"卡片离最外边的间距不一致、歪着",一度改成过
+   CSS Grid 强制同一行等宽——用户又反馈这不是想要的效果,明确要求
+   "恢复成每张卡宽度由自己文字内容撑出来,只要左右两边的间距一样就
+   行",于是改回了 flex-wrap。真正要保证的只是 .wb-cat-grid 这个容器
+   自己的左右 padding 对称(不引入任何一侧独有的偏移),容器内部每行
+   卡片长短不一、行末留白不齐,是 flex-start 靠左对齐的正常结果,不再
+   当成问题处理 */
 .workbench .wb-cat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 2px;
   margin-bottom: 8px;
 }
 .workbench .wb-cat-card {
+  flex: 0 0 auto;
+  min-width: 84px;
   padding: 12px 16px;
   text-align: center;
   border-radius: var(--wb-radius-sm);
