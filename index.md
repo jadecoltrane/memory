@@ -26,10 +26,6 @@
 - [[decisions/CLAUDE.md应尽量精简优先拆分独立文件而非压缩措辞|CLAUDE.md应尽量精简优先拆分独立文件而非压缩措辞]] (verified: 2026-07-06)
 - [[decisions/Gemini网页版只能读快照不能写入故暂不整合Gemini|Gemini网页版只能读快照不能写入故暂不整合Gemini]] (verified: 2026-07-03)
 - [[decisions/claude仓库长期只保留claude-main和gh-pages两个分支|claude仓库长期只保留claude-main和gh-pages两个分支]] (verified: 2026-07-03)
-- [[decisions/vault保留iCloud仅用nosync隔离git内部文件|vault保留iCloud仅用nosync隔离git内部文件]] (verified: 2026-07-06)
-- [[decisions/vault用xattr标记隔离git目录避免插件报错|vault用xattr标记隔离git目录避免插件报错]] (verified: 2026-07-06)
-- [[decisions/vault用外部gitdir降低插件报错的影响范围|vault用外部gitdir降低插件报错的影响范围]] (verified: 2026-07-06)
-- [[decisions/vault用普通git接受插件偶尔报错|vault用普通git接受插件偶尔报错]] (verified: 2026-07-06)
 - [[decisions/下线跨仓库指针巡检改为用户手动接入记忆库|下线跨仓库指针巡检改为用户手动接入记忆库]] (verified: 2026-07-06)
 - [[decisions/不往记忆库写grep能查到的事实|不往记忆库写grep能查到的事实]] (verified: 2026-07-03)
 - [[decisions/任务分支改完可直接合并进main不用每次确认|任务分支改完可直接合并进main不用每次确认]] (verified: 2026-07-06)
@@ -42,7 +38,6 @@
 - [[decisions/数据层保持Markdown加Git但Obsidian插件放开用|数据层保持Markdown加Git但Obsidian插件放开用]] (verified: 2026-07-04)
 - [[decisions/整理手写笔记允许改写原文而不仅是追加复核记录|整理手写笔记允许改写原文而不仅是追加复核记录]] (verified: 2026-07-04)
 - [[decisions/自动化与文档设计优先选省token不影响效果的轻量方案|自动化与文档设计优先选省token不影响效果的轻量方案]] (verified: 2026-07-04)
-- [[decisions/记忆库vault已迁出iCloud到本地只用git同步|记忆库vault已迁出iCloud到本地只用git同步]] (verified: 2026-07-06)
 
 ## 踩坑记录
 
@@ -74,4 +69,4 @@
 - [[notes/社区学/自我重养育：用含情注视代替KPI式自我审判|自我重养育：用含情注视代替KPI式自我审判]]
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 54 条记忆。
+共 49 条记忆。
