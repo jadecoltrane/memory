@@ -677,6 +677,7 @@
 .workbench .wb-cards {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   margin: 0 0 18px;
 }
@@ -721,10 +722,19 @@
 .workbench .wb-card.is-active .wb-lbl {
   color: var(--wb-accent-text);
 }
-/* ➕ 新建笔记:样式整个复用换一篇按钮的 class(拟物玻璃圆钮+转圈,
-   见下面 .wb-reunion-reroll),这里只负责把它推到胶囊行最右(草图位置)*/
+/* ➕ 新建笔记:2026-07-07 改回普通胶囊——第一版套用了"随机重逢"换一篇
+   按钮的圆形玻璃拟物 CSS,用户反馈"还是要胶囊的样子",撤掉圆钮外观,
+   跟其他五颗共用 .wb-card 的胶囊底/圆角/阴影,只把它推到行最右(草图
+   位置)。转一圈的动效保留,但只作用在图标 span 上,不影响胶囊整体形状 */
 .workbench .wb-cards .wb-newnote {
   margin-left: auto;
+}
+.workbench .wb-newnote-glyph {
+  display: inline-block;
+  transition: transform 0.4s var(--wb-ease);
+}
+.workbench .wb-newnote:hover .wb-newnote-glyph {
+  transform: rotate(360deg);
 }
 /* 页内面板:跟其他卡片同一套底/圆角/阴影;上边距收回一点贴着胶囊行
    (wb-cards 自带 18px 下边距,不收会离得太开),展开时复用入场动画
@@ -784,6 +794,19 @@
   font-size: 0.75em;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+/* 列表超过默认展示条数(8条)时的"展开全部/收起"——笔记、概念多起来
+   面板不会无限往下长,默认折叠,点了再铺开(见 工作台.md renderRows) */
+.workbench .wb-panel-more {
+  padding: 6px 10px 2px;
+  font-size: 0.78em;
+  font-weight: 600;
+  color: var(--wb-accent-text);
+  text-align: center;
+  cursor: pointer;
+}
+.workbench .wb-panel-more:hover {
+  text-decoration: underline;
 }
 /* 笔记面板顶部那排分类小方卡(草图第一屏的方块):跟嵌套 write/note
    一个思路,用比面板更沉一档的 secondary 底 + 浅阴影区分层级 */
