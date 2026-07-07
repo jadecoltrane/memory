@@ -4,11 +4,6 @@
   "newFileLocation": "folder",
   "newFileFolderPath": "notes",
   "attachmentFolderPath": "notes/assets",
-  "userIgnoreFilters": [
-    "decisions/",
-    "pitfalls/",
-    "scripts/",
-    "templates/",
-    "meta/"
-  ]
+  "userIgnoreFilters": [],
+  "showUnsupportedFiles": true
 }
