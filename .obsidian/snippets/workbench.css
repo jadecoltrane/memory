@@ -1,0 +1,869 @@
+/* ===== 工作台样式(作用于 cssclasses: workbench 的页面)=====
+   主题色 --wb-accent 由横幅画作在客户端用 canvas 取平均色自动写入(见页面内 dataviewjs),
+   这里只提供一个中性兜底值,避免脚本还没跑完时样式塌陷。
+   2026-07-05 参考「Sense」冥想 App 和苹果"内容优先、克制用色"的设计
+   原则重做过一版质感,阴影调了好几轮都出各种诡异问题(鬼影方块、左边
+   被截断……),根源是 Obsidian 这套代码块/Live Preview 容器自带的
+   装饰(.el-pre / .cm-embed-block / HyperMD-codeblock-*-bg 的虚线边)
+   会跟我们自己的阴影打架——一度干脆整个去掉阴影,但用户明确说"这就是
+   我要的美学",阴影本身没错,不能因为容器有 bug 就连风格一起放弃。
+   现在阴影加回来了,前面那几处容器装饰的清空规则留着(它们是在修真正
+   的 bug,不是阴影太重的问题)。当天中途还试过给"随机重逢"和
+   "抽卡/延伸/问题"固定用户品牌紫,用户马上反悔了("我错了,还是跟随
+   画作取色"),已撤销——全站颜色只有 --wb-accent 一处来源,不要再加
+   第二套颜色。同一天晚些时候又参考了一张冥想类 App 的截图,明确要求
+   "不要有明显的边框"+"加点让人愉悦的交互效果"——所以去掉了 --wb-border
+   这个变量和所有 border: 声明,卡片边界完全交给阴影撑出来;并新增
+   --wb-ease 这个带回弹感的缓动曲线,用在 hover/active 过渡上,
+   比线性/纯 ease-out 更有"弹一下"的愉悦感。
+   再往后用户拿一张深色任务管理 App 的截图反馈,黑夜(深色主题)下没有
+   浮起来的阴影感——中间试过三版都不满意:1) 加 filter: brightness() +
+   取色柔光模拟 hover 反馈,用户说不要;2) 把黑色阴影不透明度从
+   8%~13% 直接调到 40%~70% 硬做投影,用户嫌"太黑了";3) 只把卡片背景
+   调成一块更亮的纯色灰,用户看完说"一点都不好",又贴了一张深色 App
+   截图指名要那种质感——那张图的卡片其实是磨砂玻璃(半透明白+
+   backdrop-filter 模糊背景+顶部一条极淡的高光线),不是纯色灰块。
+   最终方案:深色主题下卡片背景改成半透明白(不是纯色),叠加
+   backdrop-filter 模糊底下的页面/画作,阴影里再加一条 inset 顶部高光
+   模拟"光打在卡片顶边"的质感——三者一起才是那种磨砂质感,浅色主题
+   不变(维持原本已经验证过的不透明白底+阴影) */
+.workbench {
+  --wb-accent: #8a8578;
+  --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, transparent);
+  --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
+  /* 文字用的强调色:这里的兜底直接用取到的主色;支持 OKLCH 相对颜色
+     语法的端(桌面 Chromium)会在下面的 @supports 块里重新派生成
+     锁定亮度的版本,保证对比度 */
+  --wb-accent-text: var(--wb-accent);
+  --wb-radius: 20px;
+  --wb-radius-sm: 14px;
+  --wb-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --wb-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.13);
+  --wb-shadow-flat: 0 2px 8px rgba(0, 0, 0, 0.05);
+  /* 统计胶囊(wb-card)保留上面那个更明显的 --wb-shadow-hover + 上浮位移;
+     其余卡片(callout、随机重逢)的 hover 反馈要克制得多,只比静息态深
+     一点点,不是跳到胶囊那种力度(2026-07-05 用户反馈:除了胶囊标签,
+     其余 hover 效果太重了,做一点点就行) */
+  --wb-shadow-hover-subtle: 0 6px 18px rgba(0, 0, 0, 0.1);
+  --wb-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* 主卡片(callout/信息条/统计卡/随机重逢)用的背景色 + 背景模糊。
+     浅色主题下就是 Obsidian 自己的 secondary-alt、不模糊;
+     深色主题下改成磨砂玻璃质感,见下面覆盖 */
+  --wb-card-bg: var(--background-secondary-alt, var(--background-secondary));
+  --wb-card-blur: none;
+  /* 每日随机生成的纸感渐变,由页面内 dataviewjs 以当天日期为种子随机
+     生成后写进来;脚本还没跑完时用这个兜底,风格跟随机生成的一致 */
+  --wb-page-gradient: linear-gradient(135deg, #ffe9c7 0%, #ffd6d6 45%, #eaf4ff 100%);
+}
+.theme-dark .workbench {
+  --wb-card-bg: rgba(255, 255, 255, 0.07);
+  --wb-card-blur: blur(24px);
+  --wb-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --wb-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 14px 34px rgba(0, 0, 0, 0.45);
+  --wb-shadow-flat: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 14px rgba(0, 0, 0, 0.25);
+  --wb-shadow-hover-subtle: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 27px rgba(0, 0, 0, 0.38);
+}
+
+/* 色调系统(2026-07-05 UI 评审):画作取到的 --wb-accent 只当"色相
+   来源"用,文字色/柔光底/引导线分别在 OKLCH 空间派生并锁定亮度和
+   彩度——OKLCH 是感知均匀的色彩空间,同样的亮度值看起来就是同样亮,
+   所以不管画作多深多灰,文字永远可读、底色永远柔和(之前在 RGB 空间
+   统一提亮 25% 是瞎猜,深画提不够、浅画提过头)。不支持相对颜色语法
+   的端自动跳过这个块,沿用上面 color-mix 的兜底,只是效果差一点 */
+@supports (color: oklch(from red 0.5 0.1 h)) {
+  .workbench {
+    --wb-accent-text: oklch(from var(--wb-accent) 0.5 min(c, 0.11) h);
+    --wb-accent-soft: oklch(from var(--wb-accent) 0.93 0.035 h);
+    --wb-accent-line: oklch(from var(--wb-accent) 0.72 min(c, 0.1) h / 0.6);
+  }
+  .theme-dark .workbench {
+    --wb-accent-text: oklch(from var(--wb-accent) 0.8 min(c, 0.1) h);
+    --wb-accent-soft: oklch(from var(--wb-accent) 0.4 0.05 h / 0.45);
+    --wb-accent-line: oklch(from var(--wb-accent) 0.65 min(c, 0.09) h / 0.5);
+  }
+}
+
+/* 页面背景:每日随机的纸感渐变 + 一层极淡的颗粒纹理。
+   之前试过从画作取色算渐变,反复调了好几轮都不满意,后来改成预设 6 组
+   按日期轮换,2026-07-05 又改成以当天日期为种子随机生成(见页面
+   dataviewjs 里的 pastel/rand),这里只负责把 --wb-page-gradient 铺成背景。
+   颗粒纹理是一段内联 SVG feTurbulence 生成的噪点,叠加在渐变上面模拟
+   参考图那种"纸张质感",用 feColorMatrix 把噪点强制压成低透明度的黑色
+   (alpha 0.05),140px 一个瓦片平铺,肉眼只觉得"这背景有点纹理感"，不
+   会看出是噪点图案。
+   选择器必须是 .markdown-preview-view.workbench(同一元素上的复合类),
+   不是 .workbench .markdown-preview-view(祖先后代)——之前在这条踩过
+   坑:Obsidian 把 workbench 这个 class 直接加在 markdown-preview-view /
+   markdown-source-view 自己身上,不是包在外层容器上,写成后代选择器
+   永远匹配不到。
+   背景图层(渐变、噪点)都用默认的 background-attachment: scroll——
+   .markdown-preview-view 本身就是那个高度等于可见视口的滚动容器,这个
+   取值下背景相对容器自己固定,不会随内部内容滚动跑掉,不需要额外写
+   fixed/local */
+.markdown-preview-view.workbench,
+.markdown-source-view.workbench {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--wb-page-gradient);
+  background-repeat: repeat, no-repeat;
+  background-size: 140px 140px, cover;
+}
+/* 深色主题不铺渐变(2026-07-06 用户反馈:浅色粉彩渐变 + 深色模式的
+   半透明磨砂卡片 + 浅色文字,三者叠一起整页发灰像蒙雾,"好恐怖")。
+   深色下整个粉彩渐变体系直接关掉,回到主题自己的深色底——磨砂玻璃
+   卡片当初就是在纯深色底上调出来的,黑色噪点纹理在深色底上本来就
+   看不见,一并去掉。这条必须放在上面浅色规则之后,同优先级靠顺序赢 */
+.theme-dark .markdown-preview-view.workbench,
+.theme-dark .markdown-source-view.workbench {
+  background-image: none;
+}
+
+/* 隐藏笔记属性面板:painting-url / generated 这些字段只是给
+   dataviewjs 脚本读的数据,不需要展示给人看,藏起来才有沉浸感。
+   frontmatter 数据本身还在,只是不渲染这个面板;要手动改这些字段时
+   切到源码模式编辑,或临时用命令面板 "Toggle properties" 唤出来。 */
+.workbench .metadata-container {
+  display: none !important;
+}
+
+/* 撑满宽度:覆盖"可读行宽"设置在这个页面上限制的最大宽度,
+   不然内容会被压成中间一小条、两侧大片留白。
+   多写几种选择器组合是因为 is-readable-line-width 这个类可能挂在
+   sizer 本身、也可能挂在它的上级容器上,具体取决于 Obsidian 版本。*/
+.workbench .markdown-preview-sizer,
+.workbench .cm-sizer,
+.workbench.is-readable-line-width .markdown-preview-sizer,
+.workbench.is-readable-line-width .cm-sizer,
+.is-readable-line-width .workbench .markdown-preview-sizer,
+.is-readable-line-width .workbench .cm-sizer {
+  max-width: none !important;
+  width: 100% !important;
+  margin-inline: 0 !important;
+}
+
+/* 去掉代码块自带的卡片外观(背景/描边/阴影,包括 hover 态)——
+   dataviewjs 代码块只用来渲染卡片,主题自带的"代码块"方框会在
+   我们自己的圆角卡片外面露出一圈方形残影。阅读视图里这层容器是
+   .el-pre,但 2026-07-05 反馈方块残影仍在,说明看到的其实是 Live
+   Preview / 编辑视图下的代码块 widget——那层用的是 .cm-embed-block
+   /.cm-preview-code-block,不是 .el-pre,两套都要清空,才能真正
+   只剩里面注入的 div(横幅/信息条/统计卡/随机重逢)自己的样式 */
+.workbench .el-pre,
+.workbench .cm-embed-block,
+.workbench .cm-preview-code-block {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+/* Border 主题给代码块另外画了一层"背景条"(HyperMD-codeblock-*-bg),
+   在编辑/Live Preview 视图里和 dataviewjs 渲染出来的 widget 是分开的
+   两层东西,前面清空 .cm-embed-block 并没有碰到它——这层背景条自带
+   --code-border(1px 虚线),画在卡片左右两侧,就是"阴影被截断"实际
+   看到的那条硬线(2026-07-05 用户贴出 dataviewjs 源码帮忙定位到的) */
+.workbench .HyperMD-codeblock-begin-bg,
+.workbench .HyperMD-codeblock-end-bg,
+.workbench .HyperMD-codeblock-bg {
+  background: transparent !important;
+  border: none !important;
+}
+/* 真正的元凶(用 devtools 实测定位到的):Dataview 给每个 dataviewjs
+   渲染容器 .block-language-dataviewjs 自己塞了一条内联样式
+   overflow-x: auto,而 CSS 规则是"两轴独立设置时,非 visible 的轴会把
+   另一轴也从 visible 提升成 auto"——于是这个容器变成了一个裁切区,
+   横幅+问候语卡片的顶部阴影、随机重逢卡片的左侧阴影、统计卡 hover
+   时的位移和阴影,只要探出容器边界一律被切平。内联样式优先级比外部
+   类选择器高,必须 !important 才压得过去 */
+.workbench .block-language-dataviewjs {
+  overflow: visible !important;
+}
+/* 随机重逢要跟名画横幅一样高:第一次修复只把 .el-pre /
+   .cm-preview-code-block / .block-language-dataviewjs 这几个已知的
+   wrapper 钉成 height:100%,仍然没撑满——百分比高度需要祖先链每一层
+   都有"确定的"高度才能逐级传递,只在几个已知 class 上单独设 100% 会在
+   中间某层(比如 .el-pre 内层真正的 <pre> 标签,或者其他没枚举到的
+   wrapper)断掉,一处没接上后面全部失效。
+   改用更稳的写法:不再枚举具体 tag/class,而是用 :has() 反向抓取
+   ——"某元素的后代里含有 .wb-reunion,但这个元素本身不是 .wb-reunion"
+   ——这样无论 Obsidian 具体套了几层什么名字的 wrapper,凡是 wb-reunion
+   到顶层 flex item 之间的每一层都会被选中,统一改成 flex 列容器 +
+   直接子元素 flex:1,靠 flex 布局逐层撑满(不依赖 height 百分比链,
+   flex:1 auto 直接用父容器实际算出来的像素高度,更可靠) */
+.workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(.wb-reunion),
+.workbench .markdown-preview-sizer > *:has(.wb-daily-painting) *:has(.wb-daily-painting) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+.workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(.wb-reunion) > *,
+.workbench .markdown-preview-sizer > *:has(.wb-daily-painting) *:has(.wb-daily-painting) > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.workbench .el-pre .edit-block-button,
+.workbench .el-pre .copy-code-button {
+  display: none !important;
+}
+.workbench .el-pre .block-language-dataviewjs {
+  cursor: default;
+}
+/* 兜底:不管 Obsidian 具体给顶层块套了哪层 wrapper,都不许裁切——
+   裁切会把卡片的柔和阴影切成方形硬边 */
+.workbench .markdown-preview-sizer > * {
+  overflow: visible;
+}
+
+/* 顶部大标题:工作台不需要重复显示文件名(横幅+问候语已经承担了
+   "欢迎/标题"的功能),2026-07-05 改为直接隐藏,不再渲染 */
+.workbench .inline-title {
+  display: none !important;
+}
+.workbench .markdown-preview-view h1,
+.workbench .markdown-rendered h1 {
+  color: var(--text-normal);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ===== 横幅:每日画作,独立一张卡片 ===== */
+/* 2026-07-05 按手绘草图重新调整:问候语挪到了上面,画作不再跟它拼一块,
+   现在是页面里单独一张卡片,四角都是圆角,阴影跟其他卡片一致(之前
+   "不要卡片框"的反馈针对的是画作+问候语拼在一起那种奇怪的整体,不是
+   针对画作本身单独成卡——现在结构变了,画作单独成卡是这次要的效果) */
+/* 2026-07-05 UI 评审给画加了超慢的 Ken Burns 呼吸(90 秒来回,慢到
+   察觉不到但页面是活的)。当时还试过美术馆标签式(简介移到画作下方
+   当图注),2026-07-06 用户明确还是想让简介留在画里,已改回简介+画名
+   两行压在画上,不要再挪出去。
+   2026-07-06 用户要求"画展示完全":画不再 cover 裁切,改成 contain
+   完整放进横幅(::after),空出的两侧/上下用同一张画的模糊放大版垫底
+   (::before,background: inherit 免去重复拿 URL)。Ken Burns 只留给
+   模糊垫底层——contain 的画一旦 scale 超过 1 就又会被裁,画本身必须
+   全程静止 */
+.workbench .wb-banner {
+  position: relative;
+  min-height: 190px;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border-radius: var(--wb-radius);
+  box-shadow: var(--wb-shadow);
+}
+/* 手机上固定 190px 高会显得又扁又挤,改按比例撑开 */
+@media (max-width: 640px) {
+  .workbench .wb-banner {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+}
+.workbench .wb-banner-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+/* 模糊垫底:静息态就放大 1.15 把模糊的透明边缘推出可视区,呼吸动画
+   在此基础上继续到 1.22;关掉动画(减少动态效果)时静态 transform
+   兜底,不会露边 */
+.workbench .wb-banner-img::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) saturate(1.1);
+  transform: scale(1.15);
+  animation: wb-breathe 90s ease-in-out infinite alternate;
+}
+/* 画本身:contain 完整展示,静止 */
+.workbench .wb-banner-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+@keyframes wb-breathe {
+  from { transform: scale(1.15); }
+  to { transform: scale(1.22); }
+}
+/* 压暗渐变只留底部(给画名保底可读性),z-index 抬到画的上面——
+   ::before 在 DOM 里先于 .wb-banner-img,不设层级会被画盖住 */
+.workbench .wb-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.05) 40%, rgba(0, 0, 0, 0.45) 100%);
+}
+.workbench .wb-banner .wb-painting-caption {
+  position: absolute;
+  z-index: 2;
+  right: 16px;
+  bottom: 12px;
+  max-width: 62%;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+}
+/* 2026-07-06 调整顺序和字重:作品名是主角,大字在上;简介/见解是
+   补充说明,小字、更淡,在下——之前反过来了(简介大、标题小淡),
+   看着像简介才是重点,不像美术馆标签 */
+.workbench .wb-banner .wb-painting-title {
+  font-size: 1em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.workbench .wb-banner .wb-painting-intro {
+  font-size: 0.72em;
+  line-height: 1.5;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* ===== 信息条:问候(左) / 实时时钟(右) ===== */
+/* 2026-07-05 按手绘草图调整:挪到了画作上方,不再是一张卡片——没有
+   背景色、没有阴影,就是页面顶部的一段纯文字页眉,直接浮在页面背景
+   (渐变)上 */
+.workbench .wb-infobar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 4px 20px;
+  margin: 0;
+}
+/* 主从层级(2026-07-05 UI 评审):一个页面只能有一个主角——问候语
+   加粗做主角,时钟退成"氛围元素":更大但极细(200)、颜色降到 muted,
+   像锁屏时间那样存在但不抢戏。字号都用 clamp() 做流体排版,手机上
+   自动缩小,不再桌面手机共用固定 em */
+.workbench .wb-infobar .wb-greet {
+  font-size: clamp(1.5em, 5vw, 1.9em);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text-normal);
+}
+.workbench .wb-infobar .wb-date {
+  font-size: 0.82em;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+/* 时钟颜色反复过一轮:2026-07-06 早些时候用户要求上取色渐变
+   (background-clip: text),同日晚些时候又要求"回到正常的颜色"——
+   已撤销渐变,回到最初的 muted 灰氛围元素,不要再给时钟上色 */
+.workbench .wb-infobar .wb-clock {
+  font-size: clamp(1.8em, 6vw, 2.4em);
+  font-weight: 200;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* 心跳报警(挂在信息条下方):唯一允许跳出主色调的红色警示,
+   做成小胶囊而不是裸文字——强对比只用在这一个"关键状态"上,
+   符合"视觉存在感 ≈ 功能重要性"——平时零占用,出问题才显眼 */
+.workbench .wb-heartbeat {
+  display: inline-block;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #c23b3a;
+  background: rgba(226, 75, 74, 0.1);
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin: -6px 0 16px;
+}
+
+/* ===== 页面级卡片网格 ======================================
+   把 markdown 顶层的每个块都当成一个 flex item:默认占满一行
+   (照旧堆叠),只有 draw/seed/ask/write/note 五种 callout 被判定为
+   "卡片",允许收窄、横排在同一行。 */
+.workbench .markdown-preview-sizer > div {
+  flex: 1 1 100%;
+  margin: 0;
+}
+.workbench .markdown-preview-sizer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 16px;
+  /* 必须显式写 flex-start,不能用默认的 stretch——手机端阅读视图会把
+     屏幕外的块虚拟化卸载,sizer 仍保持整页的估算高度,多出来的空白
+     高度会被 stretch 平摊给仅剩的几行 flex 行,每行被撑得巨高:第一行
+     是 Obsidian 自带的隐形占位元素 .markdown-preview-pusher,被撑高后
+     表现为"页面顶部空一大截",卡片行之间也被撑出大段留白(2026-07-05
+     手机端截图反馈定位到)。flex-start 让所有行贴顶排,空白只留在
+     页面底部,随滚动加载自然被后续内容填掉;桌面端所有块都渲染,
+     本来就没有多余高度,不受影响 */
+  align-content: flex-start;
+}
+/* 今日内容不再有顶层折叠壳:抽卡/延伸、问题1/问题2、回答1/回答2
+   都是页面顶层的 callout,靠页面级卡片网格(下面的 :has() 规则)
+   横排成一行。用通配符 * 选中"包含这个 callout 的顶层子元素",
+   不猜 Obsidian 具体给 callout 包了什么 wrapper class(试过
+   .el-blockquote 不生效)。
+   我的看法(note)2026-07-06 起不再是顶层块——用户要求把它包进问题
+   卡片内部,变成 [!ask] 里嵌套的子 callout,不再单独占一排;下面
+   note 相关的 :has() 选择器留着是因为它是"后代"选择器(没有 >),
+   嵌套在 ask 内部依然能命中,让外层顶层块拿到同一份 flex-basis,
+   不会因为多命中一条规则而改变布局(数值和 ask 那条完全一样)。 */
+/* flex-basis 用 max(280px, 40%):宽屏时 40% 保证一行最多塞两张
+   (三张 40% 超过 100% 必换行),于是固定配对——抽卡+延伸一排、
+   问题1+问题2一排、回答1+回答2一排;窄屏时 280px 兜底,放不下两张
+   就自然堆叠。 */
+.workbench .markdown-preview-sizer > *:has(> .callout[data-callout="draw"]),
+.workbench .markdown-preview-sizer > *:has(> .callout[data-callout="seed"]),
+.workbench .markdown-preview-sizer > *:has(> .callout[data-callout="ask"]),
+.workbench .markdown-preview-sizer > *:has(> .callout[data-callout="write"]),
+.workbench .markdown-preview-sizer > *:has(> .callout[data-callout="note"]),
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="draw"]),
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="seed"]),
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"]),
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="write"]),
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="note"]) {
+  flex: 1 1 max(280px, 40%);
+}
+/* 并排的卡片文本长度不一样,靠 flex 父级默认的 align-items: stretch
+   把外层拉伸到同一高度,这里让 callout 本身也撑满那份高度,
+   外框才会跟着对齐,不是各自贴着文字收缩。
+   note(我的看法)不在这份名单里——它默认折叠,如果强制撑满行高,
+   一旦配对的另一张折叠高度不同就会在标题下方露出一块空白
+   (用户 2026-07-05 反馈过这个空白),折叠卡片没必要跟着对齐 */
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="draw"]) .callout,
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="seed"]) .callout,
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"]) .callout,
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="write"]) .callout {
+  height: 100%;
+  box-sizing: border-box;
+}
+/* 抽卡/延伸这一行:2026-07-06 试过 6:4 的视觉特权比例,当天晚些时候
+   用户改主意要求跟问题/回答/看法的配对行一样,退回 50/50 平分 */
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="draw"]),
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="seed"]) {
+  flex: 1 1 max(280px, 40%);
+}
+/* 名画横幅 + 随机重逢横排成一行(2026-07-06 用户要求):画作横幅已经
+   拆成独立顶层块(见 工作台.md 里的拆分说明)。2026-07-06 二次调整:
+   跟"抽卡(1.5)/延伸(1)"用同一套主次比例写法,名画是主角占大份,
+   随机重逢占小份,不再 1:1 平分;窄屏两者都退到 280px 兜底,自动堆叠。
+   2026-07-07 三次调整:用户要求名画再宽一些,比例从 1.5:1 加到 2:1 */
+.workbench .markdown-preview-sizer > *:has(.wb-daily-painting) {
+  flex: 2 1 max(280px, 58%);
+}
+.workbench .markdown-preview-sizer > *:has(.wb-reunion) {
+  flex: 1 1 max(280px, 26%);
+}
+
+/* 名画横幅的外观:原来这几条(背景/圆角/模糊/阴影)是 工作台.md 里
+   dataviewjs 内联写死的,内联样式优先级盖过下面的 :hover 选择器,
+   导致加了 hover 也不生效——现在挪到这里统一管理,跟随机重逢用完全
+   相同的一套数值(半透明白 + 模糊 + 无阴影 + hover/active 时透明度
+   变化),2026-07-06 用户要求两张卡片 hover 效果一致 */
+/* 2026-07-07 用户要求名画的标题/简介跟"随机重逢"的标题/摘要对齐成
+   两条水平线——随机重逢卡片顶部多一行"随机重逢"标签+换一篇按钮
+   (按钮 40px 高 + 5px gap ≈ 45px),名画的图+文字目前是从卡片顶部
+   直接起排(align-items: flex-start),文字比随机重逢的标题整整高了
+   一个头部行。图片本身不用跟着挪(用户只圈了文字部分),只给文字块
+   (caption)一个顶部间距,把画名往下压到跟"随机重逢"标题同一行,
+   简介自然跟着摘要对上第二行。45px 是按随机重逢头部的实际尺寸估的,
+   不是精确像素对齐,如果字号/主题变化导致对不齐,再微调这个数值。
+   只在宽屏(名画和随机重逢横排成一行时)才需要这个偏移——窄屏下两张
+   卡片各占一行、上下堆叠,没有"对齐同一行"这回事,加这个间距只会在
+   图和文字之间平白多出一截空隙,所以用跟 工作台.md 里 narrowScreen
+   判断同一个断点(520px)包一层 min-width 媒体查询,窄屏不生效 */
+@media (min-width: 521px) {
+  .workbench .wb-daily-painting-side {
+    margin-top: 45px;
+  }
+}
+.workbench .wb-daily-painting {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-radius: 16px;
+  box-shadow: none;
+  transition: background 0.3s var(--wb-ease);
+}
+.workbench .wb-daily-painting:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+.workbench .wb-daily-painting:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* callout 卡片被页面渐变"染色"的真正根源(2026-07-05,第三次才定位对,
+   grep Obsidian 自带样式确认):不是背景色透明,也不是层叠优先级——
+   Obsidian 核心给 .callout 设了 mix-blend-mode: var(--callout-blend-mode),
+   浅色主题下解析为 darken:整张卡片作为一个图层跟底下的页面渐变做
+   "取较暗者"混合,白色背景 vs 彩色渐变必然输给渐变,于是背景再不透明
+   渐变照样透出来。这也是为什么"随机重逢"(普通 div,没有混合模式)
+   一直是纯白的,只有 callout 被染。之前两版修法(background-image
+   叠层、::before 垫板)对混合模式都无效,已撤销;真正的修复只需要
+   把混合模式改回 normal(深色主题下顺带修掉 lighten 的同类问题)。 */
+.workbench .callout {
+  mix-blend-mode: normal;
+}
+
+/* 随机重逢:不用边框线,靠纯色底 + 阴影分层。
+   hover 不做位移动画(2026-07-05 反馈鼠标划上去往上移那一下不好看,
+   去掉了),但保留阴影加深的反馈,点击时阴影收浅一档模拟"按下去"。
+   之前用过对角线渐变当封面,2026-07-05 用户决定连这个渐变也去掉,
+   改回纯色卡片背景;2026-07-06 用户再次明确要求"颜色跟着今日渐变
+   来",这次改成直接铺当天的 --wb-page-gradient(跟页面背景同一份变量,
+   卡片自己的盒子比页面小,渲染出来是一份缩小版但同色系的渐变)——
+   跟上面 2026-07-05 那次"不要渐变"的决定看似矛盾,但那次否决的是
+   "自己另起一份固定对角线渐变"当封面装饰,这次是复用全站唯一的颜色
+   来源(--wb-page-gradient),不是引入第二套颜色,不违反"全站只有一处
+   颜色来源"的约束。
+   2026-07-06 三次调整:改成跟名画横幅同款的毛玻璃——半透明白底
+   (rgba(255,255,255,0.35))+ backdrop-filter 模糊透出页面渐变,不再
+   直接铺不透明的 --wb-page-gradient(那样看不出模糊感,只是纯色块);
+   阴影也去掉,跟名画横幅一致靠模糊的半透明底自己撑边界 */
+.workbench .wb-reunion {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-radius: var(--wb-radius);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.3s var(--wb-ease);
+}
+/* 卡片被撑到跟名画横幅一样高之后,标签+标题只占一小截,下面一大片
+   空白很难看——摘要区用 flex:1 吃掉剩余空间,文字在这份空间里垂直
+   居中,让内容看起来"填满"整张卡片,而不是顶头堆一截、底下留白 */
+.workbench .wb-reunion-excerpt {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.workbench .wb-reunion:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+.workbench .wb-reunion:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+.workbench .wb-reunion-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.workbench .wb-reunion-tag {
+  font-size: 0.76em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--wb-accent-text);
+  background: var(--wb-accent-soft);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+/* 换一篇按钮:2026-07-06 按用户给的 figma 拟物教程(Wojciech Zieliński
+   的 button 复刻)重做成"玻璃感圆钮",教程步骤逐条翻译成 CSS:
+   ① 圆形底渐变 #EBF2FA→#F8F3FF(75%)→#FFF + 1px 纯白内阴影(顶部受光)
+   ② 双层投影:左上白色柔光 + 右下深色投影(拟物的双向光源;教程用
+      Layer blur 渐进模糊,CSS 用两档不同扩散的投影近似)
+   ③ 蓝 #EDF8FC / 粉 #FCF5FD 两团彩色光晕,分别甩向左右下方
+   ④ 渐变描边 #D9E4F2→#FEF9FD:双层 background + padding-box/border-box
+      技巧画出来,不占布局(教程的 glass 描边)
+   ⑤ 图标渐变填充 #CEC6D5→#E8E1EE(background-clip: text)+ 1px 白色
+      投影——教程原话"拟物图标上很常见的用法"
+   尺寸 36→40px 保持好按(手机反馈过点不中)。这套粉彩在深色主题会
+   发灰,深色单独覆盖回磨砂玻璃,见下面 .theme-dark 两条。
+   2026-07-06 修:旋转之前直接 transform 在按钮本体上,把这一整套
+   非对称方向光影(左上白光、右下深浅两团彩色投影)也一起转了 180°,
+   等于光源跟着转到了反方向,看着很怪。改成只转里面的图标
+   (.wb-reroll-glyph),按钮本体的阴影全程保持静止不转。 */
+.workbench .wb-reunion-reroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background:
+    linear-gradient(135deg, #ebf2fa 0%, #f8f3ff 75%, #ffffff 100%) padding-box,
+    linear-gradient(135deg, #d9e4f2, #fef9fd) border-box;
+  /* 2026-07-07 二次调整:改成跟 --wb-accent 挂钩那版用户不要,明确要求
+     恢复原来固定的蓝 #b4d6f2 / 粉 #f3cdf0 两团光晕(figma 教程原配色),
+     不再跟随画作取色;偏移/模糊半径保留上一版缩小过的数值(范围更收敛,
+     不再往外大片扩散),两个要求叠在一起就是"原来的颜色 + 更小的范围" */
+  box-shadow:
+    inset 1px 1px 1px rgba(255, 255, 255, 1),
+    -4px -4px 10px rgba(255, 255, 255, 0.85),
+    5px 7px 14px rgba(99, 110, 146, 0.16),
+    -5px 4px 10px rgba(180, 214, 242, 0.5),
+    5px 4px 10px rgba(243, 205, 240, 0.45);
+  font-size: 1.15em;
+  line-height: 1;
+  cursor: pointer;
+  transition: box-shadow 0.25s ease, transform 0.15s var(--wb-ease);
+}
+.workbench .wb-reroll-glyph {
+  display: inline-block;
+  background: linear-gradient(135deg, #cec6d5 0%, #e8e1ee 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
+  transition: transform 0.4s var(--wb-ease);
+}
+/* 2026-07-06 八次调整:用户要求恢复"鼠标划上去转一圈"的效果——转半圈
+   (180deg)是之前为了配合光影方向做的折中,这次明确要满整圈(360deg)。
+   这是纯鼠标 hover 触发的效果,跟 工作台.md 里点击换一篇时用 Web
+   Animations API 播的那次性 0→360 动画各管一路、互不冲突:hover 是
+   桌面端划过去的即时反馈,click 是换内容时的确认反馈,两者可以共存 */
+.workbench .wb-reunion-reroll:hover .wb-reroll-glyph {
+  transform: rotate(360deg);
+}
+.workbench .wb-reunion-reroll:hover {
+  box-shadow:
+    inset 1px 1px 1px rgba(255, 255, 255, 1),
+    -4px -4px 10px rgba(255, 255, 255, 0.9),
+    6px 9px 18px rgba(99, 110, 146, 0.2),
+    -6px 5px 12px rgba(180, 214, 242, 0.65),
+    6px 5px 12px rgba(243, 205, 240, 0.6);
+}
+.workbench .wb-reunion-reroll:active {
+  transform: scale(0.92);
+  box-shadow:
+    inset 2px 3px 6px rgba(99, 110, 146, 0.22),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+}
+.theme-dark .workbench .wb-reunion-reroll {
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+.theme-dark .workbench .wb-reroll-glyph {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: var(--text-muted);
+  filter: none;
+}
+.workbench .wb-reunion-title {
+  font-size: 0.98em;
+  font-weight: 700;
+  color: var(--text-normal);
+}
+.workbench .wb-reunion-excerpt {
+  font-size: 0.82em;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ===== 统计卡:一排小胶囊 ===== */
+/* 窄屏放不下时直接换行,不做横向滚动——之前的滚动方案(overflow-x:
+   auto + snap)被 2026-07-05 用户否了(体验不好),而且滚动裁切还得
+   靠 padding hack 保护阴影,一堆连锁问题;换行方案 overflow 保持
+   visible,阴影天然完好,桌面端一行放得下时和原来完全一样 */
+.workbench .wb-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.workbench .wb-card {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex: none;
+  background: var(--wb-card-bg);
+  backdrop-filter: var(--wb-card-blur);
+  -webkit-backdrop-filter: var(--wb-card-blur);
+  border-radius: 999px;
+  padding: 7px 15px;
+  box-shadow: var(--wb-shadow);
+  cursor: pointer;
+  transition: box-shadow 0.3s var(--wb-ease), transform 0.3s var(--wb-ease);
+}
+.workbench .wb-card:hover {
+  box-shadow: var(--wb-shadow-hover);
+  transform: translateY(-2px);
+}
+.workbench .wb-card:active {
+  box-shadow: var(--wb-shadow-flat);
+  transform: translateY(0) scale(0.96);
+}
+.workbench .wb-card .wb-num {
+  font-size: 0.98em;
+  font-weight: 700;
+  color: var(--wb-accent-text);
+}
+.workbench .wb-card .wb-lbl {
+  font-size: 0.78em;
+  color: var(--text-muted);
+}
+
+/* callout 卡片化:不用边框线,靠"比页面背景亮一档"的底色 + 柔和阴影
+   一起撑出"悬浮"的边界(2026-07-05 参考无边框卡片风格的截图,明确要求
+   去掉明显边框)。背景用 --background-secondary-alt 而不是
+   --background-primary——纯阴影这个方案只在浅色主题成立,深色主题里
+   primary 跟页面背景是同一色,黑色阴影在深色背景上完全看不见,卡片
+   会"隐形"(2026-07-05 用 devtools 在深色模式下实测到)*/
+/* 跟"随机重逢"卡片同款的 hover 反馈:阴影加深一档,靠 transition 过渡,
+   不做位移(2026-07-05 用户要求今日抽卡/延伸/问题/回答这些卡片也要有
+   跟随机重逢一样的 hover 效果)。write(你的回答)静息态本来就用更浅的
+   --wb-shadow-flat 模拟"输入区、更沉"的质感,所以它的 hover 单独覆盖成
+   只抬到 --wb-shadow 这一级,不跟其他卡片一样冲到 --wb-shadow-hover,
+   不然力度跟视觉分量对不上;note(我的看法)已经有自己的 hover 规则,
+   写在下面,靠更高的选择器优先级覆盖这里的通用规则,不受影响 */
+.workbench .callout {
+  border-radius: var(--wb-radius);
+  padding: 1.05em 1.3em;
+  margin: 0;
+  background: var(--wb-card-bg);
+  backdrop-filter: var(--wb-card-blur);
+  -webkit-backdrop-filter: var(--wb-card-blur);
+  box-shadow: var(--wb-shadow);
+  transition: box-shadow 0.3s var(--wb-ease);
+}
+.workbench .callout:hover {
+  box-shadow: var(--wb-shadow-hover-subtle);
+}
+.workbench .callout-title { font-size: 1.02em; font-weight: 700; align-items: center; }
+.workbench .callout-icon { display: none; } /* 标题里已有 emoji */
+
+/* 抽卡/延伸/问题的标题颜色:2026-07-05 用户要求跟"随机重逢"卡里的
+   笔记标题一致(--text-normal),不再用画作取色的强调色 */
+.workbench .callout[data-callout="draw"] .callout-title,
+.workbench .callout[data-callout="seed"] .callout-title,
+.workbench .callout[data-callout="ask"] .callout-title { color: var(--text-normal); }
+
+/* 卡片内的链接:默认不常亮下划线,hover 时才淡入,比一直亮着的下划线
+   更克制、也更有"轻交互反馈"的愉悦感 */
+.workbench .callout a {
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+.workbench .callout a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* "你的回答"输入区:之前给它加过强调色左边框,用户 2026-07-05 反馈
+   很丑——现在改成和"我的看法"接近的素色卡片,不用边框线,靠比主卡片
+   更浅一档的阴影(--wb-shadow-flat)+ 比主卡片更接近页面底色的
+   --background-secondary(而不是 secondary-alt)区分"这是输入区,
+   不是内容区"——secondary 比 secondary-alt 更贴近页面背景,两个主题
+   下都比主卡片更"沉"一点,层级才对 */
+.workbench .callout[data-callout="write"] {
+  background: var(--background-secondary);
+  box-shadow: var(--wb-shadow-flat);
+}
+.workbench .callout[data-callout="write"]:hover {
+  box-shadow: var(--wb-shadow);
+}
+.workbench .callout[data-callout="write"] .callout-title {
+  color: var(--text-muted);
+}
+.workbench .callout[data-callout="write"] .callout-content {
+  min-height: 2.4em;
+  color: var(--text-normal);
+}
+/* 完成感反馈(对勾+占位文字)试过一版,2026-07-06 用户要求去掉,
+   不要再加回来 */
+
+.workbench .callout[data-callout="feed"] .callout-title { color: var(--text-normal); }
+.workbench .callout[data-callout="feed"] ol li { margin: 7px 0; line-height: 1.65; }
+
+/* clash 曾铺过一层取色柔光渐变,2026-07-06 用户明确"卡片不要颜色",
+   已去掉,和其他卡片共用 --wb-card-bg,不要再加回来 */
+.workbench .callout[data-callout="clash"] .callout-title { color: var(--text-normal); }
+
+/* 折叠的"我的看法":比其他卡片更收敛一档(浅阴影代替边框),提醒这是
+   "先别看"的内容。标题行的 hover 高亮试过一版,2026-07-05 用户反馈
+   不要,已去掉——只保留整张卡片 hover 时阴影的反馈 */
+.workbench .callout[data-callout="note"] {
+  background: var(--background-secondary);
+  box-shadow: var(--wb-shadow-flat);
+  transition: box-shadow 0.3s var(--wb-ease);
+}
+.workbench .callout[data-callout="note"]:hover {
+  box-shadow: var(--wb-shadow);
+}
+.workbench .callout[data-callout="note"] .callout-title { color: var(--text-muted); }
+/* 2026-07-06 起"我的看法"包进问题卡片内部,变成嵌套子 callout——
+   跟外层问题卡紧贴在一起才像"包进去"而不是又飘一张卡:补一点顶部
+   间距跟问题正文分开,阴影收掉(嵌套在已经有阴影的卡片里,自己再来
+   一层阴影会显得脏),边框圆角也收小一号,视觉上是"卡片里的抽屉"而
+   不是同级卡片。用 .callout .callout 限定只在"嵌套在别的 callout 里"
+   时生效,顶层单独出现的 note(如果以后还有)不受影响 */
+.workbench .callout .callout[data-callout="note"] {
+  margin-top: 0.8em;
+  border-radius: var(--wb-radius-sm);
+  box-shadow: none;
+}
+.workbench .callout .callout[data-callout="note"]:hover {
+  box-shadow: none;
+}
+
+/* 分隔线弱化成渐隐细线 */
+.workbench hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.3), transparent);
+  clear: both;
+}
+
+/* 卡片内列表呼吸感 */
+.workbench .callout ul li,
+.workbench .callout ol li { margin: 3px 0; }
+
+/* ===== 三大区标题:小型分区标签 + 渐隐引导线 ===== */
+.workbench .markdown-rendered h2,
+.workbench .markdown-preview-view h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2.4em 0 0.9em;
+  font-size: 0.8em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--wb-accent-text);
+  border: none;
+  clear: both;
+}
+.workbench .markdown-rendered h2::after,
+.workbench .markdown-preview-view h2::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--wb-accent-line), transparent);
+}
+
+/* ===== 入场动画:每次打开工作台,顶层卡片按顺序轻轻浮现 =====
+   2026-07-05 要求"加点让人愉悦的交互效果"——静态瞬间铺满一整屏不够
+   愉悦,加一个很短的渐显+上浮、按出现顺序错开延迟,像内容一件件被
+   端上来,而不是"文件已加载完毕"式的生硬。尊重"减少动态效果"系统
+   设置的用户,直接关掉动画 */
+@keyframes wb-rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.workbench .markdown-preview-sizer > * {
+  animation: wb-rise-in 0.5s var(--wb-ease) backwards;
+}
+.workbench .markdown-preview-sizer > *:nth-child(1) { animation-delay: 0.02s; }
+.workbench .markdown-preview-sizer > *:nth-child(2) { animation-delay: 0.08s; }
+.workbench .markdown-preview-sizer > *:nth-child(3) { animation-delay: 0.14s; }
+.workbench .markdown-preview-sizer > *:nth-child(4) { animation-delay: 0.20s; }
+.workbench .markdown-preview-sizer > *:nth-child(5) { animation-delay: 0.26s; }
+.workbench .markdown-preview-sizer > *:nth-child(6) { animation-delay: 0.32s; }
+.workbench .markdown-preview-sizer > *:nth-child(7) { animation-delay: 0.38s; }
+.workbench .markdown-preview-sizer > *:nth-child(8) { animation-delay: 0.44s; }
+.workbench .markdown-preview-sizer > *:nth-child(n+9) { animation-delay: 0.5s; }
+@media (prefers-reduced-motion: reduce) {
+  .workbench .markdown-preview-sizer > *,
+  .workbench .wb-banner-img::before {
+    animation: none !important;
+  }
+}
