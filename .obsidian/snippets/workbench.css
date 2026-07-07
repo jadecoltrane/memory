@@ -178,30 +178,6 @@
 .workbench .block-language-dataviewjs {
   overflow: visible !important;
 }
-/* 随机重逢要跟名画横幅一样高:第一次修复只把 .el-pre /
-   .cm-preview-code-block / .block-language-dataviewjs 这几个已知的
-   wrapper 钉成 height:100%,仍然没撑满——百分比高度需要祖先链每一层
-   都有"确定的"高度才能逐级传递,只在几个已知 class 上单独设 100% 会在
-   中间某层(比如 .el-pre 内层真正的 <pre> 标签,或者其他没枚举到的
-   wrapper)断掉,一处没接上后面全部失效。
-   改用更稳的写法:不再枚举具体 tag/class,而是用 :has() 反向抓取
-   ——"某元素的后代里含有 .wb-reunion,但这个元素本身不是 .wb-reunion"
-   ——这样无论 Obsidian 具体套了几层什么名字的 wrapper,凡是 wb-reunion
-   到顶层 flex item 之间的每一层都会被选中,统一改成 flex 列容器 +
-   直接子元素 flex:1,靠 flex 布局逐层撑满(不依赖 height 百分比链,
-   flex:1 auto 直接用父容器实际算出来的像素高度,更可靠) */
-.workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(.wb-reunion),
-.workbench .markdown-preview-sizer > *:has(.wb-daily-painting) *:has(.wb-daily-painting) {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  box-sizing: border-box;
-}
-.workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(.wb-reunion) > *,
-.workbench .markdown-preview-sizer > *:has(.wb-daily-painting) *:has(.wb-daily-painting) > * {
-  flex: 1 1 auto;
-  min-height: 0;
-}
 .workbench .el-pre .edit-block-button,
 .workbench .el-pre .copy-code-button {
   display: none !important;
@@ -378,7 +354,16 @@
 /* ===== 页面级卡片网格 ======================================
    把 markdown 顶层的每个块都当成一个 flex item:默认占满一行
    (照旧堆叠),只有 draw/seed/ask/write/note 五种 callout 被判定为
-   "卡片",允许收窄、横排在同一行。 */
+   "卡片",允许收窄、横排在同一行。
+   2026-07-07 试过给 .cm-sizer(Live Preview/编辑视图容器)镜像一份同款
+   display:flex + flex:1 1 100%,想让编辑模式也有卡片网格——用 devtools
+   实测证明行不通:.cm-sizer 的直接子元素是 CodeMirror 按源文件每一行拆出的
+   一大堆 .cm-line(哪怕是 Live Preview,只要某个块当前显示原始文本——
+   比如光标停在里面,或 dataviewjs 还没渲染成 widget——那些行也是直接
+   子元素),对整个 .cm-sizer 做 flex-basis:100% 会让容器自身失去确定宽度,
+   退化成逐字换行的乱码排版(截图实测:一整段文字被拆成一字一行)。已撤销,
+   不要再往 .cm-sizer 加这套 flex 网格——这套卡片布局只在阅读视图生效,
+   编辑模式下退化成普通堆叠是可接受的降级,不是需要用 CSS 硬修的 bug。 */
 .workbench .markdown-preview-sizer > div {
   flex: 1 1 100%;
   margin: 0;
@@ -433,40 +418,26 @@
    不追求跟旁边配对卡片严丝合缝对齐边框;外层 sizer 的 flex 默认拉伸
    仍然存在,但那只影响透明的外层容器,卡片本身的可见边框不会被
    拉出空白 */
-/* 名画横幅 + 随机重逢横排成一行(2026-07-06 用户要求):画作横幅已经
-   拆成独立顶层块(见 工作台.md 里的拆分说明)。2026-07-06 二次调整:
-   跟"抽卡(1.5)/延伸(1)"用同一套主次比例写法,名画是主角占大份,
-   随机重逢占小份,不再 1:1 平分;窄屏两者都退到 280px 兜底,自动堆叠。
-   2026-07-07 三次调整:用户要求名画再宽一些,比例从 1.5:1 加到 2:1 */
-.workbench .markdown-preview-sizer > *:has(.wb-daily-painting) {
-  flex: 2 1 max(280px, 58%);
-}
-.workbench .markdown-preview-sizer > *:has(.wb-reunion) {
-  flex: 1 1 max(280px, 26%);
-}
+/* 名画横幅 + 随机重逢:2026-07-06/07 一度让两张卡横排成一行(比例
+   2:1),靠 :has() 选中顶层 wrapper 分配 flex-basis,再配一套 :has()
+   反向抓取 + ResizeObserver 让随机重逢跟着名画横幅的实际渲染高度同步
+   max-height。这套组合太脆弱:名画横幅是独立 dataviewjs 块,渲染/重排
+   时机跟随机重逢(换一篇后 innerHTML 整个重建)对不上,一旦随机重逢的
+   笔记摘要变长导致卡片变高,或者两次渲染时序错开,Obsidian 就会把两张
+   卡都退化成通用的 flex:1 1 100%,表现为"有时候并排、有时候各自占一整行
+   还乱套"——反复复现了好几次,靠 CSS 选择器已经堵不住这个时序竞争。
+   2026-07-07 用户看到两者都退化成堆叠状态后,反而明确要求"就要这个样子,
+   跟其余卡片(今日抽卡等)一样各自占一整行"——干脆去掉横排的特殊 flex-
+   basis,让这两张卡沿用最上面的通用规则(flex: 1 1 100%),不再横排,
+   彻底消除这个时序竞争。配套的高度同步逻辑(:has() 反向抓取 + 工作台.md
+   里的 ResizeObserver)一并删除,不然随机重逢会被那段死代码继续钉一个
+   跟名画横幅联动的 max-height,反而在新的堆叠布局下把摘要裁得莫名其妙。 */
 
 /* 名画横幅的外观:原来这几条(背景/圆角/模糊/阴影)是 工作台.md 里
    dataviewjs 内联写死的,内联样式优先级盖过下面的 :hover 选择器,
    导致加了 hover 也不生效——现在挪到这里统一管理,跟随机重逢用完全
    相同的一套数值(半透明白 + 模糊 + 无阴影 + hover/active 时透明度
    变化),2026-07-06 用户要求两张卡片 hover 效果一致 */
-/* 2026-07-07 用户要求名画的标题/简介跟"随机重逢"的标题/摘要对齐成
-   两条水平线——随机重逢卡片顶部多一行"随机重逢"标签+换一篇按钮
-   (按钮 40px 高 + 5px gap ≈ 45px),名画的图+文字目前是从卡片顶部
-   直接起排(align-items: flex-start),文字比随机重逢的标题整整高了
-   一个头部行。图片本身不用跟着挪(用户只圈了文字部分),只给文字块
-   (caption)一个顶部间距,把画名往下压到跟"随机重逢"标题同一行,
-   简介自然跟着摘要对上第二行。45px 是按随机重逢头部的实际尺寸估的,
-   不是精确像素对齐,如果字号/主题变化导致对不齐,再微调这个数值。
-   只在宽屏(名画和随机重逢横排成一行时)才需要这个偏移——窄屏下两张
-   卡片各占一行、上下堆叠,没有"对齐同一行"这回事,加这个间距只会在
-   图和文字之间平白多出一截空隙,所以用跟 工作台.md 里 narrowScreen
-   判断同一个断点(520px)包一层 min-width 媒体查询,窄屏不生效 */
-@media (min-width: 521px) {
-  .workbench .wb-daily-painting-side {
-    margin-top: 45px;
-  }
-}
 .workbench .wb-daily-painting {
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(20px) saturate(1.3);
@@ -510,18 +481,15 @@
    (rgba(255,255,255,0.35))+ backdrop-filter 模糊透出页面渐变,不再
    直接铺不透明的 --wb-page-gradient(那样看不出模糊感,只是纯色块);
    阴影也去掉,跟名画横幅一致靠模糊的半透明底自己撑边界。
-   2026-07-07 修:之前靠摘要字数(90→320 字)硬凑高度去贴近名画横幅,
-   本质是猜——画作是横是竖、笔记是长是短每天都不一样,固定字数只在
-   "凑巧差不多高"的日子好看,笔记一长、画作一矮就会反过来把名画卡片
-   撑出一截空白(见 工作台.md 里 ResizeObserver 那段注释)。改成用
-   ResizeObserver 实时量名画卡片的真实渲染高度,写成这里的 max-height,
-   加 overflow:hidden 兜底裁掉超出部分,配合下面摘要区的 line-clamp
-   出省略号,不再靠字数瞎猜 */
+   2026-07-07 起不再跟名画横幅横排同一行(见上面"名画横幅 + 随机重逢"
+   的说明),原本靠 ResizeObserver 实时量名画高度、写成这里 max-height
+   的联动逻辑已删除(工作台.md 同步移除),卡片高度改回按内容自然撑开,
+   摘要超长时靠下面 line-clamp:8 截断出省略号兜底,不再需要 height:100%
+   去跟画作卡片对齐 */
 .workbench .wb-reunion {
   display: flex;
   flex-direction: column;
   gap: 5px;
-  height: 100%;
   overflow: hidden;
   box-sizing: border-box;
   margin: 0;
