@@ -4,7 +4,7 @@
 
 1. **用户自己在 Obsidian 手写、推送到了 GitHub,没有触发词** → `notes/`(GC 或用户主动触发「帮我梳理一下 notes」时补齐分类、frontmatter、双链)
 2. **用户说了**「记下来」「存一下」「收藏这条」「写进记忆库」「remember this」等触发词 → **先判断内容性质,不是无脑塞进 notes/**:
-   - 文章、知识点、用户自己的想法/创作/经历 → `notes/`(提炼后写入,完整流程见 `meta/NOTES.md`)
+   - 文章、知识点、用户自己的想法/创作/经历 → `notes/`(提炼后写入,完整流程见 CLAUDE.md「我的收藏」一节)
    - 关于用户本人的稳定信息或偏好 → `profile/` 对应主题页(不进 notes/)
    - 对 AI 未来工作方式的约束或决定 → `decisions/`(不进 notes/)
    - 一条内容同时沾两类(比如"以后笔记都用 X 格式"既是知识又是约束)→ 两边各写一条,互相双链
@@ -22,33 +22,6 @@
 
 **pitfalls/ 的准入门槛更高一层**(2026-07-06 用户质疑后收紧):只记**环境性/结构性**的坑——不重新读代码/文件就发现不了、而且未来大概率还会再踩到(比如"仓库必须保持 private""dataviewjs 计时器要用 `registerInterval` 不然内存泄漏""iCloud 文件名编码不一致会让 git 误删")。**AI 自己实现某个功能时的编码试错/调试过程,哪怕最后确实找到了原因和解法,也不算**——这类记忆唯一的价值路径是"帮未来某次 session 少走一次弯路",受益人不是用户;如果坑本身很局部(比如某个 UI 组件的 CSS class 复用冲突),重新读一遍代码大概率就能重新发现,记下来的边际价值通常低于占用 index.md 和 GC 的注意力,不值得写。拿不准就问自己:"如果这条记忆丢了,下次真的会比现在更难查出来吗"——答案是否则就不写。
 
-**只有写 notes/ 时**才按 `meta/CONCEPTS.md` 规则在正文概念出现处挂 `[[concepts/xxx]]` 链接(概念页不存在也照写,幽灵节点零成本);笔记之间不直接互链。`concepts/` 不是录入目的地——概念页只在被第二篇笔记命中时才建。**AI 自动记忆(profile/decisions/pitfalls/insights/questions)不挂概念链、不做双链进图谱**,引用其他记忆用纯文本路径;图谱只属于用户的知识(notes + concepts)。
+**只有写 notes/ 时**才按 CLAUDE.md「概念层」规则在正文概念出现处挂 `[[concepts/xxx]]` 链接(概念页不存在也照写,幽灵节点零成本);笔记之间不直接互链。`concepts/` 不是录入目的地——概念页只在被第二篇笔记命中时才建。**AI 自动记忆(profile/decisions/pitfalls/insights/questions)不挂概念链、不做双链进图谱**,引用其他记忆用纯文本路径;图谱只属于用户的知识(notes + concepts)。
 
-## 记忆文件格式(decisions/pitfalls/insights/questions 通用)
-
-- **文件名 = 一句话结论**,不打开文件就能看懂
-- **正文** = 简短的"为什么" + 证据/来源 + 何时会失效
-- 用 Obsidian 双链 `[[目录/文件名]]` 关联相关记忆
-- frontmatter:
-
-```yaml
----
-type: decision | pitfall | insight | question
-created: YYYY-MM-DD
-last-verified: YYYY-MM-DD
-confidence: high | medium | low   # insight 必填,其余可省
-supersedes: 被本条取代的记忆文件名  # 可选
----
-```
-
-## 结论速览(meta/SUMMARY.md)
-
-`decisions/`、`pitfalls/`、`insights/` 天生是时间线。`meta/SUMMARY.md` 按主题聚合"现在信什么"而不是"怎么信到这的",末尾双链回所有相关时间线文件。
-
-- **什么时候写**:同一主题下积累 **2 条以上**相关记忆才起条目
-- **谁来维护**:写新记忆时顺手检查是否命中已有主题;GC 时也扫一遍
-- **和 index.md 的区别**:meta/index.md 全量列表、机械生成;meta/SUMMARY.md 精选聚合、手写综合
-
-## 写完之后
-
-重跑 `python3 meta/scripts/build_memory_index.py` 更新索引;若这条新记忆和已有 2 条以上记忆同属一个主题,按上方「结论速览」规则同步更新 `SUMMARY.md`;记忆、索引、速览一起提交;最后按 CLAUDE.md「写入必须告知」的格式告诉用户。
+写完之后:重跑 `python3 meta/scripts/build_memory_index.py` 更新索引;若这条新记忆和已有 2 条以上记忆同属一个主题,同步更新 `SUMMARY.md`(见 CLAUDE.md「结论速览」一节);最后按 CLAUDE.md「写入必须告知」的格式告诉用户。

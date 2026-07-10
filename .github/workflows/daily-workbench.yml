@@ -26,7 +26,7 @@ jobs:
           prompt: |
             当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 meta/WORKBENCH.md,严格按那份文件的规则更新 工作台.md 的三个 AI 板块(🎴 今日抽卡 / 🌱 今日延伸 / ❓ 今天的问题×2),以及横幅画作:
 
-            - 🖼 每日画作:用 WebSearch 挑一幅著名画作(优先 upload.wikimedia.org 直链,几百 KB 到 2MB),更新 frontmatter 的 painting-url/painting-title/painting-intro;查不到真实可访问的直链就保留前一天的值,不编造。选画前先查历史避免重复:`git log -p -- 工作台.md | grep painting-title`,避开近 30 期用过的画作
+            - 🖼 每日画作:用 WebSearch 挑一幅著名画作(优先 upload.wikimedia.org 直链,几百 KB 到 2MB),更新 frontmatter 的 painting-url/painting-title/painting-intro;查不到真实可访问的直链就保留前一天的值,不编造
             - 生成前先分别处理上一期问题1、问题2 各自 ✍️ 区块里用户写的回答:哪道有回答就无条件归档到 notes/问答/YYYY-MM 工作台问答.md,有价值的沉淀进相关概念页,并在新一期 🎴 上方各生成一个 🥊 碰撞 callout 回应(两道都答了就两个)
             - ❓ 今天的问题现在是两道(问题1/问题2),分别嵌在 [!today]+ 折叠壳里(标题留空,不要写"今日内容"字样),每道各自的 [!ask]+[!note]-+回答区 三段结构独立成组,尽量来自不同概念/笔记
             - 🌱 延伸写完后同步追加进对应概念页的延伸区(标注 [事实]/[推论]/[观点],注明未联网核查,禁止编造引用链接)
