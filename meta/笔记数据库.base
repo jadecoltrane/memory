@@ -1,36 +1,36 @@
 views:
   - type: table
-    name: 全部笔记
+    name: "全部笔记"
     filters:
       and:
-        - file.inFolder("notes")
+        - 'file.inFolder("notes")'
   - type: table
-    name: health
+    name: "health"
     filters:
       and:
-        - file.inFolder("notes/health")
+        - 'file.inFolder("notes/health")'
   - type: table
-    name: 社会学
+    name: "生活方式"
     filters:
       and:
-        - file.inFolder("notes/社会学")
+        - 'file.inFolder("notes/生活方式")'
   - type: table
-    name: 生活方式
+    name: "社会学"
     filters:
       and:
-        - file.inFolder("notes/生活方式")
+        - 'file.inFolder("notes/社会学")'
   - type: table
-    name: 未分类
+    name: "社会认知"
     filters:
       and:
-        - file.folder == "notes"
+        - 'file.inFolder("notes/社会认知")'
   - type: table
-    name: 社会认知
+    name: "未分类"
     filters:
       and:
-        - file.inFolder("notes/社会认知")
+        - 'file.folder == "notes"'
   - type: table
-    name: 问答
+    name: "问答"
     filters:
       and:
-        - file.inFolder("notes/问答")
+        - 'file.inFolder("notes/问答")'
