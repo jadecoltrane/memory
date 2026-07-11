@@ -64,7 +64,7 @@
 .markdown-source-view.workbench {
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, hsl(234, 66%, 91%) 0%, hsl(344, 87%, 92%) 57%, hsl(116, 79%, 91%) 100%); /* daily-gradient:由 meta/scripts/update_daily_gradient.py 每日重写,勿手改 */
+    linear-gradient(135deg, hsl(264, 90%, 91%) 0%, hsl(13, 67%, 91%) 47%, hsl(152, 91%, 90%) 100%); /* daily-gradient:由 meta/scripts/update_daily_gradient.py 每日重写,勿手改 */
   background-repeat: repeat, no-repeat;
   background-size: 140px 140px, cover;
 }
