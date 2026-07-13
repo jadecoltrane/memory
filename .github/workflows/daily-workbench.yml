@@ -26,7 +26,8 @@ jobs:
 
       # generated 是心跳报警的依据,不靠 prompt 遵守,前置机械写入(兜底优先)
       - name: 写入今日 generated 日期
-        run: sed -i "s/^generated:.*/generated: $(TZ=Asia/Shanghai date +%F)/" 工作台.md
+        run: |
+          sed -i "s/^generated:.*/generated: $(TZ=Asia/Shanghai date +%F)/" 工作台.md
 
       - name: Claude 生成今日工作台
         uses: anthropics/claude-code-action@v1
