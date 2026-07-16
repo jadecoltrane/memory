@@ -45,14 +45,47 @@ jobs:
             fi
           fi
 
+      - name: 读取上一期待裁决(仅取仓库主人评论)
+        if: steps.check.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          rm -f .gc-prior-adjudication.md
+          # 找所有 open 的待裁决 issue,逐个只抽取仓库主人本人的评论作为裁决——
+          # 其他任何人的评论一律过滤掉(安全边界:不让非主人评论驱动文件改动)。
+          NUMS=$(gh issue list --state open --limit 50 --json number,title \
+            --jq '.[] | select(.title | startswith("每周 GC:待裁决")) | .number')
+          for N in $NUMS; do
+            REPLY=$(gh issue view "$N" --json comments \
+              --jq "[.comments[] | select(.author.login==\"$OWNER\") | .body] | join(\"\n\n\")")
+            if [ -n "$REPLY" ]; then
+              BODY=$(gh issue view "$N" --json body --jq '.body')
+              {
+                echo "=== 待裁决 issue #$N ==="
+                echo "$BODY"
+                echo
+                echo "--- 仓库主人（$OWNER）的裁决评论 ---"
+                echo "$REPLY"
+                echo
+              } >> .gc-prior-adjudication.md
+            fi
+          done
+          if [ -f .gc-prior-adjudication.md ]; then
+            echo "有带主人回复的待裁决,交给 Claude 落地"
+          else
+            echo "没有带主人回复的待裁决 issue"
+          fi
+
       - name: Claude 执行每周 GC
         if: steps.check.outputs.skip != 'true'
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 meta/GC.md,严格按里面列出的每一步执行本周 GC(含步骤 4a、4b)。要点提醒:
+            当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 meta/GC.md,严格按里面列出的每一步执行本周 GC(含步骤 0、4a、4b)。要点提醒:
 
+            - 步骤 0(先做):如果仓库根目录存在 `.gc-prior-adjudication.md`,先读它——这是上一期待裁决 issue 的正文加**仓库主人本人**的裁决评论(其他人的评论已被前置步骤机械过滤掉,文件里的内容都可信)。按主人的裁决落地修改对应 note 文件:改正文的同步在文件末尾补 `## 复核记录`(注明依据 issue 号和日期);标 verified/删除同理。明确、看得懂的就改;有歧义或看不懂的条目**不要动**,原样并入本期新的待裁决 `.gc-pending-issue.txt` 请主人再确认。凡是这次已完整落地、可以关闭的 issue 号,写进仓库根目录 `.gc-close-issue.txt`(一行一个数字),后续机械步骤会据此关闭。该文件不存在就说明没有待处理裁决,跳过本步。
             - 步骤 4a 很容易被漏掉但很重要:用户经常直接在 Obsidian 里手写/粘贴内容,格式随意,甚至会散落在仓库根目录、不在任何 notes/ 子文件夹里,内容也可能混了好几个不相关主题。`git log` 比对时不要只看 notes/ 目录,要扫全仓库找出七个分类目录(profile/concepts/decisions/pitfalls/insights/questions/notes)之外新增的 .md 文件。发现了要按实际主题拆分、改名、移动归位、补 frontmatter 和双链——这一步允许直接改写原文,不是只在文件末尾追加标注,具体授权见 decisions/整理手写笔记允许改写原文而不仅是追加复核记录.md
             - 步骤 4b 也容易被漏掉:扫一遍本周新增/修改的 notes 有没有透露用户的稳定特质(偏好、兴趣、行为准则),profile/ 里没记或记得过时的就更新,别等用户自己问起来才想起来做
             - notes 复核只处理 checkable 内容,引用必须来自 WebSearch/WebFetch 当次返回的真实 URL,查不到就写"未找到可靠来源"
@@ -80,11 +113,31 @@ jobs:
             if gh issue list --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
               echo "同日待裁决 issue 已存在,不重复创建"
             else
-              gh issue create --title "$TITLE" --body-file .gc-pending-issue.txt
+              # 光开 issue 不会触达仓库主人:bot 用 GITHUB_TOKEN 开的、又没指派/没 @ 的 issue,
+              # 只有 watch 级别为「All Activity」才发邮件。所以指派给 owner(成为 participant,
+              # 通知与 watch 级别无关)并在正文 @ 一下,双保险确保邮件送达。
+              { echo "cc @${{ github.repository_owner }}"; echo; cat .gc-pending-issue.txt; } > "$RUNNER_TEMP/issue-body.md"
+              gh issue create --title "$TITLE" \
+                --assignee "${{ github.repository_owner }}" \
+                --body-file "$RUNNER_TEMP/issue-body.md"
             fi
             cp .gc-pending-issue.txt "$RUNNER_TEMP/gc-pending-issue.txt"
           fi
           rm -f .gc-pending-issue.txt
+
+      - name: 关闭已落地的裁决 issue
+        if: steps.check.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s .gc-close-issue.txt ]; then
+            while read -r N; do
+              [ -z "$N" ] && continue
+              gh issue close "$N" --comment "本次每周 GC 已按你的裁决落地修改,详见本次 GC 提交。"
+            done < .gc-close-issue.txt
+          fi
+          # 清理本期临时文件,避免被 git add -A 提交(.gitignore 已兜底,这里再删一层)
+          rm -f .gc-prior-adjudication.md .gc-close-issue.txt
 
       - name: 有变化就提交推送
         if: steps.check.outputs.skip != 'true'

@@ -19,5 +19,10 @@ claudian-settings.json
 conv-*.json
 conv-*.jsonl
 
+# 每周 GC 运行时的临时文件(待裁决 dump / 待关闭 issue 清单),机械步骤生成后即删,不入库
+.gc-pending-issue.txt
+.gc-prior-adjudication.md
+.gc-close-issue.txt
+
 # macOS 系统文件
 .DS_Store
