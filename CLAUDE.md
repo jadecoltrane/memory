@@ -1,11 +1,11 @@
 # CLAUDE.md — AI 协作与记忆库规则
 
-`jadecoltrane/memory` 就是记忆库本身:数据层纯 Markdown + Git(可迁移,任何 AI 都能接入),使用层 Obsidian 插件随便用(Dataview、Git 等)。当前只接入 Claude。
+`jadecoltrane/memory` 就是记忆库本身:数据层纯 Markdown + Git(可迁移,任何 AI 都能接入),使用层 Obsidian 插件随便用(Dataview、Git 等)。当前以 Codex 为主要自动化执行器,同时保留 Claude 兼容入口。
 
 
 **兜底优先**:可靠性相关的东西(失败告警、机器校验、边界情况、备份)必须**预先**设计,不等出事再补;懒加载只允许用在内容组织(概念页第二次命中才建、SUMMARY 凑够 2 条才起条目、`notes/` 子文件夹同主题第二篇笔记出现时才建、单篇新主题先放 `notes/` 根目录),不适用于安全网。
 
-**方案设计优先省 token**:几种做法效果相当时选更省 token(读/维护成本更低)的,但不能拿效果去换——本文件和下面提到的三个自动化 prompt 都按这个标准写,发现冗余可以精简,但不能牺牲可执行性。
+**方案设计优先省 token**:几种做法效果相当时选更省 token(读/维护成本更低)的,但不能拿效果去换——本文件和下面提到的 AI 自动化 prompt 都按这个标准写,发现冗余可以精简,但不能牺牲可执行性。
 
 **四个自动化,不需要 AI 手动补**:
 - `rebuild-index.yml`:推送到 main 且改了记忆文件就自动重建 `meta/index.md`(AI 仍可手动跑 `meta/scripts/build_memory_index.py` 提前核对)

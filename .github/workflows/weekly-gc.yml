@@ -1,9 +1,9 @@
 # 每周一北京时间 09:00 在云端做 Memory GC,不依赖任何本地设备开机。
-# 需要仓库 secret:CLAUDE_CODE_OAUTH_TOKEN(与工作台日更共用)。
+# 需要仓库 secret:OPENAI_API_KEY(与工作台日更共用)。
 # 2026-07-06 起不再做跨仓库指针巡检(见 decisions/下线跨仓库指针巡检改为用户手动接入记忆库.md),
 # 不再需要 REPO_PATROL_PAT。
 # 省成本闸门:如果自上次 GC 以来仓库没有任何实质性新提交(排除工作台日更),
-# 就跳过本次 Claude 调用,不付这次 GC 的读取成本。代价:60 天 insight
+# 就跳过本次 Codex 调用,不付这次 GC 的读取成本。代价:60 天 insight
 # 降级这类按时间触发、与"本周有没有新内容"无关的维护,也会在安静周被一起
 # 顺延到下次真正有新提交的那周(用户 2026-07-04 明确接受这个取舍)。
 name: 每周 Memory GC
@@ -16,15 +16,15 @@ on:
 permissions:
   contents: write
   issues: write
-  id-token: write
 
 jobs:
   gc:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: 检查本周有没有实质性新提交
         id: check
@@ -45,27 +45,69 @@ jobs:
             fi
           fi
 
-      - name: Claude 执行每周 GC
+      - name: Codex 执行每周 GC
         if: steps.check.outputs.skip != 'true'
-        uses: anthropics/claude-code-action@v1
-        env:
-          GH_TOKEN: ${{ github.token }}
+        uses: openai/codex-action@v1
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          codex-args: '["-c", "web_search=\"live\""]'
+          allow-bot-users: github-actions[bot]
           prompt: |
             当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 meta/GC.md,严格按里面列出的每一步执行本周 GC(含步骤 4a、4b)。要点提醒:
 
             - 步骤 4a 很容易被漏掉但很重要:用户经常直接在 Obsidian 里手写/粘贴内容,格式随意,甚至会散落在仓库根目录、不在任何 notes/ 子文件夹里,内容也可能混了好几个不相关主题。`git log` 比对时不要只看 notes/ 目录,要扫全仓库找出七个分类目录(profile/concepts/decisions/pitfalls/insights/questions/notes)之外新增的 .md 文件。发现了要按实际主题拆分、改名、移动归位、补 frontmatter 和双链——这一步允许直接改写原文,不是只在文件末尾追加标注,具体授权见 decisions/整理手写笔记允许改写原文而不仅是追加复核记录.md
             - 步骤 4b 也容易被漏掉:扫一遍本周新增/修改的 notes 有没有透露用户的稳定特质(偏好、兴趣、行为准则),profile/ 里没记或记得过时的就更新,别等用户自己问起来才想起来做
-            - notes 复核只处理 checkable 内容,引用必须来自 WebSearch/WebFetch 当次返回的真实 URL,查不到就写"未找到可靠来源"
-            - 需要用户裁决的条目(存疑复核结果、180 天双空缺的 note、张力扫描发现的矛盾)不要自行处置:除了写进 commit message 正文,还要用 gh issue create 在本仓库开一个 issue(标题如「每周 GC:N 项待裁决」,正文逐条列出条目、理由和建议选项)——issue 会触发 GitHub 邮件通知,这是用户唯一的主动提醒渠道。没有待裁决事项就不开 issue,保持沉默
+            - notes 复核只处理 checkable 内容,引用必须来自内置网页搜索当次返回的真实 URL,查不到就写"未找到可靠来源"
+            - 需要用户裁决的条目(存疑复核结果、180 天双空缺的 note、张力扫描发现的矛盾)不要自行处置:把逐条条目、理由和建议选项按 Markdown 写入仓库根目录 `.gc-pending-issue.txt`;没有待裁决事项就确保该文件不存在。后续机械步骤会据此创建 GitHub issue 并删除临时文件
             - 改动记忆文件后运行 python3 meta/scripts/build_memory_index.py 重建索引;检查 meta/SUMMARY.md 是否有该新起或更新的条目
             - 无事可做就不要制造改动,允许本次没有提交
 
-            有改动时提交推送:
-            git config user.name "memory-gc-bot"
-            git config user.email "actions@users.noreply.github.com"
-            git add -A && git commit -m "每周 GC:$(date -u -d '+8 hours' +%F)" && git push
-            commit message 第一行之后附上一句话摘要(动了什么、为什么)和需要用户裁决的条目清单。
-          claude_args: |
-            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch"
+            只修改工作区文件,不要自行 commit、push 或调用 gh;后续步骤会统一校验、创建 issue、提交并推送。
+
+      - name: 重建索引并体检
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          python3 meta/scripts/build_memory_index.py
+          python3 meta/scripts/lint_memory.py
+
+      - name: 创建待裁决 issue
+        if: steps.check.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s .gc-pending-issue.txt ]; then
+            TITLE="每周 GC:待裁决 $(TZ=Asia/Shanghai date +%F)"
+            if gh issue list --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
+              echo "同日待裁决 issue 已存在,不重复创建"
+            else
+              gh issue create --title "$TITLE" --body-file .gc-pending-issue.txt
+            fi
+            cp .gc-pending-issue.txt "$RUNNER_TEMP/gc-pending-issue.txt"
+          fi
+          rm -f .gc-pending-issue.txt
+
+      - name: 有变化就提交推送
+        if: steps.check.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "memory-gc-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "本周 GC 无事可做"
+          else
+            if [ -s "$RUNNER_TEMP/gc-pending-issue.txt" ]; then
+              git commit \
+                -m "每周 GC:$(TZ=Asia/Shanghai date +%F)" \
+                -m "Codex 按 meta/GC.md 完成本周整理;待裁决条目已同步到同日 GitHub issue。" \
+                -m "$(cat "$RUNNER_TEMP/gc-pending-issue.txt")"
+            else
+              git commit \
+                -m "每周 GC:$(TZ=Asia/Shanghai date +%F)" \
+                -m "Codex 按 meta/GC.md 完成本周整理;本次没有待裁决条目。"
+            fi
+            gh auth setup-git
+            git push
+          fi

@@ -1,5 +1,5 @@
 # 每天北京时间 05:00 在云端生成新一期工作台,不依赖任何本地设备开机。
-# 需要仓库 secret:CLAUDE_CODE_OAUTH_TOKEN(本地终端跑 `claude setup-token` 生成)。
+# 需要仓库 secret:OPENAI_API_KEY。
 name: 工作台日更
 
 on:
@@ -9,18 +9,18 @@ on:
 
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       # 每日渐变直接写死进 CSS(静态加载零跳变,JS 动态生成已否决),
-      # 改动会随下面 Claude 步骤的 git add -A 一起提交
+      # 改动会随最后的机械提交步骤一起提交
       - name: 写入今日页面渐变
         run: python3 meta/scripts/update_daily_gradient.py
 
@@ -29,14 +29,17 @@ jobs:
         run: |
           sed -i "s/^generated:.*/generated: $(TZ=Asia/Shanghai date +%F)/" 工作台.md
 
-      - name: Claude 生成今日工作台
-        uses: anthropics/claude-code-action@v1
+      - name: Codex 生成今日工作台
+        uses: openai/codex-action@v1
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          permission-profile: ":workspace"
+          codex-args: '["-c", "web_search=\"live\""]'
+          allow-bot-users: github-actions[bot]
           prompt: |
             当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 meta/WORKBENCH.md,严格按那份文件的规则更新 工作台.md 的三个 AI 板块(🎴 今日抽卡 / 🌱 今日延伸 / ❓ 今天的问题×2),以及横幅画作:
 
-            - 🖼 每日画作:用 WebSearch 挑一幅名画(优先 upload.wikimedia.org 直链,几百 KB 到 2MB),更新 frontmatter 的 painting-url/painting-title/painting-intro;查不到真实可访问的直链就保留前一天的值,不编造。**不许重复近半年用过的画**(先跑 `git log --since='180 days ago' --format= -p -- 工作台.md | grep '^+painting-title'`,输出只有每天一行画名,别跑裸的 git log -p),并在时代/地域/风格上轮换,不要连续几天同一风格
+            - 🖼 每日画作:用内置网页搜索挑一幅名画(优先 upload.wikimedia.org 直链,几百 KB 到 2MB),更新 frontmatter 的 painting-url/painting-title/painting-intro;查不到真实可访问的直链就保留前一天的值,不编造。**不许重复近半年用过的画**(先跑 `git log --since='180 days ago' --format= -p -- 工作台.md | grep '^+painting-title'`,输出只有每天一行画名,别跑裸的 git log -p),并在时代/地域/风格上轮换,不要连续几天同一风格
             - 生成前先分别处理上一期问题1、问题2 各自 ✍️ 区块里用户写的回答:哪道有回答就无条件归档到 notes/问答/YYYY-MM 工作台问答.md,有价值的沉淀进相关概念页,并在新一期 🎴 上方各生成一个 🥊 碰撞 callout 回应(两道都答了就两个)
             - ❓ 今天的问题现在是两道(问题1/问题2),分别嵌在 [!today]+ 折叠壳里(标题留空,不要写"今日内容"字样),每道各自的 [!ask]+[!note]-+回答区 三段结构独立成组,尽量来自不同概念/笔记
             - 🌱 延伸写完后同步追加进对应概念页的延伸区(标注 [事实]/[推论]/[观点],注明未联网核查,禁止编造引用链接)
@@ -44,9 +47,24 @@ jobs:
             - 控制成本:只读 meta/index.md 和选中的少数文件;抽卡不与最近几期重复(用 git log -p -- 工作台.md 查历史)
             - ## 标题、所有 dataviewjs 区块(横幅、信息条、今日内容折叠壳外层结构、统计卡、🎲 随机重逢卡,含心跳报警)、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses;generated 已由前置步骤写好当天日期,原样保留。改动固定展示结构或视觉风格前先查 decisions/工作台UI已否决方案清单改样式前先看这份.md,避免把已否决的元素加回来
 
-            完成后提交推送:
-            git config user.name "workbench-bot"
-            git config user.email "actions@users.noreply.github.com"
-            git add -A && git commit -m "工作台日更:$(date -u -d '+8 hours' +%F)" && git push
-          claude_args: |
-            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch"
+            只修改工作区文件,不要自行 commit 或 push;后续步骤会统一校验、提交并推送。
+
+      - name: 重建索引并体检
+        run: |
+          python3 meta/scripts/build_memory_index.py
+          python3 meta/scripts/lint_memory.py
+
+      - name: 有变化就提交推送
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "workbench-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "今日工作台没有变化"
+          else
+            git commit -m "工作台日更:$(TZ=Asia/Shanghai date +%F)"
+            gh auth setup-git
+            git push
+          fi

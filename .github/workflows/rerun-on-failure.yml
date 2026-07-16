@@ -1,7 +1,6 @@
-# 兜底:工作台日更 / 每周 Memory GC 偶发在启动阶段死于 Anthropic token 交换的
-# 401 误报("User does not have write access on this repository"),同一配置
-# 时好时坏,重跑即可恢复(见 pitfalls/云端Claude工作流会偶发401权限误报重跑即可不用改配置.md)。
-# 失败发生在 Claude 干活之前、零副作用,所以自动重跑安全;run_attempt < 3 防死循环。
+# 兜底:工作台日更 / 每周 Memory GC 遇到模型 API 或 runner 的瞬时故障时自动重跑。
+# Codex 步骤不负责提交;待裁决 issue 按日期去重,所以重跑可安全恢复。
+# run_attempt < 3 防死循环。
 name: 失败自动重跑
 
 on:
