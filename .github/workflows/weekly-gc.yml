@@ -25,7 +25,6 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-          persist-credentials: false
 
       - name: 检查本周有没有实质性新提交
         id: check
@@ -108,6 +107,5 @@ jobs:
                 -m "每周 GC:$(TZ=Asia/Shanghai date +%F)" \
                 -m "Claude 按 meta/GC.md 完成本周整理;本次没有待裁决条目。"
             fi
-            git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
             git push
           fi
