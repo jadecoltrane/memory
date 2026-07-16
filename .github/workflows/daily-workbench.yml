@@ -59,10 +59,13 @@ jobs:
         run: |
           git config user.name "workbench-bot"
           git config user.email "actions@users.noreply.github.com"
+          # claude-code-action 内部 checkout 收尾时会 unset 外层持久化的 extraheader,抹掉
+          # GITHUB_TOKEN 凭证。所以不依赖被持久化的凭证,push 时当场用 GITHUB_TOKEN 显式认证。
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
           git add -A
           if git diff --cached --quiet; then
             echo "今日工作台没有变化"
           else
             git commit -m "工作台日更:$(TZ=Asia/Shanghai date +%F)"
-            git push
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref_name }}
           fi

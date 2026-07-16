@@ -93,6 +93,10 @@ jobs:
         run: |
           git config user.name "memory-gc-bot"
           git config user.email "actions@users.noreply.github.com"
+          # claude-code-action 内部那次 checkout 在收尾时会 unset 外层 checkout 持久化的
+          # http.<github>.extraheader,把 GITHUB_TOKEN 凭证一并抹掉,导致后续 push 认证失败。
+          # 所以这里不依赖被持久化的凭证,清掉可能残留的 extraheader,push 时当场用 GITHUB_TOKEN。
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
           git add -A
           if git diff --cached --quiet; then
             echo "本周 GC 无事可做"
@@ -107,5 +111,5 @@ jobs:
                 -m "每周 GC:$(TZ=Asia/Shanghai date +%F)" \
                 -m "Claude 按 meta/GC.md 完成本周整理;本次没有待裁决条目。"
             fi
-            git push
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref_name }}
           fi
