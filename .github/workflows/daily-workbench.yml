@@ -48,6 +48,16 @@ jobs:
           claude_args: |
             --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch"
 
+      - name: 验证 AI 内容已更新
+        run: |
+          PREV=$(git show HEAD:工作台.md 2>/dev/null | grep "^painting-title:" | head -1 || echo "")
+          CURR=$(grep "^painting-title:" 工作台.md | head -1 || echo "")
+          if [ -n "$PREV" ] && [ "$PREV" = "$CURR" ]; then
+            echo "::error::Claude 未更新工作台 AI 内容(painting-title 与上次相同),请检查 Claude Code Action 是否正常运行"
+            exit 1
+          fi
+          echo "AI 内容已更新:$CURR"
+
       - name: 重建索引并体检
         run: |
           python3 meta/scripts/build_memory_index.py
