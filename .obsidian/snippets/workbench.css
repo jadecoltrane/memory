@@ -417,12 +417,16 @@
   -webkit-text-fill-color: var(--text-muted);
   filter: none;
 }
-/* 标题下方 8px,跟画作卡 .wb-daily-painting-name 一致 */
+/* 标题下方 8px,跟画作卡 .wb-daily-painting-name 一致;
+   top 留 12px 把标题推到换一篇按钮(40px 高,绝对定位在 top:14px)下方;
+   right 留 56px 防止标题文字流到按钮区域下面 */
 .workbench .wb-reunion-title {
   font-size: 0.98em;
   font-weight: 700;
   color: var(--text-normal);
+  margin-top: 12px;
   margin-bottom: 8px;
+  padding-right: 56px;
 }
 
 /* ===== 胶囊标签栏(统计/面板开关)===== */
@@ -431,7 +435,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin: 0 0 18px;
+  margin: 16px 0 18px;
 }
 .workbench .wb-card {
   display: flex;
