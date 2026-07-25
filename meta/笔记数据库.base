@@ -5,20 +5,25 @@ views:
       and:
         - 'file.inFolder("notes")'
   - type: table
-    name: "社会学"
+    name: "生活方式"
     filters:
       and:
-        - 'file.inFolder("notes/社会学")'
+        - 'file.inFolder("notes/生活方式")'
   - type: table
     name: "健康"
     filters:
       and:
         - 'file.inFolder("notes/健康")'
   - type: table
-    name: "生活方式"
+    name: "社会学"
     filters:
       and:
-        - 'file.inFolder("notes/生活方式")'
+        - 'file.inFolder("notes/社会学")'
+  - type: table
+    name: "社会认知"
+    filters:
+      and:
+        - 'file.inFolder("notes/社会认知")'
   - type: table
     name: "未分类"
     filters:

@@ -1,14 +1,5 @@
-/* ===== 工作台样式(作用于 cssclasses: workbench 的页面)=====
-   颜色只有一处来源:--wb-accent 由页面脚本从当日画作取主色写入,其余
-   强调色从它派生,取不到色时用下面的中性兜底。
-   浅色主题 = 不透明卡片 + 柔和阴影;深色主题 = 磨砂玻璃(半透明白 +
-   backdrop-filter + 顶部高光内阴影)。
-   历次已否决的方案清单见 decisions/,改样式前先翻一眼,别把否决过的
-   方案又做回来。 */
 .workbench {
   --wb-accent: #8a8578;
-  /* 胶囊底色必须不透明(混白而不是混透明):半透明底在不透明白卡片
-     和毛玻璃卡片上会透出两种底色,同一颗药丸显出两种颜色 */
   --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, white);
   --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
   --wb-accent-text: var(--wb-accent);
@@ -21,10 +12,7 @@
   --wb-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
   --wb-card-bg: var(--background-secondary-alt, var(--background-secondary));
 }
-/* 深色卡片不开 backdrop-filter:深色下页面背景是纯色,模糊纯色等于
-   没模糊(2026-07-10 devtools 实测关掉后画面零变化),它却是 hover
-   闪烁的来源(过渡触发合成图层切换,模糊掉帧)。深色磨砂感由半透明
-   白底+顶部高光内阴影提供;浅色卡片背后是彩色渐变,模糊仍有意义 */
+
 .theme-dark .workbench {
   --wb-card-bg: rgba(255, 255, 255, 0.07);
   --wb-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -33,8 +21,6 @@
   --wb-shadow-hover-subtle: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 27px rgba(0, 0, 0, 0.38);
 }
 
-/* OKLCH 派生:锁定亮度和彩度,画作再深再灰文字也可读、底色也柔和;
-   不支持相对颜色语法的端跳过,沿用上面的 color-mix 兜底 */
 @supports (color: oklch(from red 0.5 0.1 h)) {
   .workbench {
     --wb-accent-text: oklch(from var(--wb-accent) 0.5 min(c, 0.11) h);
@@ -47,19 +33,13 @@
     --wb-accent-line: oklch(from var(--wb-accent) 0.65 min(c, 0.09) h / 0.5);
   }
 }
-/* 深色下强调色不跟画作,用主题自带的中性语义变量(用户定的);
-   放在 @supports 之后,靠源码顺序稳赢块内那份 */
+
 .theme-dark .workbench {
   --wb-accent-text: var(--text-normal);
   --wb-accent-soft: var(--background-modifier-hover);
   --wb-accent-line: var(--background-modifier-border);
 }
 
-/* 页面背景:固定纸感渐变 + 一层极淡噪点纹理。曾按日随机生成渐变,
-   但 JS 得等 Dataview 跑完才能写入,每次打开都先见兜底色再跳一次,
-   2026-07-08 撤销随机,固定这一套。
-   选择器必须是复合类(.markdown-preview-view.workbench):Obsidian 把
-   workbench 类直接挂在这层容器自己身上,写成后代选择器匹配不到 */
 .markdown-preview-view.workbench,
 .markdown-source-view.workbench {
   background-image:
@@ -68,19 +48,16 @@
   background-repeat: repeat, no-repeat;
   background-size: 140px 140px, cover;
 }
-/* 深色不铺浅色渐变(和磨砂卡叠一起整页发灰),回到主题深色底 */
+
 .theme-dark .markdown-preview-view.workbench,
 .theme-dark .markdown-source-view.workbench {
   background-image: none;
 }
 
-/* frontmatter 属性面板只是给脚本读的数据,不渲染;要改就切源码模式 */
 .workbench .metadata-container {
   display: none !important;
 }
 
-/* 撑满宽度:覆盖"可读行宽"限制。is-readable-line-width 可能挂在
-   sizer 或它的上级,几种组合都写上 */
 .workbench .markdown-preview-sizer,
 .workbench .cm-sizer,
 .workbench.is-readable-line-width .markdown-preview-sizer,
@@ -92,8 +69,6 @@
   margin-inline: 0 !important;
 }
 
-/* 清掉代码块容器自带的卡片装饰:dataviewjs 块只用来渲染卡片,阅读
-   视图是 .el-pre,Live Preview 是 .cm-embed-block,两套都要清 */
 .workbench .el-pre,
 .workbench .cm-embed-block,
 .workbench .cm-preview-code-block {
@@ -103,22 +78,18 @@
   padding: 0 !important;
   overflow: visible !important;
 }
-/* Border 等主题给代码块另画的背景条(带虚线边),也要清 */
+
 .workbench .HyperMD-codeblock-begin-bg,
 .workbench .HyperMD-codeblock-end-bg,
 .workbench .HyperMD-codeblock-bg {
   background: transparent !important;
   border: none !important;
 }
-/* Dataview 给渲染容器塞了内联 overflow-x:auto,会把卡片阴影裁成
-   方形硬边,必须 !important 压回 visible */
+
 .workbench .block-language-dataviewjs {
   overflow: visible !important;
 }
-/* 随机重逢要跟画作卡等高:用 :has() 把 wb-reunion 到顶层块之间的
-   每层未知 wrapper 都改成 flex 列 + 子元素撑满,不依赖 height 百分比
-   链(中间断一层就全失效)。这组只给随机重逢用——画作卡按内容收缩,
-   高度反过来由 syncReunionHeight 同步给随机重逢 */
+
 .workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(.wb-reunion) {
   display: flex;
   flex-direction: column;
@@ -133,17 +104,15 @@
 .workbench .el-pre .copy-code-button {
   display: none !important;
 }
-/* 顶层块一律不裁切,保护卡片阴影 */
+
 .workbench .markdown-preview-sizer > * {
   overflow: visible;
 }
 
-/* 文件名大标题不渲染,问候语已承担标题功能 */
 .workbench .inline-title {
   display: none !important;
 }
 
-/* ===== 信息条:问候(左)/ 实时时钟(右),纯文字页眉不做卡片 ===== */
 .workbench .wb-infobar {
   display: flex;
   align-items: center;
@@ -152,7 +121,7 @@
   padding: 4px 4px 20px;
   margin: 0;
 }
-/* 问候语是主角(粗),时钟是氛围元素(大但极细、muted、不上色) */
+
 .workbench .wb-infobar .wb-greet {
   font-size: clamp(1.5em, 5vw, 1.9em);
   font-weight: 700;
@@ -171,7 +140,6 @@
   color: var(--text-muted);
 }
 
-/* 心跳报警:全站唯一允许跳出主色调的红色,只在出问题时出现 */
 .workbench .wb-heartbeat {
   display: inline-block;
   font-size: 0.8em;
@@ -183,11 +151,6 @@
   margin: -6px 0 16px;
 }
 
-/* ===== 页面级卡片网格:顶层块默认占满一行,白名单里的允许收窄横排 =====
-   min-width:0 必须有:flex 子项默认最小宽度是自身 min-content,面板
-   行里 nowrap 的长标题会把整个顶层块的 min-content 撑到超过屏幕,
-   表现为面板超出手机屏宽、其他行(如胶囊排)跟着变宽导致换行位置
-   随面板展开/收起乱跳 */
 .workbench .markdown-preview-sizer > div {
   flex: 1 1 100%;
   min-width: 0;
@@ -197,18 +160,15 @@
   display: flex;
   flex-wrap: wrap;
   gap: 20px 16px;
-  /* 必须 flex-start:手机端阅读视图会虚拟化卸载屏幕外的块,默认
-     stretch 会把估算出的空白高度平摊给仅剩的行,页面顶部空一大截 */
   align-content: flex-start;
 }
-/* 允许横排的只有问题1/问题2(write/note 嵌在 ask 里,选择器没写 >
-   也能命中,数值一致所以不影响布局);抽卡/延伸各自独占一行 */
+
 .workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"]),
 .workbench .markdown-preview-sizer > *:has(.callout[data-callout="write"]),
 .workbench .markdown-preview-sizer > *:has(.callout[data-callout="note"]) {
   flex: 1 1 max(280px, 40%);
 }
-/* 名画横幅 + 随机重逢横排,主次 2:1;窄屏退到 280px 兜底自动堆叠 */
+
 .workbench .markdown-preview-sizer > *:has(.wb-daily-painting) {
   flex: 2 1 max(280px, 58%);
 }
@@ -216,8 +176,8 @@
   flex: 1 1 max(280px, 26%);
 }
 
-/* ===== 名画横幅卡(结构性内联样式在 工作台.md,外观全在这) ===== */
 .workbench .wb-daily-painting {
+  align-self: flex-start;
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(20px) saturate(1.3);
   -webkit-backdrop-filter: blur(20px) saturate(1.3);
@@ -231,8 +191,7 @@
   -webkit-backdrop-filter: none;
   box-shadow: var(--wb-shadow);
 }
-/* 纯外观类 hover 一律包 (hover:hover):触屏的 :hover 会在手指刚碰到
-   时误触发;:active 是真实按下,不包 */
+
 @media (hover: hover) and (pointer: fine) {
   .workbench .wb-daily-painting:hover {
     background: rgba(255, 255, 255, 0.45);
@@ -259,18 +218,16 @@
   opacity: 0.75;
 }
 
-/* Obsidian 给 .callout 设了 mix-blend-mode(浅色下是 darken),白卡
-   会跟页面渐变做混合被染色,必须改回 normal */
 .workbench .callout {
   mix-blend-mode: normal;
 }
 
-/* ===== 随机重逢卡:跟名画横幅同一套毛玻璃质感,成对维护 ===== */
 .workbench .wb-reunion {
   position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
   margin: 0;
@@ -303,11 +260,7 @@
 .theme-dark .workbench .wb-reunion:active {
   background: rgba(255, 255, 255, 0.05);
 }
-/* 摘要区吃掉剩余空间;text 用 margin:auto——空间富余时垂直居中,
-   文字超高时 auto 边距归零、贴顶从第一行显示(align-items:center 在
-   超高时会居中裁切,开头被裁掉,看起来像从中间开始)。行数上限由
-   syncReunionHeight 按实际剩余高度写入,这里的 14 行只是 JS 没跑时
-   的兜底 */
+
 .workbench .wb-reunion-excerpt {
   flex: 1;
   display: flex;
@@ -323,22 +276,21 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 14;
   overflow: hidden;
+  min-height: 0;
 }
 @media (max-width: 520px) {
   .workbench .wb-reunion-excerpt-text {
     -webkit-line-clamp: 8;
   }
 }
-/* 两张卡的标签行:只装药丸,高度一致,药丸→标题的间距因此一致
-   (换一篇按钮已绝对定位到卡片右上角,不再撑高这一行) */
+
 .workbench .wb-reunion-head,
 .workbench .wb-painting-head {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
 }
-/* 药丸标签:字号/内边距跟抽卡/延伸/问题的胶囊标题(0.78em/3px 12px)
-   完全一致 */
+
 .workbench .wb-reunion-tag,
 .workbench .wb-painting-tag {
   font-size: 0.78em;
@@ -349,9 +301,7 @@
   padding: 3px 12px;
   border-radius: 999px;
 }
-/* 换一篇按钮:figma 拟物玻璃圆钮(圆形底渐变+双向光影+彩色光晕+
-   渐变描边+图标渐变填充)。绝对定位在卡片右上角,不参与标签行高度。
-   旋转只转图标,不转按钮本体(光影方向不能跟着转) */
+
 .workbench .wb-reunion-reroll {
   position: absolute;
   top: 14px;
@@ -417,21 +367,21 @@
   -webkit-text-fill-color: var(--text-muted);
   filter: none;
 }
-/* 标题下方 8px,跟画作卡 .wb-daily-painting-name 一致 */
+
 .workbench .wb-reunion-title {
   font-size: 0.98em;
   font-weight: 700;
   color: var(--text-normal);
   margin-bottom: 8px;
+  padding-right: 56px;
 }
 
-/* ===== 胶囊标签栏(统计/面板开关)===== */
 .workbench .wb-cards {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin: 0 0 18px;
+  margin: 16px 0 18px;
 }
 .workbench .wb-card {
   display: flex;
@@ -464,7 +414,7 @@
   font-size: 0.78em;
   color: var(--text-muted);
 }
-/* 点亮态:对应下方页内面板展开 */
+
 .workbench .wb-card.is-active {
   background: var(--wb-accent-soft);
   box-shadow: var(--wb-shadow-flat);
@@ -472,7 +422,7 @@
 .workbench .wb-card.is-active .wb-lbl {
   color: var(--wb-accent-text);
 }
-/* ➕ 新建笔记:普通胶囊,只有图标转圈 */
+
 .workbench .wb-newnote-glyph {
   display: inline-block;
   transition: transform 0.4s var(--wb-ease);
@@ -483,7 +433,6 @@
   }
 }
 
-/* ===== 页内面板 ===== */
 .workbench .wb-panel {
   margin: -6px 0 4px;
   padding: 12px 14px;
@@ -492,7 +441,7 @@
   box-shadow: var(--wb-shadow);
   animation: wb-rise-in 0.35s var(--wb-ease) backwards;
 }
-/* 搜标题框:跟嵌套 write 输入井同一质感(浅内凹) */
+
 .workbench .wb-panel-search {
   margin-bottom: 10px;
 }
@@ -520,8 +469,7 @@
   font-size: 0.85em;
   color: var(--text-muted);
 }
-/* 行列表:整行可点。标题必须 flex:1 1 0 + min-width:0 才能真被压缩
-   出省略号,否则 nowrap 长标题会把日期推出屏幕 */
+
 .workbench .wb-panel-row {
   display: flex;
   align-items: baseline;
@@ -565,7 +513,7 @@
     text-decoration: underline;
   }
 }
-/* 分类/概念小方卡:Grid 等宽等距,名字超出卡宽用省略号(手机约容 6 个字) */
+
 .workbench .wb-cat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -610,7 +558,6 @@
   text-align: center;
 }
 
-/* ===== callout 卡片化:无边框,靠底色+阴影撑边界 ===== */
 .workbench .callout {
   border-radius: var(--wb-radius);
   padding: 1.05em 1.3em;
@@ -625,10 +572,8 @@
   }
 }
 .workbench .callout-title { font-size: 1.02em; font-weight: 700; align-items: center; }
-.workbench .callout-icon { display: none; } /* 标题里已有 emoji */
+.workbench .callout-icon { display: none; }
 
-/* 顶层内容卡的标题降格成小胶囊(> 保证不命中嵌套 note/write 的标题),
-   跟 🖼/🎲 标签同一套设计语言 */
 .workbench .callout[data-callout="draw"] > .callout-title,
 .workbench .callout[data-callout="seed"] > .callout-title,
 .workbench .callout[data-callout="ask"] > .callout-title,
@@ -644,7 +589,7 @@
   border-radius: 999px;
   margin-bottom: 0.3em;
 }
-/* 幽灵数字:问题卡右上角超大半透明序号水印 */
+
 .workbench .markdown-preview-sizer,
 .workbench .cm-sizer {
   counter-reset: wb-ask;
@@ -666,7 +611,6 @@
   pointer-events: none;
 }
 
-/* 卡内链接:下划线 hover 才淡入 */
 .workbench .callout a {
   text-decoration-color: transparent;
   text-underline-offset: 3px;
@@ -678,7 +622,6 @@
   }
 }
 
-/* "你的回答"输入区:比主卡片更沉一档(secondary 底 + 浅阴影) */
 .workbench .callout[data-callout="write"] {
   background: var(--background-secondary);
   box-shadow: var(--wb-shadow-flat);
@@ -698,7 +641,6 @@
 
 .workbench .callout[data-callout="feed"] ol li { margin: 7px 0; line-height: 1.65; }
 
-/* 折叠的"我的看法":比其他卡收敛一档 */
 .workbench .callout[data-callout="note"] {
   background: var(--background-secondary);
   box-shadow: var(--wb-shadow-flat);
@@ -710,7 +652,7 @@
   }
 }
 .workbench .callout[data-callout="note"] .callout-title { color: var(--text-muted); }
-/* 嵌套在问题卡里的 note:卡片里的抽屉,不再自带阴影 */
+
 .workbench .callout .callout[data-callout="note"] {
   margin-top: 0.8em;
   border-radius: var(--wb-radius-sm);
@@ -719,8 +661,7 @@
 .workbench .callout .callout[data-callout="note"]:hover {
   box-shadow: none;
 }
-/* 嵌套在问题卡里的 write:卡片里的输入井,inset 阴影模拟凹陷,
-   不做 hover 反馈(不是可点击的卡) */
+
 .workbench .callout .callout[data-callout="write"],
 .workbench .callout .callout[data-callout="write"]:hover {
   margin-top: 0.8em;
@@ -733,7 +674,6 @@
   box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* 分隔线弱化成渐隐细线 */
 .workbench hr {
   border: none;
   height: 1px;
@@ -741,11 +681,9 @@
   clear: both;
 }
 
-/* 卡片内列表呼吸感 */
 .workbench .callout ul li,
 .workbench .callout ol li { margin: 3px 0; }
 
-/* ===== 分区标题(h2):小型分区标签 + 渐隐引导线 ===== */
 .workbench .markdown-rendered h2,
 .workbench .markdown-preview-view h2 {
   display: flex;
@@ -767,8 +705,6 @@
   background: linear-gradient(90deg, var(--wb-accent-line), transparent);
 }
 
-/* ===== 入场动画:打开时顶层卡片从上到下依次浮现(纯 CSS,不做
-   滚动重播);backwards 保证元素创建起就是未播放帧,不闪已渲染内容 ===== */
 @keyframes wb-rise-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
