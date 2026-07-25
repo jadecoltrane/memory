@@ -1,9 +1,9 @@
 {
   "cssTheme": "Border",
   "enabledCssSnippets": [
-    "workbench",
     "quiet-notes",
-    "claudian-ui"
+    "claudian-ui",
+    "workbench"
   ],
   "showRibbon": false,
   "theme": "system"
