@@ -417,14 +417,15 @@
   -webkit-text-fill-color: var(--text-muted);
   filter: none;
 }
-/* 标题下方 8px,跟画作卡 .wb-daily-painting-name 一致;
-   top 留 12px 把标题推到换一篇按钮(40px 高,绝对定位在 top:14px)下方;
-   right 留 56px 防止标题文字流到按钮区域下面 */
+/* 标题下方 8px,跟画作卡 .wb-daily-painting-name 一致(两卡标题因此
+   落在同一条水平线上)。padding-right 56px 给右上角换一篇按钮(width
+   40 + right 16)让位,标题文字始终排在按钮左侧、不会被挡——按钮和
+   标题横向错开,所以不需要再用 margin-top 把标题往下推(那样只会让
+   随机重逢标题比画作标题低一截、两卡对不齐) */
 .workbench .wb-reunion-title {
   font-size: 0.98em;
   font-weight: 700;
   color: var(--text-normal);
-  margin-top: 12px;
   margin-bottom: 8px;
   padding-right: 56px;
 }
