@@ -1,6 +1,6 @@
 # 记忆索引
 
-> 自动生成于 2026-07-24,勿手改;运行 `python3 meta/scripts/build_memory_index.py` 更新。
+> 自动生成于 2026-07-25,勿手改;运行 `python3 meta/scripts/build_memory_index.py` 更新。
 
 ## 用户画像
 
@@ -21,21 +21,6 @@
 - [[concepts/胰岛素抵抗|胰岛素抵抗]]
 - [[concepts/膳食纤维|膳食纤维]]
 - [[concepts/自我重养育|自我重养育]]
-
-## 决策与约定
-
-- [[decisions/作品集分别维护Claude和Codex技能目录|作品集分别维护Claude和Codex技能目录]] (verified: 2026-07-16)
-- [[decisions/作品集工作区保持公开不拆分|作品集工作区保持公开不拆分]] (verified: 2026-07-11)
-- [[decisions/作品集案例内容更新要同步到gh-pages网站|作品集案例内容更新要同步到gh-pages网站]] (verified: 2026-07-18)
-- [[decisions/工作台UI已否决方案清单改样式前先看这份|工作台UI已否决方案清单改样式前先看这份]] (verified: 2026-07-10)
-- [[decisions/每日工作台与每周GC继续使用Claude OAuth自动运行|每日工作台与每周GC继续使用Claude OAuth自动运行]] (verified: 2026-07-16)
-- [[decisions/记忆库改动直接推main不用开PR|记忆库改动直接推main不用开PR]] (verified: 2026-07-11)
-
-## 踩坑记录
-
-- [[pitfalls/bot开的issue默认不发邮件要指派或at才触达|bot开的issue默认不发邮件要指派或at才触达]] (verified: 2026-07-16)
-- [[pitfalls/claude-code-action结束后git-push要显式认证否则凭证被抹掉|claude-code-action结束后git-push要显式认证否则凭证被抹掉]] (verified: 2026-07-16)
-- [[pitfalls/云端Claude工作流会偶发401权限误报重跑即可不用改配置|云端Claude工作流会偶发401权限误报重跑即可不用改配置]] (verified: 2026-07-16)
 
 ## 判断与洞察
 
@@ -71,4 +56,4 @@
 - [[notes/车机技术基础-View-CAN总线-Android-网关隔离|车机技术基础-View-CAN总线-Android-网关隔离]] (verified: false)
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 51 条记忆。
+共 42 条记忆。
