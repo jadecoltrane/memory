@@ -218,6 +218,11 @@
 
 /* ===== 名画横幅卡(结构性内联样式在 工作台.md,外观全在这) ===== */
 .workbench .wb-daily-painting {
+  /* align-self:flex-start 保证画作卡永不被任何祖先 flex 拉伸——一旦被
+     拉高,syncReunionHeight 量到的就是被撑大的高度(而不是图片+padding
+     的自然高度),再拿去当随机重逢卡的 max-height 就失去了"卡到画作
+     高度"的意义。钉死不拉伸,量出来的永远是自然高度 */
+  align-self: flex-start;
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(20px) saturate(1.3);
   -webkit-backdrop-filter: blur(20px) saturate(1.3);
@@ -271,6 +276,14 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  /* min-height:0 必须显式写:reunion 是 flex 项,默认 min-height:auto =
+     内容 min-content。摘要是 -webkit-box line-clamp:14,某些 Chromium
+     版本下它的 min-content 会锁成 14 行的高度,成为一个高于画作的下限;
+     而 CSS 里 min-height 优先级高于 max-height,syncReunionHeight 设的
+     maxHeight=画作高度 会被这个下限顶穿,表现就是随机重逢卡比画作高
+     一截、两卡对不齐。显式 min-height:0 让它能真正收缩到画作高度以下,
+     交给下面的 overflow:hidden 裁掉超出的摘要 */
+  min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
   margin: 0;
@@ -323,6 +336,8 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 14;
   overflow: hidden;
+  /* 同理:-webkit-box 的 min-content 别把外层 excerpt 撑出高度下限 */
+  min-height: 0;
 }
 @media (max-width: 520px) {
   .workbench .wb-reunion-excerpt-text {
