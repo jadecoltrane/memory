@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """记忆库体检:断链 + frontmatter 完整性。
 
-规则由 AI 执行,但 AI 会漏(真实案例:supersede 删旧文件后忘了更新 SUMMARY 里的双链)。
+规则由 AI 执行,但 AI 会漏(真实案例:supersede 删旧文件后忘了更新引用它的双链)。
 这里做机器能做的兜底检查,错误时退出码 1 让 CI 亮红灯。
 
 - 断链:双链指向的文件必须存在。例外:[[concepts/xxx]] 允许是幽灵节点(懒加载设计),
   但幽灵可以命中概念页的 aliases;裸名链接按 basename 或 aliases 解析。
-- frontmatter:decisions/pitfalls/insights/questions 必须有 type 和 created,
-  insight 必须有 confidence;concepts 必须有 type: concept。
+- frontmatter:concepts 必须有 type: concept;profile 必须有 type: profile 和 updated。
 - notes/ 只给警告不报错:用户手写笔记允许没有 frontmatter,GC 时才补齐。
 """
 
@@ -16,8 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-TIMELINE_DIRS = ["decisions", "pitfalls", "insights", "questions"]
-LINK_CHECK_FILES = ["meta/SUMMARY.md", "工作台.md"]  # CLAUDE/RESOLVER 里是示例链接,不查
+LINK_CHECK_FILES = ["工作台.md"]  # CLAUDE/RESOLVER 里是示例链接,不查
 WIKILINK = re.compile(r"\[\[([^\]|#^]+)")
 
 errors, warnings = [], []
@@ -82,13 +80,7 @@ def check_frontmatter(path: Path):
     rel = path.relative_to(ROOT).as_posix()
     top = rel.split("/")[0]
     fm = parse_frontmatter(path.read_text(encoding="utf-8"))
-    if top in TIMELINE_DIRS:
-        for field in ("type", "created"):
-            if field not in fm:
-                errors.append(f"{rel}: frontmatter 缺 {field}")
-        if top == "insights" and "confidence" not in fm:
-            errors.append(f"{rel}: insight 必须标 confidence")
-    elif top == "concepts":
+    if top == "concepts":
         if fm.get("type") != "concept":
             errors.append(f"{rel}: 概念页 frontmatter 必须是 type: concept")
     elif top == "profile":
@@ -103,7 +95,7 @@ def check_frontmatter(path: Path):
 
 def main():
     paths, basenames, aliases = collect_pages()
-    for top in TIMELINE_DIRS + ["notes", "concepts", "profile"]:
+    for top in ["notes", "concepts", "profile"]:
         d = ROOT / top
         if not d.is_dir():
             continue

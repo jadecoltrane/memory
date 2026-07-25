@@ -42,7 +42,7 @@ jobs:
             - 🌱 延伸写完后同步追加进对应概念页的延伸区(标注 [事实]/[推论]/[观点],注明未联网核查,禁止编造引用链接)
             - 改动了 concepts/ 或 notes/ 就运行 python3 meta/scripts/build_memory_index.py 重建索引
             - 控制成本:只读 meta/index.md 和选中的少数文件;抽卡不与最近几期重复(用 git log -p -- 工作台.md 查历史)
-            - ## 标题、所有 dataviewjs 区块(横幅、信息条、今日内容折叠壳外层结构、统计卡、🎲 随机重逢卡,含心跳报警)、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses;generated 已由前置步骤写好当天日期,原样保留。改动固定展示结构或视觉风格前先查 decisions/工作台UI已否决方案清单改样式前先看这份.md,避免把已否决的元素加回来
+            - ## 标题、所有 dataviewjs 区块(横幅、信息条、今日内容折叠壳外层结构、统计卡、🎲 随机重逢卡,含心跳报警)、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses;generated 已由前置步骤写好当天日期,原样保留。改动固定展示结构或视觉风格前先翻 .obsidian/snippets/workbench.css 里带日期的历史注释(撤销/否决过的方案都在注释里标了原因),避免把已否决的元素加回来
 
             只修改工作区文件,不要自行 commit 或 push;后续步骤会统一校验、提交并推送。
           claude_args: |

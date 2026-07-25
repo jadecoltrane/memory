@@ -22,10 +22,6 @@
 - [[concepts/膳食纤维|膳食纤维]]
 - [[concepts/自我重养育|自我重养育]]
 
-## 判断与洞察
-
-- [[insights/AI自写自读的记忆回路需要人工否决权|AI自写自读的记忆回路需要人工否决权]] (confidence: high, verified: 2026-07-03)
-
 ## 我的收藏
 
 - [[notes/Git核心原理与Obsidian-Git操作速查|Git核心原理与Obsidian-Git操作速查]] (verified: false)
@@ -57,4 +53,4 @@
 - [[notes/车机技术基础-View-CAN总线-Android-网关隔离|车机技术基础-View-CAN总线-Android-网关隔离]] (verified: false)
 - [[notes/问答/2026-07 工作台问答|2026-07 工作台问答]]
 
-共 43 条记忆。
+共 42 条记忆。

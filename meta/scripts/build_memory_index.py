@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""扫描仓库根目录的四类记忆,生成 meta/index.md — 每条记忆一行,文件名即结论。"""
+"""扫描仓库根目录的各类记忆,生成 meta/index.md — 每条记忆一行,文件名即结论。"""
 import datetime
 import re
 from pathlib import Path
@@ -8,10 +8,6 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 SECTIONS = [
     ("profile", "用户画像"),
     ("concepts", "概念"),
-    ("decisions", "决策与约定"),
-    ("pitfalls", "踩坑记录"),
-    ("insights", "判断与洞察"),
-    ("questions", "未解问题"),
     ("notes", "我的收藏"),
 ]
 
