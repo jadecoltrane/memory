@@ -16,5 +16,10 @@
   "showUnsupportedFiles": true,
   "promptDelete": false,
   "alwaysUpdateLinks": true,
-  "defaultViewMode": "source"
+  "defaultViewMode": "source",
+  "mobileToolbarCommands": [
+    "editor:undo",
+    "editor:redo",
+    "editor:configure-toolbar"
+  ]
 }
