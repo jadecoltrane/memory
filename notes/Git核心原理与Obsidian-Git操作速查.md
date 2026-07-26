@@ -105,3 +105,7 @@ Obsidian Git 的 backup 是「把手机本地 vault 当前状态原样推上去�
 ## 为什么 GitHub 免费
 
 GitHub 存的是快照 + 内容寻址（相同内容只存一份），代码是纯文本压缩率极高，边际存储成本很低。商业模式是免费吸引开发者，向企业收费（Teams/Enterprise 才是主要收入）。
+
+## 复核记录
+
+- 2026-07-26：有争议（部分不准确）。四区域模型、"存快照不存差异+内容寻址复用 blob"、push 前必须 pull 的非快进拒绝机制、`git checkout <commit> -- 文件` 恢复误删文件、GitHub 2008 年成立等核心陈述均查有可靠来源、准确。但"Git 是 1991 年 Linus Torvalds 写的"有误：Git 由 Linus Torvalds 创建于 2005 年（首次提交 2005-04-07，因 BitKeeper 授权纠纷而写），1991 年是 Linux 内核的诞生年份，笔记把两者混淆了。来源：https://git-scm.com/book/en/v2/Getting-Started-A-Short-History-of-Git ，https://github.blog/open-source/git/git-turns-20-a-qa-with-linus-torvalds/ ，https://en.wikipedia.org/wiki/GitHub （GitHub 2008-02-08 成立/2008-04-10 上线），https://github.blog/open-source/git/commits-are-snapshots-not-diffs/ 。下次复核约一周后（2026-08 初）。

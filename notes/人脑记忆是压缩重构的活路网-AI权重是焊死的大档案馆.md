@@ -68,3 +68,7 @@ tags: [记忆, 神经科学, AI, 认知]
 | 工作台🎴 抽卡(点开笔记前先在脑里过一遍) | 主动回忆 / 提取练习,防遗忘 |
 | 每周 GC(去重、合并、补链、张力扫描) | 睡眠巩固(海马体筛选、把临时记忆固化进皮层) |
 | 开工时把相关记忆塞进上下文 | 海马体把长期记忆调回工作记忆 |
+
+## 复核记录
+
+- 2026-07-26:支持,核心陈述均有真实来源交叉验证——① 86 亿神经元(应为 860 亿)、约 100 万亿突触为神经科学界广泛引用的估算(实际突触数范围 100-1000 万亿,新皮层精确估算约 164 万亿±17%,笔记"量级"表述方向正确);② Salk 研究所 2016 年约 1PB 记忆容量估算确有其事,原始新闻稿见 https://www.salk.edu/news-release/memory-capacity-of-brain-is-10-times-more-than-previously-thought/ ;③ 海马体在睡眠中巩固记忆有大量文献支持,见 https://pubmed.ncbi.nlm.nih.gov/17905642/ ;④ 髓鞘化与突触修剪贯穿青春期、前额叶约 20 多岁才成熟,见 https://pmc.ncbi.nlm.nih.gov/articles/PMC3982854/ ;⑤ 工作记忆 4±1 组块出自 Cowan 2001,见 https://journalofcognition.org/articles/10.5334/joc.387 ;⑥ 流体智力 20 多岁达峰、晶体智力(词汇等)延伸到 60-70 岁达峰,见 https://www.technologyreview.com/2015/06/23/167504/its-not-all-downhill-after-20/ 与 https://www.clearerthinking.org/post/does-iq-peak-in-the-mid-to-late-20s-and-then-decline-and-how-does-this-look-for-crystallized-vs 。晶体智力具体达峰年龄不同研究间有差异(40s vs 60-70s),但笔记引用的"60-70 岁"说法确有对应真实研究支持,不算编造。下次复核约 2027-01。

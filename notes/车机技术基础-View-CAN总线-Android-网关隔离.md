@@ -47,3 +47,7 @@ CAN(Controller Area Network)= 车内各电子控制单元(ECU)互相通信的专
 - **单向只读**:车速等数据可流入车机展示,车机无法逆向修改底层传感器值。
 
 座舱域接收车速信号同样须经网关——网关既是安全墙,也是整车状态数据(车速/档位/门窗)的唯一交通枢纽。
+
+## 复核记录
+
+- 2026-07-26:支持。关键技术陈述均查有可靠来源:AAOS 直连车辆 ECU/CAN 总线且不经手机投屏,代表车型 Volvo(XC40 Recharge)/Polestar(Polestar 2 为首发)/Cadillac(Lyriq)属实;CAN 总线仲裁"数值越小的标识符优先级越高、逐位竞争、非破坏性仲裁"机制准确;域架构(动力域/底盘域/座舱域等)经网关互联、网关作为跨域数据唯一枢纽的描述准确;SecOC(Secure Onboard Communication)用于报文签名认证、ECU 白名单(进程签名/端口白名单)、车速>15km/h 触发车门自动落锁(Kia/Hyundai/Honda/Genesis 等厂商说明书印证)、EPS 转向助力随车速联动等均有据可查。唯一未找到直接来源佐证的细节:NIO/小鹏/理想是否严格基于 AOSP 深度定制(搜索仅确认小鹏采用 ACCESS Twine 等第三方方案,未直接证实 AOSP 归属),这一点存疑但不影响整体结论。来源:https://grokipedia.com/page/Android_Automotive ,https://www.hms-networks.com/tech-blog/blogpost/hms-blog/2024/06/18/what-is-can-arbitration-and-how-does-this-work ,https://www.einfochips.com/blog/what-is-central-gateway-module-and-its-significance-in-automotive-world/ ,https://www.linkedin.com/pulse/secure-on-board-communication-automotive-sandeep-nagarajan ,https://ownersmanual.kia.com/full_webhelp/KA4KH/2026/en_US/topics/chapter5_5_6.html ,https://link.springer.com/article/10.1007/s42154-023-00266-9 。下次复核约 180 天后(2027-01 前后)。
