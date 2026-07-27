@@ -10,7 +10,7 @@ verified: false
 
 ## Git 是什么
 
-Git 是一个**本地命令行工具**，和 GitHub 没有任何关系。1991 年 Linus Torvalds 写的，装在电脑上就能用，不需要网络、不需要账号。GitHub 是 2008 年才出现的公司，只是把 Git 仓库放到云上加了协作界面。
+Git 是一个**本地命令行工具**，和 GitHub 没有任何关系。2005 年 Linus Torvalds 写的（因 BitKeeper 授权纠纷，首次提交 2005-04-07），装在电脑上就能用，不需要网络、不需要账号。1991 年是**Linux 内核**的诞生年份，跟 Git 是两件不同的事，容易混淆。GitHub 是 2008 年才出现的公司，只是把 Git 仓库放到云上加了协作界面。
 
 ```
 Git   ≈ Word（软件本身）
@@ -109,3 +109,4 @@ GitHub 存的是快照 + 内容寻址（相同内容只存一份），代码是�
 ## 复核记录
 
 - 2026-07-26：有争议（部分不准确）。四区域模型、"存快照不存差异+内容寻址复用 blob"、push 前必须 pull 的非快进拒绝机制、`git checkout <commit> -- 文件` 恢复误删文件、GitHub 2008 年成立等核心陈述均查有可靠来源、准确。但"Git 是 1991 年 Linus Torvalds 写的"有误：Git 由 Linus Torvalds 创建于 2005 年（首次提交 2005-04-07，因 BitKeeper 授权纠纷而写），1991 年是 Linux 内核的诞生年份，笔记把两者混淆了。来源：https://git-scm.com/book/en/v2/Getting-Started-A-Short-History-of-Git ，https://github.blog/open-source/git/git-turns-20-a-qa-with-linus-torvalds/ ，https://en.wikipedia.org/wiki/GitHub （GitHub 2008-02-08 成立/2008-04-10 上线），https://github.blog/open-source/git/commits-are-snapshots-not-diffs/ 。下次复核约一周后（2026-08 初）。
+- 2026-07-27：用户按 issue #11 裁决，选择方案①，正文年份已改正为 2005 并说明 1991 是 Linux 内核诞生年，此项裁决完结。
