@@ -4,7 +4,7 @@
 
 ## notes 的复核(反茧房,防止未经查证的内容被当真理囤积)
 
-**仅对 `checkable` 内容生效**(见 CLAUDE.md「我的收藏」一节的 verified/checkable 判断);`checkable: false` 的笔记跳过本节全部流程。
+**仅对 `checkable` 内容生效**(verified/checkable 的判断标准见 `meta/RESOLVER.md`「写 notes 的执行流程」);`checkable: false` 的笔记跳过本节全部流程。
 
 **复核节奏**(按上次结果动态调整,不是查过一次就永远每月重查):
 
