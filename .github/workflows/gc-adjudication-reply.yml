@@ -1,0 +1,104 @@
+# 「每周 GC:待裁决」issue 一收到仓库主人的回复评论就立刻落地处理,
+# 不用等到下周一的例行 GC。只做「落地这一条裁决」(对应 meta/GC.md 步骤 0),
+# 不跑完整每周 GC 的其余步骤(去重、概念维护、复核到期检查等),更即时也更省 token。
+name: GC 待裁决即时处理
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+  id-token: write
+
+jobs:
+  handle-reply:
+    runs-on: ubuntu-latest
+    # 安全边界:只认仓库主人本人在「每周 GC:待裁决」标题的 issue 下发的评论,
+    # 其他任何人(或 bot 自己后续发的关闭评论)都不会触发。
+    if: >
+      startsWith(github.event.issue.title, '每周 GC:待裁决') &&
+      github.event.comment.user.login == github.event.repository.owner.login
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: 抽取这条 issue 上主人的裁决评论
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          ISSUE_NUM: ${{ github.event.issue.number }}
+        run: |
+          rm -f .gc-prior-adjudication.md
+          REPLY=$(gh issue view "$ISSUE_NUM" --json comments \
+            --jq "[.comments[] | select(.author.login==\"$OWNER\") | .body] | join(\"\n\n\")")
+          if [ -n "$REPLY" ]; then
+            BODY=$(gh issue view "$ISSUE_NUM" --json body --jq '.body')
+            {
+              echo "=== 待裁决 issue #$ISSUE_NUM ==="
+              echo "$BODY"
+              echo
+              echo "--- 仓库主人（$OWNER）的裁决评论 ---"
+              echo "$REPLY"
+              echo
+            } > .gc-prior-adjudication.md
+          fi
+
+      - name: Claude 落地这条裁决
+        if: hashFiles('.gc-prior-adjudication.md') != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            当前目录是个人记忆库仓库(jadecoltrane/memory)。仓库根目录的 `.gc-prior-adjudication.md`
+            是待裁决 issue #${{ github.event.issue.number }} 的正文加仓库主人本人刚发的裁决评论
+            (其他人的评论已被前置步骤过滤掉,不会出现在这个文件里)。
+
+            只做这一件事:按 meta/GC.md 步骤 0 描述的规则,把主人的裁决落地到对应的记忆文件——
+            改正文的同步在文件末尾补 `## 复核记录`(注明依据 issue 号和日期);标 verified/删除同理。
+            明确、看得懂的裁决就改;有歧义或看不懂的条目不要动,保持原状,不用创建新的待裁决文件。
+
+            这次不需要跑完整的每周 GC(去重、概念维护、笔记复核到期检查等),只处理这一条回复。
+
+            如果这条裁决已经完整处理完(改完了/标完了/删完了),把 issue 号
+            ${{ github.event.issue.number }} 写进仓库根目录 `.gc-close-issue.txt`;
+            如果有歧义没法处理,不要创建这个文件,issue 会保持打开等下次再确认。
+            改动记忆文件后运行 python3 meta/scripts/build_memory_index.py 重建索引。
+            只修改工作区文件,不要自行 commit、push 或调用 gh。
+          claude_args: |
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
+
+      - name: 重建索引并体检
+        if: hashFiles('.gc-prior-adjudication.md') != ''
+        run: |
+          python3 meta/scripts/build_memory_index.py
+          python3 meta/scripts/lint_memory.py
+
+      - name: 关闭已落地的 issue
+        if: hashFiles('.gc-prior-adjudication.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -s .gc-close-issue.txt ]; then
+            gh issue close "${{ github.event.issue.number }}" \
+              --comment "已根据你刚才的回复即时处理,详见本次提交。"
+          fi
+          rm -f .gc-prior-adjudication.md .gc-close-issue.txt
+
+      - name: 有变化就提交推送
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "memory-gc-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true
+          git add -A
+          if git diff --cached --quiet; then
+            echo "没有需要落地的改动"
+          else
+            git commit -m "GC 待裁决即时处理:issue #${{ github.event.issue.number }}" \
+              -m "仓库主人回复后自动落地,详见 issue 内容。"
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref_name }}
+          fi
