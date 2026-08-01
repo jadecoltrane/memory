@@ -1,10 +1,9 @@
 # 记忆索引
 
-> 自动生成于 2026-07-31,勿手改;运行 `python3 meta/scripts/build_memory_index.py` 更新。
+> 自动生成于 2026-08-01,勿手改;运行 `python3 meta/scripts/build_memory_index.py` 更新。
 
 ## 用户画像
 
-- [[profile/使用偏好|使用偏好]]
 - [[profile/健康|健康]]
 - [[profile/兴趣爱好|兴趣爱好]]
 - [[profile/职业|职业]]
@@ -61,4 +60,4 @@
 - [[notes/车机技术基础-View-CAN总线-Android-网关隔离|车机技术基础-View-CAN总线-Android-网关隔离]] (verified: false)
 - [[notes/非线性联想型思维如何转译成线性文章|非线性联想型思维如何转译成线性文章]]
 
-共 50 条记忆。
+共 49 条记忆。
