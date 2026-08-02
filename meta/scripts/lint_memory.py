@@ -14,6 +14,7 @@
 - notes/ 缺 frontmatter:用户手写笔记允许没有,GC 时才补齐。
 - note→note 超标:单篇 > MAX_NOTE_LINKS 条,且超出部分没标"上下篇"。防网状化。
 - 概念裸奔:已有概念页的名字/别名在正文里出现 ≥2 次却一次双链都没打。防图谱连不上。
+- 出现在漏收:笔记挂了 [[concepts/X]],X 的「出现在」区却没收录它。防枢纽不认识自己的辐条。
 - 文件夹膨胀:单个文件夹 > MAX_FOLDER_NOTES 篇。防下一个"社会学 28 篇"。
 - 概念页延伸超限:延伸区 > MAX_EXTENSIONS 条,该做晋升(定论折进定义,其余进已探讨)。
 """
@@ -155,6 +156,30 @@ def check_naked_concepts(path: Path, concept_names: dict):
                 break
 
 
+def check_concept_backlinks(concept_names: dict):
+    """反向检查:笔记挂了 [[concepts/X]],X 的「出现在」区却没收录这篇。
+    Obsidian 的反链面板能看到,但 AI 读的是概念页正文——出现在漏收 = 枢纽自己不知道谁连着它。"""
+    for cpath in concept_names:
+        p = ROOT / f"{cpath}.md"
+        if not p.exists():
+            continue
+        text = p.read_text(encoding="utf-8")
+        m = re.search(r"^## 出现在.*$", text, re.M)
+        listed = set()
+        if m:
+            rest = text[m.end():]
+            nxt = re.search(r"^## ", rest, re.M)
+            for x in WIKILINK.findall(rest[: nxt.start()] if nxt else rest):
+                listed.add(x.strip().split("|")[0].rsplit("/", 1)[-1])
+        miss = []
+        for n in sorted((ROOT / "notes").rglob("*.md")):
+            targets = [x.strip().split("|")[0] for x in WIKILINK.findall(n.read_text(encoding="utf-8"))]
+            if (cpath in targets or cpath.split("/")[-1] in targets) and n.stem not in listed:
+                miss.append(n.stem)
+        if miss:
+            warnings.append(f"{cpath}.md: 「出现在」漏收 {len(miss)} 篇 → {miss[0]} 等")
+
+
 def check_folder_sizes():
     counts = defaultdict(int)
     for p in (ROOT / "notes").rglob("*.md"):
@@ -197,6 +222,7 @@ def main():
                 check_naked_concepts(p, concept_names)
             elif top == "concepts":
                 check_extension_cap(p)
+    check_concept_backlinks(concept_names)
     check_folder_sizes()
     for name in LINK_CHECK_FILES:
         p = ROOT / name
