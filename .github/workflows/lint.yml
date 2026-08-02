@@ -2,6 +2,10 @@
 # 错误(断链、frontmatter 缺失)→ 退出码 1,workflow 亮红灯 + 邮件通知。
 # 警告(note→note 超标、概念裸奔、文件夹膨胀、概念页延伸超限)→ 不阻断,
 #   打进 job summary,当期没修就是下次 GC 第 5 步的工单。
+# 另外查一件跟内容无关但更要命的事:仓库可见性。sources/raw/ 里是**未脱敏的
+# 原始对话导出**(2026-08-02 定的规矩:脱敏过的原文就不是原文了),所以
+# "仓库始终 private" 是这条规矩的唯一前提。这个库 2026-07-11 因为默认公开
+# 泄露过一次,补救要重写 82 个提交。所以不靠人记得,每次推送查一遍。
 name: 记忆库体检
 
 on:
@@ -23,6 +27,31 @@ jobs:
         run: |
           set -o pipefail
           python3 meta/scripts/lint_memory.py 2>&1 | tee /tmp/lint.txt
+
+      - name: 仓库必须是 private(sources/raw 存未脱敏原文)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          VIS=$(gh repo view "$REPO" --json visibility --jq .visibility)
+          echo "仓库可见性:$VIS" >> "$GITHUB_STEP_SUMMARY"
+          [ "$VIS" = "PRIVATE" ] && exit 0
+          cat > /tmp/vis.md <<EOF
+          \`sources/raw/\` 存的是**原样未脱敏**的对话导出(见 sources/README.md),
+          前提是这个仓库始终 private。现在它是 **$VIS**。
+
+          立刻做:Settings → General → Danger Zone → Change visibility → Private。
+
+          ⚠️ 公开窗口期内若有人克隆过,内容收不回来。这个库 2026-07-11 发生过一次,
+          补救是 git-filter-repo 重写 82 个提交,而且 GitHub 缓存的旧提交仍可通过
+          旧 SHA 直链访问。
+          EOF
+          gh issue create --title "🚨 仓库已变成 $VIS —— sources/raw 里是未脱敏原文" \
+                          --body-file /tmp/vis.md || true
+          echo "::error::仓库不是 private,而 sources/raw 存着未脱敏原文"
+          exit 1
 
       - name: 警告写进 job summary
         if: always()
