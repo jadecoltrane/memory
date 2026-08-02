@@ -11,7 +11,10 @@
     "工作台.md",
     "claude.md",
     "agents.md",
-    "index.md"
+    "index.md",
+    "/sources/",
+    "/archive/",
+    "assets/"
   ],
   "showUnsupportedFiles": true,
   "promptDelete": false,
