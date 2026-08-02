@@ -9,7 +9,7 @@
 
 **视觉基调**:由横幅画作在客户端用 canvas 取主色调自动算出(色相分桶投票,不用平均色——平均会把所有颜色互相抵消成灰)、写进 CSS 变量 `--wb-accent`,CSS 里再用 OKLCH 相对颜色语法派生锁定亮度的文字色/柔光底。
 
-**🖼 每日画作**(横幅背景):每天生成时用执行器可用的网页搜索工具挑一幅著名画作(Claude 自动化使用 WebSearch/WebFetch),优先 Wikimedia Commons 上 `upload.wikimedia.org` 开头的直链图片(几百 KB 到 2MB 的中等分辨率版本,不要几十 MB 的原图),写入 frontmatter 三个字段:`painting-url`、`painting-title`(画名·作者)、`painting-intro`(一句话简介)。**链接必须是当次搜索/抓取真实确认可访问的,查不到就保留前一天的画,不编造 URL**。选画不许与近半年重复(查重命令:`git log --since='180 days ago' --format= -p -- 工作台.md | grep '^+painting-title'`,输出仅每天一行画名,省 token 且永久封顶;不要跑裸的 `git log -p`),并在时代/地域/风格上轮换,不要连续几天同一风格。
+**🖼 每日画作**(横幅背景):每天生成时用执行器可用的网页搜索工具挑一幅著名画作(Claude 自动化使用 WebSearch/WebFetch),优先 Wikimedia Commons 上 `upload.wikimedia.org` 开头的直链图片(几百 KB 到 2MB 的中等分辨率版本,不要几十 MB 的原图),写入 frontmatter 三个字段:`painting-url`、`painting-title`(画名·作者)、`painting-intro`(一句话简介)。**链接必须是当次搜索/抓取真实确认可访问的**。选画不许与近半年重复(查重命令:`git log --since='180 days ago' --format= -p -- 工作台.md | grep '^+painting-title'`,输出仅每天一行画名,省 token 且永久封顶;不要跑裸的 `git log -p`),并在时代/地域/风格上轮换,不要连续几天同一风格。**2026-08-02 起:第一个候选验证失败(链接打不开、不是直链等)不算完事,换一幅候选继续试,最多尝试 3 幅**;3 幅都验证失败才保留前一天的值,不编造 URL——保留是最后的兜底,不是遇到第一次失败就退回的默认选项。
 
 每日生成三个板块,都在 ☀️ 每日回路的 `[!today]+` 折叠壳里(标题留空):
 
