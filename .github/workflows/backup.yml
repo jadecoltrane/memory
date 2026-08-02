@@ -1,23 +1,16 @@
-# 每周备份。2026-08-02 之前这个库只有 GitHub 一份,Obsidian 本地副本是碰巧不是设计,
-# 直接违反 CLAUDE.md 第一条「兜底优先:可靠性相关的东西必须预先设计」。
+# 每周全量备份。一个 git bundle 装下所有分支和全部历史,打完当场 verify
+# ——打不开的备份等于没有备份。存 Release(留最近 12 期)+ workflow artifact(90 天)。
+# 零配置、不调用 Claude、不花 token,一周跑一次约一分钟。
 #
-# 两层,防的东西不一样:
-#   第一层 git bundle(不需要任何配置,装上就生效)——一个文件装下全部历史和所有分支。
-#     防:误删文件、强推翻车、历史被改写、某次 GC 把东西搞坏了。
-#     不防:GitHub 账号本身出事(bundle 存在同一个仓库的 Release 里)。
-#   第二层 异地镜像(需要用户配两个 secret,没配就自动跳过,不报错)——
-#     防:账号被锁、仓库被删、GitHub 整体不可用。
+# 防的是:误删、强推翻车、历史被改写、某次 GC 把东西搞坏。
+# 不防的是:GitHub 账号本身出事(bundle 存在同一个仓库里)。
 #
-# 配第二层的方法(只需做一次):
-#   1. 在另一个 Git 托管处(GitLab / Gitee / 另一个 GitHub 账号)建一个**私有**空仓库
-#   2. 本仓库 Settings → Secrets → Actions 添加:
-#      MIRROR_URL   例 https://gitlab.com/<你>/memory-mirror.git
-#      MIRROR_TOKEN 那边的 push token
-#   ⚠️ 镜像仓库必须是私有的——这个库里有 profile/ 和薪资、公司信息,
-#      而且这个仓库曾经因为默认公开泄露过一次(见 profile/职业)。
+# ⚠️ 异地镜像已在 2026-08-02 评估后**决定不做**,不要再加回来,也不要建议用户配:
+#    这个库实际有三份完整副本(GitHub + Mac 和手机上 Obsidian Git 的 clone,各自带
+#    完整历史),账号级事故是低概率事件,为它增加两个 secret 和一条外部依赖不划算。
 #
-# 任何一层失败都会开 issue(而不是静默红灯),因为备份失败是那种"你不会去看"的失败。
-name: 每周备份与异地镜像
+# 失败会自动开 issue,不静默——备份失败属于"不主动看就永远不知道"的那类。
+name: 每周备份
 
 on:
   schedule:
@@ -77,22 +70,6 @@ jobs:
             --jq '.[].tagName | select(startswith("backup-"))' \
             | sort -r | tail -n +13 \
             | xargs -r -I{} gh release delete {} --yes --cleanup-tag
-
-      - name: 异地镜像(没配 secret 就跳过)
-        env:
-          MIRROR_URL: ${{ secrets.MIRROR_URL }}
-          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [ -z "${MIRROR_URL:-}" ] || [ -z "${MIRROR_TOKEN:-}" ]; then
-            echo "::warning::未配置 MIRROR_URL / MIRROR_TOKEN,只有第一层备份生效。"
-            echo "⚠️ **异地镜像未配置** —— 目前只防误删/误改,不防账号级事故。配置方法见本 workflow 文件头。" \
-              >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          AUTHED=$(printf '%s' "$MIRROR_URL" | sed -E "s#https://#https://oauth2:${MIRROR_TOKEN}@#")
-          git push --mirror "$AUTHED"
-          echo "✅ 已镜像到异地" >> "$GITHUB_STEP_SUMMARY"
 
       - name: 备份失败就开 issue(不静默)
         if: failure()
