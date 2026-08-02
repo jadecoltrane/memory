@@ -17,8 +17,13 @@
 # 检出到磁盘的几十次 IO 被 iOS 挂起打断,账本前进了仓库没跟上;下一次自动
 # backup 的 add -A 就把这个落差当成"用户的修改"提交回去。当晚连发两次,
 # 删掉了一个 77 行脚本、撤销三份规则文件、恢复了已删除的 1.3MB 附件。
-# git 视角是纯快进、零冲突,pull 一声不吭。已加 .github/workflows/
-# guard-silent-revert.yml 做检测,但治本仍然是**关掉手机端的自动 commit**
+# git 视角是纯快进、零冲突,pull 一声不吭。
+# ⚠️ 当晚用户澄清:**手机端根本没开自动 commit,那两次 backup 是手点的**。
+# 所以问题不在"自动",在 pull 的检出没写完就去 backup 了——关自动 commit
+# 不治本(本来就是关的)。可执行的规矩改成:**按 backup 前扫一眼改动列表,
+# 出现 meta/ 或 sources/ 下的文件就停手,先重新 pull**——那两个目录用户
+# 从不在手机上编辑,它们出现在列表里本身就是"这次 pull 没完成"的信号。
+# 检测兜底见 .github/workflows/guard-silent-revert.yml
 .obsidian/plugins/obsidian-git/data.json
 
 # Claudian 插件的本地配置与会话缓存,不是记忆内容,不入库
