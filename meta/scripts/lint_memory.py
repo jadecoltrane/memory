@@ -17,6 +17,7 @@
 - 出现在漏收:笔记挂了 [[concepts/X]],X 的「出现在」区却没收录它。防枢纽不认识自己的辐条。
 - 文件夹膨胀:单个文件夹 > MAX_FOLDER_NOTES 篇。防下一个"社会学 28 篇"。
 - 概念页延伸超限:延伸区 > MAX_EXTENSIONS 条,该做晋升(定论折进定义,其余进已探讨)。
+- 指向 archive/ 的双链:归档的东西不该还挂在图谱上,改成纯文本路径。
 """
 
 import re
@@ -84,6 +85,11 @@ def check_links(path: Path, paths, basenames, aliases):
         target = target.strip()
         if not target or target.startswith("concepts/"):
             continue  # 幽灵概念是设计允许的
+        if target.startswith("archive/"):
+            # 归档的东西不该还留在图谱里。按 archive/README.md,归档前要先把
+            # 指向它的双链改成纯文本路径——这条就是那一步的守门员。
+            warnings.append(f"{rel}: 双链指向已归档的 [[{target}]],改成纯文本路径并注明「已归档」")
+            continue
         if "/" in target:
             if target not in paths:
                 errors.append(f"{rel}: 断链 [[{target}]]")

@@ -1,6 +1,7 @@
 ---
 type: note
 tier: 参考
+expires: 2027-02-02
 created: 2026-08-02
 source: Gemini 对话导出(2026-08-02,追问 AI 大脑长什么样、缓存机制、能处理多长文本、能不能直接给 PDF、为什么能识别手写);**技术参数部分已由 Claude 用 claude-api skill 的当期文档核对并更正**
 checkable: true
