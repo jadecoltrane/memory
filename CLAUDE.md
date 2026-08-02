@@ -8,6 +8,8 @@
 
 **七个 Actions 自动跑,AI 不用手动补**:索引重建、每周 GC、待裁决回复、工作台日更、lint 体检、每周备份、静默回滚哨兵(备份=全量 bundle;异地镜像已评估后决定不配,别再建议)。细节在各 `.github/workflows/*.yml` 文件头。
 
+**在 shell 里解析 git 输出的文件名时,必须加 `-c core.quotepath=false`**——本库文件名基本全是中文,git 默认转义成 `"meta/\347\254\224…"`(带引号),`grep '^meta/'` 之类会静默匹配不上,检查看着在跑其实全空。Python 脚本走 pathlib,不受影响。
+
 **写完记忆必须跑 `python3 meta/scripts/lint_memory.py`**(幽灵概念不算断链;警告都是真工单,能修就修,修不动留给 GC)。
 
 **推送冲突分两种。** ①**git 会报的**:机器人侧已兜住(`concurrency` 排队 + `git_push_retry.sh` 先 rebase 再推、真冲突一律 abort 重跑,绝不自己选边)。②**git 不会报的**——Obsidian Git 的 vault backup 可能用旧版工作区覆盖新提交,纯快进、零冲突、pull 一声不吭(2026-08-02 真实发生:删掉一个脚本、撤销三份规则、恢复已删的附件)。`guard-silent-revert.yml` 会开 issue 报警,但**用户说「我推了一下」时必须自己 fetch 对一眼 diff**,别只看有没有冲突标记。任何情况下:**先看清对面改了什么再合**,不盲目 pull 或 `--force`。
