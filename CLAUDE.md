@@ -6,7 +6,16 @@
 
 **方案设计优先省 token**:几种做法效果相当时选更省 token(读/维护成本更低)的,但不能拿效果去换——本文件和下面提到的 AI 自动化 prompt 都按这个标准写,发现冗余可以精简,但不能牺牲可执行性。
 
-**五个 GitHub Actions 自动跑,AI 不需要手动补**:索引重建、每周 GC、待裁决回复即时处理、工作台日更、lint 体检——各自的时间和取舍写在 `.github/workflows/*.yml` 的文件头注释里,需要时再看。两条平时用得上的:工作台规范单独在 `meta/WORKBENCH.md`(处理工作台任务时才读);AI 写完记忆**必须**本地跑一遍 `meta/scripts/lint_memory.py`(幽灵概念是设计允许的,不算断链;警告不阻断但都是真工单——note→note 超标、概念裸奔、文件夹膨胀、概念页延伸超限,当场能修就修,修不动就留给 GC)。
+**六个 GitHub Actions 自动跑,AI 不需要手动补**:索引重建、每周 GC、待裁决回复即时处理、工作台日更、lint 体检、每周备份与异地镜像——各自的时间和取舍写在 `.github/workflows/*.yml` 的文件头注释里,需要时再看。两条平时用得上的:工作台规范单独在 `meta/WORKBENCH.md`(处理工作台任务时才读);AI 写完记忆**必须**本地跑一遍 `meta/scripts/lint_memory.py`(幽灵概念是设计允许的,不算断链;警告不阻断但都是真工单——note→note 超标、概念裸奔、文件夹膨胀、概念页延伸超限,当场能修就修,修不动就留给 GC)。
+
+## 推送冲突怎么处理(人和机器人共用一个 main)
+
+三个机器人(工作台日更 05:00、索引重建、每周 GC 04:00)会往 main 推,你这边 Obsidian Git 插件也在自动推。撞上过——`.trash/conflict-files-obsidian-git.md` 就是物证。规则:
+
+- **机器人侧已经兜住**(2026-08-02):三个 workflow 共用 `concurrency: memory-bot-push` 排队,任何一个推送前先 `pull --rebase --autostash`、失败退避重试 5 次(`meta/scripts/git_push_retry.sh`)。**真冲突时机器人一律 abort、让整个 job 失败重跑,绝不自己选边**——它们的产物(工作台、索引、GC 结果)都能重新生成,重跑比猜错安全。
+- **AI 在会话里推送**:同样先 `git fetch` 看一眼再合,**合之前必须先看清对面改了什么**,不要盲目 `pull` 或 `--force`。远端有你没见过的提交时,先读 diff 再决定。
+- **你在 Obsidian 侧**:手机和 Mac 别同时开着自动推;如果插件生成了 `conflict-files-*.md`,那是插件放弃自动合并的信号,不要直接删,先看两边差异。**注意手机端 Obsidian Git 常常只有浅历史**,在手机上解冲突比在 Mac 上危险得多。
+- **兜底**:每周一 03:00 有全量 bundle 备份(Release + artifact),真搞坏了可以整仓回滚。备份失败会自动开 issue,不会静默。
 
 ## 开工时(必做)
 

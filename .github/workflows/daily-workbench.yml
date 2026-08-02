@@ -11,6 +11,12 @@ permissions:
   contents: write
   id-token: write
 
+# 三个机器人共用一个并发组:同一时间只允许一个在推,后来的排队等前一个跑完。
+# 不用 cancel-in-progress——它们各自的产物都要保留,取消掉等于当天没跑。
+concurrency:
+  group: memory-bot-push
+  cancel-in-progress: false
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -67,5 +73,5 @@ jobs:
             echo "今日工作台没有变化"
           else
             git commit -m "工作台日更:$(TZ=Asia/Shanghai date +%F)"
-            git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:${{ github.ref_name }}
+            bash meta/scripts/git_push_retry.sh "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "${{ github.ref_name }}"
           fi

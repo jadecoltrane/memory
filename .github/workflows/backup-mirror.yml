@@ -1,0 +1,118 @@
+# 每周备份。2026-08-02 之前这个库只有 GitHub 一份,Obsidian 本地副本是碰巧不是设计,
+# 直接违反 CLAUDE.md 第一条「兜底优先:可靠性相关的东西必须预先设计」。
+#
+# 两层,防的东西不一样:
+#   第一层 git bundle(不需要任何配置,装上就生效)——一个文件装下全部历史和所有分支。
+#     防:误删文件、强推翻车、历史被改写、某次 GC 把东西搞坏了。
+#     不防:GitHub 账号本身出事(bundle 存在同一个仓库的 Release 里)。
+#   第二层 异地镜像(需要用户配两个 secret,没配就自动跳过,不报错)——
+#     防:账号被锁、仓库被删、GitHub 整体不可用。
+#
+# 配第二层的方法(只需做一次):
+#   1. 在另一个 Git 托管处(GitLab / Gitee / 另一个 GitHub 账号)建一个**私有**空仓库
+#   2. 本仓库 Settings → Secrets → Actions 添加:
+#      MIRROR_URL   例 https://gitlab.com/<你>/memory-mirror.git
+#      MIRROR_TOKEN 那边的 push token
+#   ⚠️ 镜像仓库必须是私有的——这个库里有 profile/ 和薪资、公司信息,
+#      而且这个仓库曾经因为默认公开泄露过一次(见 profile/职业)。
+#
+# 任何一层失败都会开 issue(而不是静默红灯),因为备份失败是那种"你不会去看"的失败。
+name: 每周备份与异地镜像
+
+on:
+  schedule:
+    - cron: "0 19 * * 0" # UTC 周日 19:00 = 北京时间周一 03:00,排在 GC(04:00)前一小时
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # 全history,bundle 才有意义
+
+      - name: 打包全量 bundle
+        id: bundle
+        run: |
+          set -euo pipefail
+          git fetch --all --tags --prune
+          STAMP=$(TZ=Asia/Shanghai date +%F)
+          FILE="memory-${STAMP}.bundle"
+          git bundle create "$FILE" --all
+          # 立刻验证:一个打不开的备份等于没有备份
+          git bundle verify "$FILE"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h "$FILE" | cut -f1)" >> "$GITHUB_OUTPUT"
+          {
+            echo "## 每周备份"
+            echo "- 文件:\`$FILE\`($(du -h "$FILE" | cut -f1))"
+            echo "- 提交数:$(git rev-list --all --count)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 存为 workflow artifact(90 天)
+        uses: actions/upload-artifact@v4
+        with:
+          name: memory-bundle-${{ steps.bundle.outputs.stamp }}
+          path: ${{ steps.bundle.outputs.file }}
+          retention-days: 90
+
+      - name: 存为 Release 资产(长期,可直接下载)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="backup-${{ steps.bundle.outputs.stamp }}"
+          gh release create "$TAG" "${{ steps.bundle.outputs.file }}" \
+            --title "备份 ${{ steps.bundle.outputs.stamp }}" \
+            --notes "全量 git bundle(${{ steps.bundle.outputs.size }})。恢复:\`git clone memory-*.bundle memory\`" \
+            || gh release upload "$TAG" "${{ steps.bundle.outputs.file }}" --clobber
+          # 只留最近 12 期,免得 Release 列表长到没法看
+          gh release list --limit 100 --json tagName \
+            --jq '.[].tagName | select(startswith("backup-"))' \
+            | sort -r | tail -n +13 \
+            | xargs -r -I{} gh release delete {} --yes --cleanup-tag
+
+      - name: 异地镜像(没配 secret 就跳过)
+        env:
+          MIRROR_URL: ${{ secrets.MIRROR_URL }}
+          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${MIRROR_URL:-}" ] || [ -z "${MIRROR_TOKEN:-}" ]; then
+            echo "::warning::未配置 MIRROR_URL / MIRROR_TOKEN,只有第一层备份生效。"
+            echo "⚠️ **异地镜像未配置** —— 目前只防误删/误改,不防账号级事故。配置方法见本 workflow 文件头。" \
+              >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          AUTHED=$(printf '%s' "$MIRROR_URL" | sed -E "s#https://#https://oauth2:${MIRROR_TOKEN}@#")
+          git push --mirror "$AUTHED"
+          echo "✅ 已镜像到异地" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 备份失败就开 issue(不静默)
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/body.md <<EOF
+          备份 workflow 失败了。这是那种「不主动看就永远不知道」的失败,所以开成 issue 而不是只亮个红灯。
+
+          运行记录:$RUN_URL
+
+          自查顺序:
+          1. bundle 那步失败 → 仓库历史可能有问题,先跑 \`git fsck\`
+          2. Release 那步失败 → 多半是配额或权限,不影响 artifact 那份(90 天内仍可下载)
+          3. 镜像那步失败 → token 过期或对面仓库没了,重配 MIRROR_TOKEN
+
+          修好之前,这个库退回到「只有 GitHub 一份」的状态。
+          EOF
+          gh issue create \
+            --title "⚠️ 每周备份失败($(TZ=Asia/Shanghai date +%F))" \
+            --body-file /tmp/body.md

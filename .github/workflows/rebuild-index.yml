@@ -11,6 +11,12 @@ on:
 permissions:
   contents: write
 
+# 三个机器人共用一个并发组:同一时间只允许一个在推,后来的排队等前一个跑完。
+# 不用 cancel-in-progress——它们各自的产物都要保留,取消掉等于当天没跑。
+concurrency:
+  group: memory-bot-push
+  cancel-in-progress: false
+
 jobs:
   rebuild-index:
     runs-on: ubuntu-latest
@@ -25,11 +31,24 @@ jobs:
         run: python3 meta/scripts/build_memory_index.py
 
       - name: 有变化就提交推送
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "memory-bot"
           git config user.email "actions@users.noreply.github.com"
           if ! git diff --quiet -- meta/index.md; then
             git add meta/index.md
             git commit -m "自动重建记忆索引"
-            git push
+            # rebase 之后别人可能又加了笔记,索引会过时——重新生成一次再推,
+            # 有差异就 amend 进同一个提交,不留一串"重建索引"的空转提交。
+            bash meta/scripts/git_push_retry.sh \
+              "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+              "${{ github.ref_name }}" || {
+                python3 meta/scripts/build_memory_index.py
+                git add meta/index.md
+                git diff --cached --quiet || git commit --amend --no-edit
+                bash meta/scripts/git_push_retry.sh \
+                  "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+                  "${{ github.ref_name }}"
+              }
           fi
