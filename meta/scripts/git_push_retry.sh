@@ -29,6 +29,11 @@ for i in $(seq 1 "$MAX"); do
   fi
 
   if git push "$URL" "HEAD:$BRANCH"; then
+    # 用 URL 推不会更新 origin/<branch> 这个远程跟踪引用,后续任何依赖它的判断
+    # (git status、reset --soft origin/main、diff origin/main)都会看到过期状态。
+    # 2026-08-02 真踩过:推送成功但本地 origin/main 还停在上一个 commit,
+    # 差点按错误的基线做 reset。所以推完显式对齐一次。
+    git update-ref "refs/remotes/origin/$BRANCH" HEAD 2>/dev/null || true
     echo "推送成功(第 $i 次尝试)"
     exit 0
   fi
