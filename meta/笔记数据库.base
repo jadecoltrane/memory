@@ -10,6 +10,11 @@ views:
       and:
         - 'file.inFolder("notes/社会学")'
   - type: table
+    name: "未分类"
+    filters:
+      and:
+        - 'file.folder == "notes"'
+  - type: table
     name: "健康"
     filters:
       and:
@@ -19,8 +24,3 @@ views:
     filters:
       and:
         - 'file.inFolder("notes/生活方式")'
-  - type: table
-    name: "未分类"
-    filters:
-      and:
-        - 'file.folder == "notes"'

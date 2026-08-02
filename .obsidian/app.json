@@ -3,7 +3,7 @@
   "openBehavior": "file:工作台",
   "newFileLocation": "folder",
   "newFileFolderPath": "notes",
-  "attachmentFolderPath": "notes/assets",
+  "attachmentFolderPath": "assets",
   "userIgnoreFilters": [
     "meta/",
     "profile/",
