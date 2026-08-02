@@ -44,7 +44,7 @@
 .markdown-source-view.workbench {
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, hsl(148, 74%, 90%) 0%, hsl(249, 67%, 89%) 51%, hsl(17, 67%, 92%) 100%); /* daily-gradient:由 meta/scripts/update_daily_gradient.py 每日重写,勿手改 */
+    linear-gradient(135deg, hsl(148, 74%, 90%) 0%, hsl(249, 67%, 89%) 51%, hsl(17, 67%, 92%) 100%); /* daily-gradient */
   background-repeat: repeat, no-repeat;
   background-size: 140px 140px, cover;
 }
@@ -577,7 +577,6 @@
 .workbench .callout[data-callout="draw"] > .callout-title,
 .workbench .callout[data-callout="seed"] > .callout-title,
 .workbench .callout[data-callout="ask"] > .callout-title,
-.workbench .callout[data-callout="clash"] > .callout-title,
 .workbench .callout[data-callout="feed"] > .callout-title {
   display: inline-flex;
   font-size: 0.78em;
@@ -588,6 +587,45 @@
   padding: 3px 12px;
   border-radius: 999px;
   margin-bottom: 0.3em;
+}
+
+.workbench .callout[data-callout="clash"] {
+  --wb-clash-hue: #c2664a;
+  border-left: 4px solid var(--wb-clash-hue);
+}
+.theme-dark .workbench .callout[data-callout="clash"] {
+  --wb-clash-hue: #e08a72;
+}
+.workbench .callout[data-callout="clash"] > .callout-title {
+  display: inline-flex;
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--wb-clash-hue);
+  background: color-mix(in srgb, var(--wb-clash-hue) 14%, transparent);
+  padding: 3px 12px;
+  border-radius: 999px;
+  margin-bottom: 0.3em;
+}
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="clash"]) {
+  flex: 1 1 100%;
+}
+.workbench .callout[data-callout="clash"] > .callout-content > p:first-of-type {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+.workbench .callout[data-callout="clash"] .callout[data-callout="note"] {
+  opacity: 0.72;
+  font-size: 0.92em;
+}
+.workbench .callout[data-callout="clash"] > .callout-content > p:last-of-type {
+  margin-top: 0.9em;
+  padding-left: 14px;
+  border-left: 3px solid var(--wb-clash-hue);
+  font-size: 1.03em;
+  font-weight: 500;
+  color: var(--text-normal);
 }
 
 .workbench .markdown-preview-sizer,
