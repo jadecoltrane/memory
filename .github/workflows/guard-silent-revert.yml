@@ -1,0 +1,125 @@
+# 静默回滚哨兵。2026-08-02 真实事故:手机端 Obsidian Git 的 "vault backup"
+# 以最新提交为父提交,但工作区文件还是旧版本,`git add -A` 把旧内容当成"修改"
+# 提交了回去——删掉了一个 77 行的脚本、撤销了三份规则文件的改动、还把已删除的
+# 附件恢复了回来。**git 视角是纯快进、零冲突,git pull 一声都不会吭。**
+# 那次是用户随口问了句"看有没有冲突"才发现的。
+#
+# 所以这里查的不是 git 冲突(git 自己会查),而是"合法提交恰好撤销了别人的工作":
+#   A. 非机器人提交删除了 notes/ 和 .obsidian/ 之外的文件
+#   B. 非机器人提交改动了 meta/ 或 .github/(基础设施应该只由 AI 和机器人改;
+#      用户在 Obsidian 里改根目录 CLAUDE.md 是正常的,不算)
+#   C. 非机器人提交让 meta/ 净减少超过阈值行
+#
+# 命中就开 issue,不阻断推送——推都推了,拦没有意义,要的是让你知道。
+# 误报的处理方式是关掉 issue,不需要改配置。
+name: 静默回滚哨兵
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    # 机器人自己推的不查(它们改 meta/ 是本职工作)
+    if: >-
+      github.event.head_commit.author.email != 'noreply@anthropic.com' &&
+      github.event.head_commit.author.email != 'actions@users.noreply.github.com'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: 查静默回滚
+        id: scan
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+        run: |
+          set -euo pipefail
+          # 首推 / 强推后 before 可能是全 0 或已不可达,退回只查最后一条
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            RANGE="$AFTER~1..$AFTER"
+          else
+            RANGE="$BEFORE..$AFTER"
+          fi
+
+          BOTS='noreply@anthropic.com|actions@users.noreply.github.com'
+          : > /tmp/findings.md
+
+          for C in $(git rev-list --reverse "$RANGE"); do
+            EMAIL=$(git log -1 --format='%ae' "$C")
+            echo "$EMAIL" | grep -qE "$BOTS" && continue
+            SUBJ=$(git log -1 --format='%s' "$C")
+
+            # ⚠️ 全部加 -c core.quotepath=false:这个库的文件名基本都是中文,
+            # git 默认会把它们转义成 "meta/\347\254\224..." 带引号的形式,
+            # 那样下面所有 grep 的 ^meta/ 都匹配不上,检查会静默失效。
+            G='git -c core.quotepath=false'
+
+            # A. 删除了 notes/ 与 .obsidian/ 之外的文件
+            DEL=$($G diff --diff-filter=D --name-only "$C^" "$C" \
+                  | grep -vE '^"?(notes/|\.obsidian/)' || true)
+            # B. 动了基础设施(meta/ 或 .github/)。只认真的改了内容的:
+            #    numstat 里 +0/-0 是仅权限位或重命名,跨设备同步常有,不是回滚信号。
+            #    .base 是 Obsidian 的数据库视图配置,用户自己在界面里改很正常,排除。
+            INFRA=$($G diff --numstat "$C^" "$C" \
+                  | awk '$1+$2 > 0 {print $3}' \
+                  | grep -E '^"?(meta/|\.github/)' | grep -v '\.base"\?$' || true)
+            # C. meta/ 净减行数
+            NET=$($G diff --numstat "$C^" "$C" -- meta/ \
+                  | awk '{a+=$1; d+=$2} END {print (a-d)+0}')
+
+            if [ -n "$DEL" ] || [ -n "$INFRA" ] || [ "$NET" -lt -20 ]; then
+              {
+                echo "### \`$(git rev-parse --short "$C")\` $SUBJ"
+                echo "作者:$EMAIL"
+                [ -n "$DEL" ]   && { echo; echo "**删除了 notes/ 之外的文件:**"; echo '```'; echo "$DEL"; echo '```'; }
+                [ -n "$INFRA" ] && { echo; echo "**改动了基础设施:**"; echo '```'; echo "$INFRA"; echo '```'; }
+                [ "$NET" -lt -20 ] && { echo; echo "**\`meta/\` 净减少 $((0-NET)) 行**"; }
+                echo
+              } >> /tmp/findings.md
+            fi
+          done
+
+          if [ -s /tmp/findings.md ]; then
+            echo "hit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "hit=false" >> "$GITHUB_OUTPUT"
+            echo "没有可疑改动" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: 开 issue
+        if: steps.scan.outputs.hit == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          {
+            echo "有非机器人提交删除了文件、或改动了 \`meta/\` / \`.github/\`。"
+            echo
+            echo "**这不一定是问题**——你在 Obsidian 里手动改规则文件也会命中。"
+            echo "但如果你没有主动改过它们,那大概率是手机/桌面端 Obsidian Git 的"
+            echo "\`vault backup\` 用旧版工作区覆盖了新提交(2026-08-02 发生过一次,"
+            echo "删掉了一个 77 行脚本、撤销了三份规则文件、还恢复了已删除的附件)。"
+            echo
+            echo "**怎么确认**:\`git diff <可疑提交>^ <可疑提交>\`,看新增的行是不是"
+            echo "都是旧版本内容被写回。是的话就是静默回滚。"
+            echo
+            echo "**怎么修**:\`git checkout <被覆盖前的提交> -- <那些文件>\` 再提交。"
+            echo "核实对方提交里没有属于自己的新内容,恢复就不会覆盖任何东西。"
+            echo
+            echo "---"
+            echo
+            cat /tmp/findings.md
+            echo "运行记录:$RUN_URL"
+          } > /tmp/body.md
+          gh issue create \
+            --title "⚠️ 可能的静默回滚($(TZ=Asia/Shanghai date +%F\ %H:%M))" \
+            --body-file /tmp/body.md
