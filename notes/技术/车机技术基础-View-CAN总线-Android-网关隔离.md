@@ -1,5 +1,6 @@
 ---
 type: note
+tier: 参考
 created: 2026-07-22
 source: Gemini 对话导出(2026-07-22,经 AI Exporter 保存;技术内容均为 AI 转述,未交叉核实)
 checkable: true

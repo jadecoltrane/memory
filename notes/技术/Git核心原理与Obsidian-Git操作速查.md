@@ -1,5 +1,6 @@
 ---
 type: note
+tier: 方法
 created: 2026-07-22
 source: 与 Claude 的对话（2026-07-22，从原理到实操的系统梳理）
 checkable: true

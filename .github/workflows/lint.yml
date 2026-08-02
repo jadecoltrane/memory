@@ -1,5 +1,7 @@
-# 每次推送做记忆库体检:断链、frontmatter 完整性。
-# 体检失败 workflow 亮红灯,GitHub 会邮件通知——规则不再只靠 AI 自觉遵守。
+# 每次推送做记忆库体检。规则不再只靠 AI 自觉遵守。
+# 错误(断链、frontmatter 缺失)→ 退出码 1,workflow 亮红灯 + 邮件通知。
+# 警告(note→note 超标、概念裸奔、文件夹膨胀、概念页延伸超限)→ 不阻断,
+#   打进 job summary,当期没修就是下次 GC 第 5 步的工单。
 name: 记忆库体检
 
 on:
@@ -17,5 +19,17 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: 断链与 frontmatter 检查
-        run: python3 meta/scripts/lint_memory.py
+      - name: 体检(错误阻断,警告进摘要)
+        run: |
+          set -o pipefail
+          python3 meta/scripts/lint_memory.py 2>&1 | tee /tmp/lint.txt
+
+      - name: 警告写进 job summary
+        if: always()
+        run: |
+          {
+            echo "## 记忆库体检"
+            echo '```'
+            cat /tmp/lint.txt 2>/dev/null || echo "(无输出)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

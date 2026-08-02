@@ -1,5 +1,6 @@
 ---
 type: note
+tier: 核心
 created: 2026-07-02
 checkable: false
 tags: [自我关怀, 心理, 成长, 自我接纳, re-parenting]
