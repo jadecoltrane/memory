@@ -55,6 +55,9 @@ jobs:
           for C in $(git rev-list --reverse "$RANGE"); do
             EMAIL=$(git log -1 --format='%ae' "$C")
             echo "$EMAIL" | grep -qE "$BOTS" && continue
+            # 合并提交跳过:diff C^ C 是拿第一父提交比,会把另一条分支带进来的
+            # 全部改动算成"这次改的",于是每次 merge 都误报。2026-08-03 实测命中。
+            [ "$(git rev-list --parents -n1 "$C" | wc -w)" -gt 2 ] && continue
             SUBJ=$(git log -1 --format='%s' "$C")
 
             # ⚠️ 全部加 -c core.quotepath=false:这个库的文件名基本都是中文,
