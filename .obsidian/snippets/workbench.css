@@ -44,7 +44,7 @@
 .markdown-source-view.workbench {
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, hsl(144, 93%, 90%) 0%, hsl(261, 62%, 94%) 41%, hsl(42, 66%, 92%) 100%); /* daily-gradient */
+    linear-gradient(135deg, hsl(4, 92%, 93%) 0%, hsl(114, 82%, 92%) 52%, hsl(229, 71%, 91%) 100%); /* daily-gradient */
   background-repeat: repeat, no-repeat;
   background-size: 140px 140px, cover;
 }
