@@ -7,6 +7,7 @@ source-mapped: 原文已不可得(2026-08-02 登记;导出文件未留存,该次
 checkable: true
 verified: false
 tags: [健康, 睡眠, 大脑, 神经科学]
+last-surfaced: 2026-08-11
 ---
 
 # 睡前大脑停不下来——DMN 高活跃与游戏后降频方法
