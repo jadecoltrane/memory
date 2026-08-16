@@ -10,6 +10,8 @@
 
 **在 shell 里解析 git 输出的文件名时,必须加 `-c core.quotepath=false`**——本库文件名基本全是中文,git 默认转义成 `"Meta/\347\254\224…"`(带引号),`grep '^Meta/'` 之类会静默匹配不上,检查看着在跑其实全空。Python 脚本走 pathlib,不受影响。
 
+**顶层目录 2026-08-16 起是英文首字母大写**(`Notes/ Concepts/ Meta/ Profile/ Sources/ Archive/ Diary/ Works/ Home.md`)。改这批名字时注意:macOS 文件系统不分大小写 + `core.ignorecase=true`,**只改大小写的重命名 git 完全看不见**——`git status` 是干净的,索引里存的还是旧大小写,但 dataview 的路径匹配分大小写,当天就把工作台的笔记数打成 0、随机重逢渲染成一张白卡。要让 git 记录这类改名得走两步 `git mv A tmp && git mv tmp B`;改完全库搜一遍引用,**别只搜带斜杠的 `notes/`**,`dv.pages('"notes"')`、`ROOT / "notes"`、`file.inFolder("notes")` 这些裸字符串才是真正会静默失效的地方。
+
 **写完记忆必须跑 `python3 Meta/scripts/lint_memory.py`**(幽灵概念不算断链;警告都是真工单,能修就修,修不动留给 GC)。
 
 **推送冲突分两种。** ①**git 会报的**:机器人侧已兜住(`concurrency` 排队 + `git_push_retry.sh` 先 rebase 再推、真冲突一律 abort 重跑,绝不自己选边)。②**git 不会报的**——Obsidian Git 的 vault backup 可能用旧版工作区覆盖新提交,纯快进、零冲突、pull 一声不吭(2026-08-02 真实发生:删掉一个脚本、撤销三份规则、恢复已删的附件)。**现在没有任何自动告警会报这件事了**(哨兵 2026-08-16 删了),唯一的防线就是人和 AI 自己看:**用户说「我推了一下」时必须自己 fetch 对一眼 diff**,别只看有没有冲突标记。lint 只能间接兜住其中一部分——被删的笔记如果有人链接它,会以断链的形式亮红(2026-08-15 那次就是这么发现的);孤立的、没有反向链接的笔记被删掉,不会有任何声音。任何情况下:**先看清对面改了什么再合**,不盲目 pull 或 `--force`。
