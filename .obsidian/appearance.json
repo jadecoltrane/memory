@@ -6,5 +6,6 @@
     "workbench"
   ],
   "showRibbon": false,
-  "theme": "system"
+  "theme": "system",
+  "accentColor": ""
 }
