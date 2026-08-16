@@ -469,7 +469,11 @@ const mountDiaryBtn = (triesLeft = 34) => {
   }
   const host = well.querySelector(".callout-content") ?? well;
   if (host.querySelector(".wb-diary-btn")) return;
-  const btn = host.createEl("button", { cls: "wb-diary-btn", text: "📔 写日记" });
+  // 文案说"打开"而不是"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
+  // 两个入口叠在一起不写清楚会让人以为点了才能在上面的井里写
+  const btn = host.createEl("button", { cls: "wb-diary-btn" });
+  btn.createEl("span", { text: "📔 打开今天的日记" });
+  btn.createEl("span", { cls: "wb-diary-btn-arrow", text: "→" });
   btn.onclick = (e) => { e.stopPropagation(); newDiary(); };
 };
 mountDiaryBtn();
