@@ -7,7 +7,10 @@
   /* 分层(苹果那套):页面带一丝紫的近中性色 → 卡片纯白 → 卡片内的槽位再压深一档。
      卡片靠"比背景亮"被看见,不靠描边和重投影,所以页面绝不能是纯白。
      色相不写死,从主题的 --color-accent 借——换强调色时背景自动跟着走 */
-  --wb-tint: var(--color-accent, #7852ee);
+  /* 这里原本写的是 var(--color-accent),但 Border 主题的强调色是 hsl(232, 96%, 64%),
+     偏蓝不是紫,借过来整页都不紫。用户要浅紫,所以直接钉死色相。
+     想让它重新跟着主题走,把下面这行换回 var(--color-accent) 即可 */
+  --wb-tint: #7b5cf0;
   /* 兜底值(不支持 relative oklch 时用):比下面 oklch 那套略糙,但同样是低彩度 */
   --wb-page: color-mix(in srgb, var(--wb-tint) 4%, #f7f7f9);
   --wb-surface: #ffffff;
@@ -634,9 +637,9 @@
 /* 碰撞这一块原来在四个地方同时喊颜色:卡片左边 4px 橘条、标题胶囊、结论段的橘色引用条,
    再加正文里的蓝链接。改成整张卡只带一层极淡的暖色底,饱和的橘只留给胶囊一个地方,
    卡片内所有文字一律中性——有色的东西越少,那一个颜色越有分量 */
-/* 碰撞不再用橘色。整页只剩一个色相,那它靠什么跟普通 callout 区分?靠同一个紫的
-   份量差:别的标签是浅紫底 + 紫字,碰撞是实心紫底 + 白字。同色不同重量,
-   比再引进一个色相干净——卡片本身就是普通白卡,不再单独染底 */
+/* 碰撞不再用橘色,也不搞实心紫的特殊待遇——胶囊跟其他标签(.wb-reunion-tag)
+   完全一致。卡片本身也是普通白卡,不再单独染底。它跟别的块的区别只剩布局:
+   整行通宽 */
 .workbench .callout[data-callout="clash"] {
   border-left: none;
   background: var(--wb-surface);
@@ -649,8 +652,8 @@
   font-size: 0.78em;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #fff;
-  background: var(--wb-tint);
+  color: var(--wb-accent-text);
+  background: var(--wb-accent-soft);
   padding: 3px 12px;
   border-radius: 999px;
   margin-bottom: 0.3em;
