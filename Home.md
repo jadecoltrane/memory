@@ -154,13 +154,14 @@ const renderReunion = async (container, forceNew = false) => {
   const snippet = body.slice(0, 1500).replace(/\s+/g, " ").trim();
   excerptTextEl.setText(snippet + (body.length > 1500 ? "…" : ""));
 };
-const reunionEl = dv.container.createEl("div", { cls: "wb-reunion" });
-renderReunion(reunionEl);
-
 // 两张卡等高现在纯靠 CSS(随机重逢绝对定位铺满画作那一行),这里不再测量。
 // 旧写法是 JS 量画作高度 + ResizeObserver 追,有两个甩不掉的毛病:一是 querySelector
 // 拿的是文档里第一个 .workbench,而 reading/source 两个视图容器同时在 DOM 里,可能量到
 // 隐藏的那个;二是图片异步加载、面板展开都会改高度,追不齐就是一次错位。
+// ⚠️ 代码块不能以行注释结尾:dataview 把代码包成 `(async () => { 代码 })()`,而它拿到的
+// 代码块末尾没有换行,那句 ` })()` 会直接接在最后一行 // 后面被吃掉,报 Unexpected end of input
+const reunionEl = dv.container.createEl("div", { cls: "wb-reunion" });
+renderReunion(reunionEl);
 ```
 
 ```dataviewjs

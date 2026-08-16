@@ -247,6 +247,25 @@ def check_extension_cap(path: Path):
         )
 
 
+def check_dataviewjs_blocks(path: Path) -> None:
+    """dataviewjs 代码块不能以行注释结尾。
+
+    2026-08-16 真实踩到:dataview 把代码包成 `(async () => { 代码 })()`,而它从
+    markdown 拿到的代码块末尾没有换行,那句 ` })()` 就直接接在最后一行 `//` 后面被
+    注释吃掉,整块报 Unexpected end of input。单看代码块本身语法完全正确,node --check
+    也过,只有连包装一起看才暴露——所以必须机器查,靠人记得肯定要再犯。
+    """
+    rel = path.relative_to(ROOT).as_posix()
+    for i, block in enumerate(re.findall(r"```dataviewjs\n(.*?)```", path.read_text(encoding="utf-8"), re.S), 1):
+        lines = [ln for ln in block.rstrip().splitlines() if ln.strip()]
+        if lines and lines[-1].lstrip().startswith("//"):
+            errors.append(
+                f"{rel}: 第 {i} 个 dataviewjs 块以行注释结尾——"
+                f"dataview 追加的 `}})()` 会被这行 // 吃掉,整块报 Unexpected end of input。"
+                f"把注释挪到代码上方,或改成 /* */"
+            )
+
+
 def main():
     paths, basenames, aliases = collect_pages()
     concept_names = collect_concept_names()
@@ -269,6 +288,7 @@ def main():
         p = ROOT / name
         if p.exists():
             check_links(p, paths, basenames, aliases)
+            check_dataviewjs_blocks(p)
 
     for w in warnings:
         print(f"⚠️  {w}")
