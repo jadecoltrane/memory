@@ -1,5 +1,6 @@
 .workbench {
-  --wb-accent: #8a8578;
+  /* 强调色不再取自当天画作(那样整页配色每天赌一次运气),固定跟着主题强调色走 */
+  --wb-accent: var(--wb-tint);
   --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, white);
   --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
   --wb-accent-text: var(--wb-accent);
@@ -10,7 +11,7 @@
   /* 兜底值(不支持 relative oklch 时用):比下面 oklch 那套略糙,但同样是低彩度 */
   --wb-page: color-mix(in srgb, var(--wb-tint) 4%, #f7f7f9);
   --wb-surface: #ffffff;
-  --wb-sunken: color-mix(in srgb, var(--wb-tint) 6%, #f1f1f4);
+  --wb-sunken: rgba(0, 0, 0, 0.045);
   --wb-hairline: rgba(0, 0, 0, 0.07);
   --wb-radius: 18px;
   --wb-radius-sm: 12px;
@@ -39,7 +40,6 @@
     /* 有色背景的关键是彩度压到几乎没有:亮度锁在 0.96 以上、C 只给 0.006~0.010,
        只留一丝色相。直接按百分比兑强调色会得到明晃晃的淡紫,不是这个路子 */
     --wb-page: oklch(from var(--wb-tint) 0.972 0.007 h);
-    --wb-sunken: oklch(from var(--wb-tint) 0.945 0.011 h);
     --wb-hairline: oklch(from var(--wb-tint) 0.62 0.02 h / 0.14);
     --wb-accent-text: oklch(from var(--wb-accent) 0.5 min(c, 0.11) h);
     --wb-accent-soft: oklch(from var(--wb-accent) 0.93 0.035 h);

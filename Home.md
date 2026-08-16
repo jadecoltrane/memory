@@ -55,42 +55,9 @@ titleEl.style.cssText = "font-weight:600; font-size:1.05em; line-height:1.4; mar
 const introEl = caption.createEl("div", { cls: "wb-daily-painting-desc", text: p["painting-intro"] ?? "" });
 introEl.style.cssText = "font-size:0.92em; line-height:1.6; opacity:0.75; position:static; background:none; text-shadow:none;";
 
-// 取画作主色调写进 --wb-accent:按色相分 12 桶投票取票数最多的桶均值,而非平均色(平均会让所有颜色互相抵消成灰)
-if (p["painting-url"]) {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.onload = () => {
-    try {
-      const c = document.createElement("canvas");
-      c.width = 32; c.height = 32;
-      const ctx = c.getContext("2d");
-      ctx.drawImage(img, 0, 0, 32, 32);
-      const d = ctx.getImageData(0, 0, 32, 32).data;
-      const bins = Array.from({ length: 12 }, () => ({ r: 0, g: 0, b: 0, n: 0 }));
-      for (let i = 0; i < d.length; i += 4) {
-        const r = d[i], g = d[i + 1], b = d[i + 2];
-        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-        if (mx - mn < 24) continue; // 近灰的像素没有可用色相,不参与投票
-        const h = mx === r ? ((g - b) / (mx - mn) + 6) % 6 : mx === g ? (b - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4;
-        const bin = bins[Math.floor(h * 2) % 12]; // h∈[0,6) → 12 桶,每桶 30°
-        bin.r += r; bin.g += g; bin.b += b; bin.n++;
-      }
-      const top = bins.reduce((a, x) => (x.n > a.n ? x : a));
-      if (top.n) {
-        const R = Math.round(top.r / top.n), G = Math.round(top.g / top.n), B = Math.round(top.b / top.n);
-        root?.style.setProperty("--wb-accent", `rgb(${R}, ${G}, ${B})`);
-      } else {
-        console.warn("[工作台] 取色失败:整幅画在采样点都太接近灰色,没有可投票的色相,沿用兜底色 --wb-accent");
-      }
-    } catch (e) {
-      console.warn("[工作台] 画作取色失败,沿用兜底色 --wb-accent:", e);
-    }
-  };
-  img.onerror = (e) => {
-    console.warn("[工作台] 画作图片加载失败,取色跳过,沿用兜底色 --wb-accent。图片地址:", p["painting-url"], e);
-  };
-  img.src = p["painting-url"];
-}
+// 2026-08-16 删掉「按当天画作取主色调写进 --wb-accent」那段(canvas 采样 + 色相分桶投票)。
+// 用户要求胶囊固定用浅紫:强调色每天跟着画走,意味着整页配色每天赌一次运气,今天是土黄
+// 明天可能是墨绿,跟页面底色撞不撞全看画。--wb-accent 现在在 CSS 里直接指向 --wb-tint。
 
 const gen = p.generated;
 const genMs = gen?.toMillis ? gen.toMillis() : (gen ? new Date(String(gen)).getTime() : NaN);
