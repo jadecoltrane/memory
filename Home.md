@@ -157,39 +157,10 @@ const renderReunion = async (container, forceNew = false) => {
 const reunionEl = dv.container.createEl("div", { cls: "wb-reunion" });
 renderReunion(reunionEl);
 
-// 随机重逢卡片高度跟着画作横幅走:画作图片异步加载会撑高卡片,用 ResizeObserver 而非一次性测量,保证加载完成后重新同步
-const syncReunionHeight = () => {
-  const painting = document.querySelector(".workbench .wb-daily-painting");
-  if (!painting) return;
-  if (window.innerWidth <= 520) {
-    reunionEl.style.maxHeight = "";
-    return;
-  }
-  const h = painting.getBoundingClientRect().height;
-  if (h > 0) reunionEl.style.maxHeight = h + "px";
-};
-
-// 标题对齐完全交给 CSS(两边 margin-bottom 对齐),这里只需要高度同步
-const syncLayout = syncReunionHeight;
-// 两个 dataviewjs 块之间不保证渲染顺序,轮询等真正找到画作卡片 DOM 后再挂 ResizeObserver
-const setupLayoutSync = (triesLeft = 34) => {
-  const paintingEl = document.querySelector(".workbench .wb-daily-painting");
-  if (!paintingEl) {
-    if (triesLeft > 0) setTimeout(() => setupLayoutSync(triesLeft - 1), 150);
-    else console.warn("[工作台] 等了 5 秒还是没找到画作卡片的 DOM,放弃高度同步——可能画作代码块本身报错了");
-    return;
-  }
-  syncLayout();
-  // dv.component.register 把 disconnect/removeEventListener 绑定到本次渲染生命周期,重渲染时自动清理,避免新旧观察者互相打架
-  if (window.ResizeObserver) {
-    const ro = new ResizeObserver(syncLayout);
-    ro.observe(paintingEl);
-    dv.component.register(() => ro.disconnect());
-  }
-  window.addEventListener("resize", syncLayout);
-  dv.component.register(() => window.removeEventListener("resize", syncLayout));
-};
-setupLayoutSync();
+// 两张卡等高现在纯靠 CSS(随机重逢绝对定位铺满画作那一行),这里不再测量。
+// 旧写法是 JS 量画作高度 + ResizeObserver 追,有两个甩不掉的毛病:一是 querySelector
+// 拿的是文档里第一个 .workbench,而 reading/source 两个视图容器同时在 DOM 里,可能量到
+// 隐藏的那个;二是图片异步加载、面板展开都会改高度,追不齐就是一次错位。
 ```
 
 ```dataviewjs

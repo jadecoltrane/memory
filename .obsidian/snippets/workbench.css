@@ -3,15 +3,15 @@
   --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, white);
   --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
   --wb-accent-text: var(--wb-accent);
-  /* 分层(苹果那套):页面淡紫 → 卡片纯白 → 卡片内的槽位再回到淡紫。
+  /* 分层(苹果那套):页面带一丝紫的近中性色 → 卡片纯白 → 卡片内的槽位再压深一档。
      卡片靠"比背景亮"被看见,不靠描边和重投影,所以页面绝不能是纯白。
-     淡紫不写死,从主题的 --color-accent 兑出来——换强调色时背景自动跟着走。
-     兜底值是 Obsidian 的默认强调色,主题没给 --color-accent 时不至于掉回灰 */
+     色相不写死,从主题的 --color-accent 借——换强调色时背景自动跟着走 */
   --wb-tint: var(--color-accent, #7852ee);
-  --wb-page: color-mix(in srgb, var(--wb-tint) 9%, #fdfdff);
+  /* 兜底值(不支持 relative oklch 时用):比下面 oklch 那套略糙,但同样是低彩度 */
+  --wb-page: color-mix(in srgb, var(--wb-tint) 4%, #f7f7f9);
   --wb-surface: #ffffff;
-  --wb-sunken: color-mix(in srgb, var(--wb-tint) 11%, #f7f6fc);
-  --wb-hairline: color-mix(in srgb, var(--wb-tint) 14%, rgba(0, 0, 0, 0.06));
+  --wb-sunken: color-mix(in srgb, var(--wb-tint) 6%, #f1f1f4);
+  --wb-hairline: rgba(0, 0, 0, 0.07);
   --wb-radius: 18px;
   --wb-radius-sm: 12px;
   /* 双层投影:一层紧贴边缘勾轮廓,一层大范围铺开做距离感。单层要么糊要么脏 */
@@ -36,6 +36,11 @@
 
 @supports (color: oklch(from red 0.5 0.1 h)) {
   .workbench {
+    /* 有色背景的关键是彩度压到几乎没有:亮度锁在 0.96 以上、C 只给 0.006~0.010,
+       只留一丝色相。直接按百分比兑强调色会得到明晃晃的淡紫,不是这个路子 */
+    --wb-page: oklch(from var(--wb-tint) 0.972 0.007 h);
+    --wb-sunken: oklch(from var(--wb-tint) 0.945 0.011 h);
+    --wb-hairline: oklch(from var(--wb-tint) 0.62 0.02 h / 0.14);
     --wb-accent-text: oklch(from var(--wb-accent) 0.5 min(c, 0.11) h);
     --wb-accent-soft: oklch(from var(--wb-accent) 0.93 0.035 h);
     --wb-accent-line: oklch(from var(--wb-accent) 0.72 min(c, 0.1) h / 0.6);
@@ -186,14 +191,23 @@
 .workbench .markdown-preview-sizer > *:has(.wb-daily-painting) {
   flex: 2 1 max(280px, 58%);
 }
+/* 两张卡等高:让画作那张单独决定行高,随机重逢绝对定位铺满同一行,
+   它再长也不会把行撑高。原来靠 JS 测量 + ResizeObserver 追,竞态多还容易失手 */
 .workbench .markdown-preview-sizer > *:has(.wb-reunion) {
   flex: 1 1 max(280px, 26%);
+  position: relative;
+}
+.workbench .markdown-preview-sizer > *:has(.wb-reunion) > .wb-reunion,
+.workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(> .wb-reunion) {
+  position: absolute;
+  inset: 0;
 }
 
 /* 原本是半透明白 + backdrop-filter 的毛玻璃,靠身后的彩色渐变才看得出来。
    渐变去掉之后白底上叠半透明白等于什么都没有,所以整套换成实心白 + 发丝边 + 双层投影 */
 .workbench .wb-daily-painting {
   align-self: flex-start;
+  height: auto;
   background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
@@ -266,6 +280,10 @@
   font-size: 0.82em;
   color: var(--text-muted);
   line-height: 1.5;
+  /* 摘要装不下时底部渐隐,让截断看起来是有意的而不是被硬切一刀。
+     装得下时最后 12% 落在空白上,看不出来,所以不用判断长短 */
+  mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 88%, transparent 100%);
 }
 .workbench .wb-reunion-excerpt-text {
   margin: auto 0;
@@ -801,5 +819,14 @@
   .workbench .markdown-preview-sizer > *,
   .workbench .cm-sizer > * {
     animation: none !important;
+  }
+}
+
+/* 窄屏会 flex-wrap 成上下两行,这时不存在"对齐"问题,绝对定位反而会让容器塌成 0 高 */
+@media (max-width: 576px) {
+  .workbench .markdown-preview-sizer > *:has(.wb-reunion) > .wb-reunion,
+  .workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(> .wb-reunion) {
+    position: static;
+    inset: auto;
   }
 }
