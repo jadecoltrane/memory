@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "",
+  "search": "-path:sources -path:archive -path:作品 -path:日记 -path:profile -path:meta -path:工作台 -path:CLAUDE -path:AGENTS",
   "showTags": false,
   "showAttachments": false,
   "hideUnresolved": true,
@@ -25,6 +25,6 @@
   "repelStrength": 10,
   "linkStrength": 1,
   "linkDistance": 250,
-  "scale": 2.296319783056116,
-  "close": false
+  "scale": 1.0385165929285427,
+  "close": true
 }
