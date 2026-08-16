@@ -9,7 +9,11 @@ SECTIONS = [
     ("profile", "用户画像"),
     ("concepts", "概念"),
     ("notes", "我的收藏"),
+    # 日记进索引是 2026-08-16 用户明确要的:让 AI 看得见、能据此了解和分析用户。
+    # 一月一个文件所以一年只多 12 行。作品/ 和 archive/ 不进(它们不是给 AI 读的)。
+    ("日记", "日记"),
 ]
+SKIP_NAMES = {"README.md"}  # 目录说明文件不是记忆
 
 
 # 分层(meta/RESOLVER.md 定义):核心=我自己的判断和立场,方法=可执行做法,
@@ -54,6 +58,7 @@ lines = [
 total = 0
 for dirname, title in SECTIONS:
     files = sorted((ROOT / dirname).rglob("*.md")) if (ROOT / dirname).exists() else []
+    files = [f for f in files if f.name not in SKIP_NAMES]
     if not files:
         continue
     lines += [f"## {title}", ""]

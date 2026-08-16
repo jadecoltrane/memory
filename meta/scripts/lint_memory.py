@@ -16,6 +16,7 @@
 - 概念裸奔:已有概念页的名字/别名在正文里出现 ≥2 次却一次双链都没打。防图谱连不上。
 - 出现在漏收:笔记挂了 [[concepts/X]],X 的「出现在」区却没收录它。防枢纽不认识自己的辐条。
 - 文件夹膨胀:单个文件夹 > MAX_FOLDER_NOTES 篇。防下一个"社会学 28 篇"。
+  FOLDER_CAP_EXEMPT 里的流水型目录(书影音)不查——按条目自然增长的东西,按数量拆没意义。
 - 顶层过宽:notes/ 直属子文件夹 > MAX_TOP_FOLDERS 个。上面那条只封单个文件夹的宽度,
   不封文件夹**数量**——一路平铺拆下去文件树会比笔记还难翻,所以拆分往深里走。
 - 概念页延伸超限:延伸区 > MAX_EXTENSIONS 条,该做晋升(定论折进定义,其余进已探讨)。
@@ -34,6 +35,11 @@ WIKILINK = re.compile(r"\[\[([^\]|#^]+)")
 MAX_NOTE_LINKS = 2  # 单篇 note→note 上限;标了"上下篇"的那行不计入
 MAX_FOLDER_NOTES = 12  # 单个 notes/ 子文件夹的笔记数上限(按直接父目录计,嵌套不受罚)
 MAX_TOP_FOLDERS = 10  # notes/ 直属子文件夹数上限;2026-08-16 定,当时 8 个
+# 12 篇上限不查的目录(前缀匹配)。判据是"流水型 vs 观点型":
+# 观点型笔记堆到 12 条同级结论就说明该分层了,警告有意义;书影音这种按条目自然增长的,
+# 一年几十本,按数量拆只会拆出一堆没有意义的文件夹——它们该按年份/门类分。
+# 而且找一本书是靠书名找的,不靠翻文件夹,"翻不动"这个原始问题在这里不成立。
+FOLDER_CAP_EXEMPT = ("notes/书影音",)
 MAX_EXTENSIONS = 6  # 概念页「延伸」区条目上限
 SERIES_MARK = re.compile(r"上下篇|上篇|下篇")  # 豁免标记:写在含该链接的同一行里
 
@@ -197,6 +203,8 @@ def check_folder_sizes():
     for p in (ROOT / "notes").rglob("*.md"):
         counts[p.parent.relative_to(ROOT).as_posix()] += 1
     for folder, n in sorted(counts.items()):
+        if folder.startswith(FOLDER_CAP_EXEMPT):
+            continue
         if n > MAX_FOLDER_NOTES:
             warnings.append(
                 f"{folder}/: {n} 篇(上限 {MAX_FOLDER_NOTES})——该拆了,"
