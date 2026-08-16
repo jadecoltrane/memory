@@ -16,6 +16,8 @@
 - 概念裸奔:已有概念页的名字/别名在正文里出现 ≥2 次却一次双链都没打。防图谱连不上。
 - 出现在漏收:笔记挂了 [[concepts/X]],X 的「出现在」区却没收录它。防枢纽不认识自己的辐条。
 - 文件夹膨胀:单个文件夹 > MAX_FOLDER_NOTES 篇。防下一个"社会学 28 篇"。
+- 顶层过宽:notes/ 直属子文件夹 > MAX_TOP_FOLDERS 个。上面那条只封单个文件夹的宽度,
+  不封文件夹**数量**——一路平铺拆下去文件树会比笔记还难翻,所以拆分往深里走。
 - 概念页延伸超限:延伸区 > MAX_EXTENSIONS 条,该做晋升(定论折进定义,其余进已探讨)。
 - 指向 archive/ 的双链:归档的东西不该还挂在图谱上,改成纯文本路径。
 """
@@ -30,7 +32,8 @@ LINK_CHECK_FILES = ["工作台.md"]  # CLAUDE/RESOLVER 里是示例链接,不查
 WIKILINK = re.compile(r"\[\[([^\]|#^]+)")
 
 MAX_NOTE_LINKS = 2  # 单篇 note→note 上限;标了"上下篇"的那行不计入
-MAX_FOLDER_NOTES = 12  # 单个 notes/ 子文件夹的笔记数上限
+MAX_FOLDER_NOTES = 12  # 单个 notes/ 子文件夹的笔记数上限(按直接父目录计,嵌套不受罚)
+MAX_TOP_FOLDERS = 10  # notes/ 直属子文件夹数上限;2026-08-16 定,当时 8 个
 MAX_EXTENSIONS = 6  # 概念页「延伸」区条目上限
 SERIES_MARK = re.compile(r"上下篇|上篇|下篇")  # 豁免标记:写在含该链接的同一行里
 
@@ -195,7 +198,26 @@ def check_folder_sizes():
         counts[p.parent.relative_to(ROOT).as_posix()] += 1
     for folder, n in sorted(counts.items()):
         if n > MAX_FOLDER_NOTES:
-            warnings.append(f"{folder}/: {n} 篇(上限 {MAX_FOLDER_NOTES})——该拆分了")
+            warnings.append(
+                f"{folder}/: {n} 篇(上限 {MAX_FOLDER_NOTES})——该拆了,"
+                "**在这个文件夹里面开子文件夹**,别在 notes/ 下平铺出新顶层"
+            )
+
+
+def check_top_folder_count():
+    """顶层宽度上限。MAX_FOLDER_NOTES 只封了单个文件夹能有多宽,不封文件夹**数量**:
+    每满 12 篇就在 notes/ 下平铺一个新文件夹,一年后文件树比笔记本身还难翻
+    (2026-08-16 按当时 9 篇/周算过,一年 ~470 篇 = 40 个顶层文件夹)。
+    lint 数的是直接父目录,所以嵌套天然不受罚——拆分往深里走,顶层锁在这个数。"""
+    d = ROOT / "notes"
+    if not d.is_dir():
+        return
+    tops = sorted(x.name for x in d.iterdir() if x.is_dir())
+    if len(tops) > MAX_TOP_FOLDERS:
+        warnings.append(
+            f"notes/ 顶层 {len(tops)} 个文件夹(上限 {MAX_TOP_FOLDERS})——"
+            f"该把近邻主题合并、或收进同一个大类下面了:{'、'.join(tops)}"
+        )
 
 
 def check_extension_cap(path: Path):
@@ -233,6 +255,7 @@ def main():
                 check_extension_cap(p)
     check_concept_backlinks(concept_names)
     check_folder_sizes()
+    check_top_folder_count()
     for name in LINK_CHECK_FILES:
         p = ROOT / name
         if p.exists():
