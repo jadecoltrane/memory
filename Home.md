@@ -29,6 +29,13 @@ const p = dv.current();
 // closest(".workbench") 而非 querySelector——reading/source 两个视图容器都在 DOM 里,querySelector 只会拿第一个,可能拿到隐藏的那个
 const root = dv.container.closest(".workbench");
 
+// 清掉历史版本用 setProperty 写在容器上的内联变量。这两个变量的定义已经搬回 CSS,
+// 但内联值挂在 DOM 元素上,删掉写它的代码并不会让它消失——只要视图不被重建就一直
+// 压着 CSS 里的新值(2026-08-16:胶囊死活不变色就是 --wb-accent 还留着画作取的土黄)。
+// 每次渲染主动 remove 一次,不用靠用户重启 Obsidian
+root?.style.removeProperty("--wb-accent");
+root?.style.removeProperty("--wb-page-gradient");
+
 const banner = dv.container.createEl("div", { cls: "wb-daily-painting" });
 const narrowScreen = window.matchMedia("(max-width: 520px)").matches;
 banner.style.cssText = [
