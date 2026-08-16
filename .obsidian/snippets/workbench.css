@@ -10,7 +10,9 @@
   /* 这里原本写的是 var(--color-accent),但 Border 主题的强调色是 hsl(232, 96%, 64%),
      偏蓝不是紫,借过来整页都不紫。用户要浅紫,所以直接钉死色相。
      想让它重新跟着主题走,把下面这行换回 var(--color-accent) 即可 */
-  --wb-tint: #7b5cf0;
+  /* 单一源头在 quiet-notes.css 的 --jade-tint(那份 snippet 管全库链接色,
+     两边必须是同一个紫)。写 fallback 是为了那份被关掉时工作台不掉色 */
+  --wb-tint: var(--jade-tint, #7b5cf0);
   /* 兜底值(不支持 relative oklch 时用):比下面 oklch 那套略糙,但同样是低彩度 */
   --wb-page: color-mix(in srgb, var(--wb-tint) 4%, #f7f7f9);
   --wb-surface: #ffffff;
