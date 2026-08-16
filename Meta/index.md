@@ -1,6 +1,6 @@
 # 记忆索引
 
-> 自动生成于 2026-08-17,勿手改;运行 `python3 Meta/scripts/build_memory_index.py` 更新。
+> 自动生成于 2026-08-16,勿手改;运行 `python3 Meta/scripts/build_memory_index.py` 更新。
 
 ## 用户画像
 
@@ -106,8 +106,4 @@
 - [[Notes/知识/厂牌不是公司-是唱片行业里审美与文化认同的品牌|厂牌不是公司-是唱片行业里审美与文化认同的品牌]] (verified: false)
 - [[Notes/知识/车机技术基础-View-CAN总线-Android-网关隔离|车机技术基础-View-CAN总线-Android-网关隔离]] (verified: false)
 
-## 日记
-
-- [[Diary/2026/2026-08|2026-08]]
-
-共 88 条记忆。
+共 87 条记忆。
