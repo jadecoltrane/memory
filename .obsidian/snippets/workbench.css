@@ -42,15 +42,13 @@
 
 .markdown-preview-view.workbench,
 .markdown-source-view.workbench {
-  /* 2026-08-16 用户要求去掉每日渐变、底色用白。只留那层噪点保住纸感
-     ——同时删掉了 update_daily_gradient.py 和日更里写渐变那一步。
-     白色写死(Border 主题浅色下的 --background-primary 是偏灰的米白),
-     所以深色模式必须在下面那条规则里把底色抢回去,否则跟着一起变白 */
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* 2026-08-16 用户要求:去掉每日渐变,底色纯白。噪点层也一并删了——它是 5% 不透明度的
+     黑铺满整个面,实测叠在纯白上平均只有 248.6/255(#f9f9f9)、最暗 244,没有一个像素是
+     纯白,肉眼就是一层灰。想要纸感只能换成更淡的噪点,不能靠调 background-color 补救。
+     白色写死(Border 主题浅色下的 --background-primary 是偏灰的米白),所以深色模式
+     必须在下面那条规则里把底色抢回去,否则跟着一起变白 */
+  background-image: none;
   background-color: #fff;
-  background-repeat: repeat;
-  background-size: 140px 140px;
 }
 
 .theme-dark .markdown-preview-view.workbench,
