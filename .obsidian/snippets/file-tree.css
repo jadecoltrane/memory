@@ -1,0 +1,71 @@
+/* ============================================================
+   File Tree — 左侧文件栏分区
+
+   顶层按用途分四组,每组带小标题和一条分割线;顺序由 flex order 定,
+   不用插件、也不给文件夹名加数字前缀(名字一改,全库路径引用就得跟着改)。
+   只作用于 .nav-files-container,不碰正文和其他侧边栏。
+
+   加了新的顶层目录,记得在下面「顺序」一节补一行,否则它会排到最前面
+   (没写 order 的项默认 order: 0)。
+   ============================================================ */
+
+/* 根目录的子项排成一列,order 才有意义。
+   1.13 的文件栏结构是 .nav-files-container > 一个没有 class 的 div > 各个 .tree-item
+   ——没有 .nav-folder.mod-root / .nav-folder-children 那层了(实测 1.13.7),
+   所以这里只能按"直接子 div"选。哪天升级后顺序失效,先来查这一条 */
+.nav-files-container > div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- 顺序 ---------- */
+
+.nav-files-container .tree-item:has(> [data-path="Home.md"])   { order: 1; }
+.nav-files-container .tree-item:has(> [data-path="Diary"])     { order: 2; }
+
+.nav-files-container .tree-item:has(> [data-path="Notes"])     { order: 3; }
+.nav-files-container .tree-item:has(> [data-path="Concepts"])  { order: 4; }
+.nav-files-container .tree-item:has(> [data-path="Profile"])   { order: 5; }
+
+.nav-files-container .tree-item:has(> [data-path="Works"])     { order: 6; }
+
+.nav-files-container .tree-item:has(> [data-path="Meta"])      { order: 7; }
+.nav-files-container .tree-item:has(> [data-path="Sources"])   { order: 8; }
+.nav-files-container .tree-item:has(> [data-path="Archive"])   { order: 9; }
+.nav-files-container .tree-item:has(> [data-path="CLAUDE.md"]) { order: 10; }
+.nav-files-container .tree-item:has(> [data-path="AGENTS.md"]) { order: 11; }
+
+/* ---------- 分组标题 + 分割线 ---------- */
+
+.nav-files-container .tree-item:has(> [data-path="Home.md"])::before,
+.nav-files-container .tree-item:has(> [data-path="Notes"])::before,
+.nav-files-container .tree-item:has(> [data-path="Works"])::before,
+.nav-files-container .tree-item:has(> [data-path="Meta"])::before {
+  display: block;
+  margin: 16px 6px 5px;
+  padding-top: 13px;
+  border-top: 1px solid var(--background-modifier-border);
+  font-size: 0.7em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-faint);
+}
+
+/* 第一组顶在最上面,不需要分割线 */
+.nav-files-container .tree-item:has(> [data-path="Home.md"])::before {
+  content: "今天";
+  margin-top: 2px;
+  padding-top: 0;
+  border-top: none;
+}
+.nav-files-container .tree-item:has(> [data-path="Notes"])::before { content: "记忆"; }
+.nav-files-container .tree-item:has(> [data-path="Works"])::before { content: "产出"; }
+.nav-files-container .tree-item:has(> [data-path="Meta"])::before  { content: "底层"; }
+
+/* ---------- 隐藏 ---------- */
+
+/* 导出原文只给脚本和复核用,几十份堆在树里纯噪音。
+   文件还在,搜索和 source_slice.py 照常能找到,只是不在文件栏里显示 */
+.nav-files-container .tree-item:has(> [data-path="Sources/raw"]) {
+  display: none;
+}

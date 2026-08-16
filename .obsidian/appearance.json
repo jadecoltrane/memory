@@ -3,7 +3,8 @@
   "enabledCssSnippets": [
     "quiet-notes",
     "claudian-ui",
-    "workbench"
+    "workbench",
+    "file-tree"
   ],
   "showRibbon": false,
   "theme": "system",
