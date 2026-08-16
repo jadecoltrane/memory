@@ -27,13 +27,15 @@
   --wb-shadow-hover-subtle: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 28px rgba(0, 0, 0, 0.07);
   /* 无回弹:苹果只在手势跟随时用弹簧,界面元素的悬停/展开一律是纯减速 */
   --wb-ease: cubic-bezier(0.32, 0.72, 0, 1);
-  --wb-card-bg: var(--wb-surface);
 }
 
 .theme-dark .workbench {
   --wb-sunken: rgba(0, 0, 0, 0.22);
   --wb-hairline: rgba(255, 255, 255, 0.09);
-  --wb-card-bg: rgba(255, 255, 255, 0.07);
+  /* 深色底翻的是 --wb-surface 本身,不是每个用到它的块各写一条 .theme-dark 覆盖——
+     漏一个就是一张白卡贴在深色页上(今日日记那张就这么白了一阵)。
+     原来还有个 --wb-card-bg 是它的别名、只有别名翻了色,已合并 */
+  --wb-surface: rgba(255, 255, 255, 0.07);
   --wb-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 8px 24px rgba(0, 0, 0, 0.35);
   --wb-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 14px 34px rgba(0, 0, 0, 0.45);
   --wb-shadow-flat: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 14px rgba(0, 0, 0, 0.25);
@@ -227,10 +229,6 @@
   box-shadow: var(--wb-shadow);
   transition: box-shadow 0.4s var(--wb-ease), transform 0.4s var(--wb-ease);
 }
-.theme-dark .workbench .wb-daily-painting {
-  background: var(--wb-card-bg);
-  border-color: var(--wb-hairline);
-}
 
 @media (hover: hover) and (pointer: fine) {
   .workbench .wb-daily-painting:hover {
@@ -270,9 +268,6 @@
   box-shadow: var(--wb-shadow);
   cursor: pointer;
   transition: box-shadow 0.4s var(--wb-ease), transform 0.4s var(--wb-ease);
-}
-.theme-dark .workbench .wb-reunion {
-  background: var(--wb-card-bg);
 }
 @media (hover: hover) and (pointer: fine) {
   .workbench .wb-reunion:hover {
@@ -400,7 +395,7 @@
   align-items: baseline;
   gap: 5px;
   flex: none;
-  background: var(--wb-card-bg);
+  background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
   border-radius: 999px;
   padding: 7px 15px;
@@ -489,7 +484,7 @@
 .workbench .wb-panel {
   margin: -6px 0 4px;
   padding: 12px 14px;
-  background: var(--wb-card-bg);
+  background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
   box-shadow: var(--wb-shadow);
@@ -616,7 +611,7 @@
   border-radius: var(--wb-radius);
   padding: 1.05em 1.3em;
   margin: 0;
-  background: var(--wb-card-bg);
+  background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
   box-shadow: var(--wb-shadow);
   transition: box-shadow 0.4s var(--wb-ease);
@@ -653,9 +648,6 @@
 .workbench .callout[data-callout="clash"] {
   border-left: none;
   background: var(--wb-surface);
-}
-.theme-dark .workbench .callout[data-callout="clash"] {
-  background: var(--wb-card-bg);
 }
 .workbench .callout[data-callout="clash"] > .callout-title {
   display: inline-flex;
