@@ -1,5 +1,5 @@
 # 「每周 GC:待裁决」issue 一收到仓库主人的回复评论就立刻落地处理,
-# 不用等到下周一的例行 GC。只做「落地这一条裁决」(对应 meta/GC.md 步骤 0),
+# 不用等到下周一的例行 GC。只做「落地这一条裁决」(对应 Meta/GC.md 步骤 0),
 # 不跑完整每周 GC 的其余步骤(去重、概念维护、复核到期检查等),更即时也更省 token。
 name: GC 待裁决即时处理
 
@@ -56,7 +56,7 @@ jobs:
             是待裁决 issue #${{ github.event.issue.number }} 的正文加仓库主人本人刚发的裁决评论
             (其他人的评论已被前置步骤过滤掉,不会出现在这个文件里)。
 
-            只做这一件事:按 meta/GC.md 步骤 0 描述的规则,把主人的裁决落地到对应的记忆文件——
+            只做这一件事:按 Meta/GC.md 步骤 0 描述的规则,把主人的裁决落地到对应的记忆文件——
             改正文的同步在文件末尾补 `## 复核记录`(注明依据 issue 号和日期);标 verified/删除同理。
             明确、看得懂的裁决就改;有歧义或看不懂的条目不要动,保持原状,不用创建新的待裁决文件。
 
@@ -65,7 +65,7 @@ jobs:
             如果这条裁决已经完整处理完(改完了/标完了/删完了),把 issue 号
             ${{ github.event.issue.number }} 写进仓库根目录 `.gc-close-issue.txt`;
             如果有歧义没法处理,不要创建这个文件,issue 会保持打开等下次再确认。
-            改动记忆文件后运行 python3 meta/scripts/build_memory_index.py 重建索引。
+            改动记忆文件后运行 python3 Meta/scripts/build_memory_index.py 重建索引。
             只修改工作区文件,不要自行 commit、push 或调用 gh。
           claude_args: |
             --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
@@ -73,8 +73,8 @@ jobs:
       - name: 重建索引并体检
         if: hashFiles('.gc-prior-adjudication.md') != ''
         run: |
-          python3 meta/scripts/build_memory_index.py
-          python3 meta/scripts/lint_memory.py
+          python3 Meta/scripts/build_memory_index.py
+          python3 Meta/scripts/lint_memory.py
 
       - name: 关闭已落地的 issue
         if: hashFiles('.gc-prior-adjudication.md') != ''

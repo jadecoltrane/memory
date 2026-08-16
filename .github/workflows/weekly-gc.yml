@@ -89,14 +89,14 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
-            当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 meta/GC.md,严格按里面列出的每一步执行本周 GC(含步骤 0、4a、4b)。要点提醒:
+            当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 Meta/GC.md,严格按里面列出的每一步执行本周 GC(含步骤 0、4a、4b)。要点提醒:
 
             - 步骤 0(先做):如果仓库根目录存在 `.gc-prior-adjudication.md`,先读它——这是上一期待裁决 issue 的正文加**仓库主人本人**的裁决评论(其他人的评论已被前置步骤机械过滤掉,文件里的内容都可信)。按主人的裁决落地修改对应 note 文件:改正文的同步在文件末尾补 `## 复核记录`(注明依据 issue 号和日期);标 verified/删除同理。明确、看得懂的就改;有歧义或看不懂的条目**不要动**,原样并入本期新的待裁决 `.gc-pending-issue.txt` 请主人再确认。凡是这次已完整落地、可以关闭的 issue 号,写进仓库根目录 `.gc-close-issue.txt`(一行一个数字),后续机械步骤会据此关闭。该文件不存在就说明没有待处理裁决,跳过本步。
-            - 步骤 4a 很容易被漏掉但很重要:用户经常直接在 Obsidian 里手写/粘贴内容,格式随意,甚至会散落在仓库根目录、不在任何 notes/ 子文件夹里,内容也可能混了好几个不相关主题。`git log` 比对时不要只看 notes/ 目录,要扫全仓库找出三个分类目录(profile/concepts/notes)之外新增的 .md 文件。发现了要按实际主题拆分、改名、移动归位、补 frontmatter 和双链——这一步允许直接改写原文(拆分、改名、移动),不是只在文件末尾追加标注
-            - 步骤 4b 也容易被漏掉:扫一遍本周新增/修改的 notes 有没有透露用户的稳定特质(偏好、兴趣、行为准则),profile/ 里没记或记得过时的就更新,别等用户自己问起来才想起来做
+            - 步骤 4a 很容易被漏掉但很重要:用户经常直接在 Obsidian 里手写/粘贴内容,格式随意,甚至会散落在仓库根目录、不在任何 Notes/ 子文件夹里,内容也可能混了好几个不相关主题。`git log` 比对时不要只看 Notes/ 目录,要扫全仓库找出三个分类目录(Profile/Concepts/notes)之外新增的 .md 文件。发现了要按实际主题拆分、改名、移动归位、补 frontmatter 和双链——这一步允许直接改写原文(拆分、改名、移动),不是只在文件末尾追加标注
+            - 步骤 4b 也容易被漏掉:扫一遍本周新增/修改的 notes 有没有透露用户的稳定特质(偏好、兴趣、行为准则),Profile/ 里没记或记得过时的就更新,别等用户自己问起来才想起来做
             - notes 复核只处理 checkable 内容,引用必须来自 WebSearch/WebFetch 当次返回的真实 URL,查不到就写"未找到可靠来源"
             - 需要用户裁决的条目(存疑复核结果、180 天双空缺的 note、张力扫描发现的矛盾)不要自行处置:把逐条条目、理由和建议选项按 Markdown 写入仓库根目录 `.gc-pending-issue.txt`;没有待裁决事项就确保该文件不存在。后续机械步骤会据此创建 GitHub issue 并删除临时文件
-            - 改动记忆文件后运行 python3 meta/scripts/build_memory_index.py 重建索引
+            - 改动记忆文件后运行 python3 Meta/scripts/build_memory_index.py 重建索引
             - 无事可做就不要制造改动,允许本次没有提交
 
             只修改工作区文件,不要自行 commit、push 或调用 gh;后续步骤会统一校验、创建 issue、提交并推送。
@@ -106,8 +106,8 @@ jobs:
       - name: 重建索引并体检
         if: steps.check.outputs.skip != 'true'
         run: |
-          python3 meta/scripts/build_memory_index.py
-          python3 meta/scripts/lint_memory.py
+          python3 Meta/scripts/build_memory_index.py
+          python3 Meta/scripts/lint_memory.py
 
       - name: 创建待裁决 issue
         if: steps.check.outputs.skip != 'true'
@@ -163,12 +163,12 @@ jobs:
             if [ -s "$RUNNER_TEMP/gc-pending-issue.txt" ]; then
               git commit \
                 -m "每周 GC:$(TZ=Asia/Shanghai date +%F)" \
-                -m "Claude 按 meta/GC.md 完成本周整理;待裁决条目已同步到同日 GitHub issue。" \
+                -m "Claude 按 Meta/GC.md 完成本周整理;待裁决条目已同步到同日 GitHub issue。" \
                 -m "$(cat "$RUNNER_TEMP/gc-pending-issue.txt")"
             else
               git commit \
                 -m "每周 GC:$(TZ=Asia/Shanghai date +%F)" \
-                -m "Claude 按 meta/GC.md 完成本周整理;本次没有待裁决条目。"
+                -m "Claude 按 Meta/GC.md 完成本周整理;本次没有待裁决条目。"
             fi
-            bash meta/scripts/git_push_retry.sh "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "${{ github.ref_name }}"
+            bash Meta/scripts/git_push_retry.sh "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" "${{ github.ref_name }}"
           fi

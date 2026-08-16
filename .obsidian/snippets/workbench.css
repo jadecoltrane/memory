@@ -428,7 +428,8 @@
   transition: transform 0.4s var(--wb-ease);
 }
 @media (hover: hover) and (pointer: fine) {
-  .workbench .wb-newnote:hover .wb-newnote-glyph {
+  .workbench .wb-newnote:hover .wb-newnote-glyph,
+  .workbench .wb-newdiary:hover .wb-newnote-glyph {
     transform: rotate(360deg);
   }
 }

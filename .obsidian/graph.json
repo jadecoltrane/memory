@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "-path:sources -path:archive -path:作品 -path:日记 -path:profile -path:meta -path:工作台 -path:CLAUDE -path:AGENTS",
+  "search": "-path:Sources -path:Archive -path:Works -path:Diary -path:Profile -path:Meta -path:Home -path:CLAUDE -path:AGENTS",
   "showTags": false,
   "showAttachments": false,
   "hideUnresolved": true,
@@ -8,7 +8,7 @@
   "collapse-color-groups": false,
   "colorGroups": [
     {
-      "query": "path:concepts  ",
+      "query": "path:Concepts",
       "color": {
         "a": 1,
         "rgb": 14048348

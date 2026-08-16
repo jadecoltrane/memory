@@ -1,0 +1,26 @@
+views:
+  - type: table
+    name: "全部笔记"
+    filters:
+      and:
+        - 'file.inFolder("Notes")'
+  - type: table
+    name: "思考"
+    filters:
+      and:
+        - 'file.inFolder("Notes/思考")'
+  - type: table
+    name: "个人"
+    filters:
+      and:
+        - 'file.inFolder("Notes/个人")'
+  - type: table
+    name: "练习"
+    filters:
+      and:
+        - 'file.inFolder("Notes/练习")'
+  - type: table
+    name: "知识"
+    filters:
+      and:
+        - 'file.inFolder("Notes/知识")'

@@ -4,7 +4,7 @@
 #   打进 job summary,当期没修就是下次 GC 第 5 步的工单。
 #
 # 曾经还查一件跟内容无关但更要命的事:**仓库可见性**。2026-08-16 按用户要求删了。
-# 背景留在这里,别当成没发生过:sources/raw/ 存的是未脱敏的原始对话导出
+# 背景留在这里,别当成没发生过:Sources/raw/ 存的是未脱敏的原始对话导出
 # (2026-08-02 定的规矩:脱敏过的原文就不是原文了),"仓库始终 private" 是这条
 # 规矩的唯一前提;这个库 2026-07-11 因为默认公开泄露过一次,补救要重写 82 个提交,
 # 而且 GitHub 缓存的旧提交仍可通过旧 SHA 直链访问。
@@ -29,7 +29,7 @@ jobs:
       - name: 体检(错误阻断,警告进摘要)
         run: |
           set -o pipefail
-          python3 meta/scripts/lint_memory.py 2>&1 | tee /tmp/lint.txt
+          python3 Meta/scripts/lint_memory.py 2>&1 | tee /tmp/lint.txt
 
       - name: 警告写进 job summary
         if: always()

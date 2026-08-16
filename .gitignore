@@ -21,7 +21,7 @@
 # ⚠️ 当晚用户澄清:**手机端根本没开自动 commit,那两次 backup 是手点的**。
 # 所以问题不在"自动",在 pull 的检出没写完就去 backup 了——关自动 commit
 # 不治本(本来就是关的)。可执行的规矩改成:**按 backup 前扫一眼改动列表,
-# 出现 meta/ 或 sources/ 下的文件就停手,先重新 pull**——那两个目录用户
+# 出现 Meta/ 或 Sources/ 下的文件就停手,先重新 pull**——那两个目录用户
 # 从不在手机上编辑,它们出现在列表里本身就是"这次 pull 没完成"的信号。
 # 曾经有个 guard-silent-revert.yml 做检测兜底,2026-08-16 因误报太多删了,
 # 所以上面那条"按 backup 前扫一眼改动列表"现在是唯一的防线,别省。
@@ -41,7 +41,7 @@ conv-*.jsonl
 .DS_Store
 conflict-files-obsidian-git.md
 
-# Python 字节码缓存。meta/scripts/ 里的脚本被 import 时会生成(比如测某个检查函数
+# Python 字节码缓存。Meta/scripts/ 里的脚本被 import 时会生成(比如测某个检查函数
 # 有没有正常触发),不是记忆内容,别入库。
 __pycache__/
 *.pyc

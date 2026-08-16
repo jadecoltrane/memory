@@ -123,7 +123,7 @@ const REUNION_KEY = "wb-reunion-pick";
 const open = (path) => app.workspace.openLinkText(path, "/", false);
 const renderReunion = async (container, forceNew = false) => {
   container.innerHTML = "";
-  const arr = dv.pages('"notes"').array();
+  const arr = dv.pages('"Notes"').array();
   if (!arr.length) return;
   let pick;
   const cur = window.localStorage.getItem(REUNION_KEY);
@@ -207,7 +207,7 @@ setupLayoutSync();
 const open = (path) => app.workspace.openLinkText(path, "/", false);
 const openGraph = () => app.commands.executeCommandById("graph:open");
 const newNote = async () => {
-  const folder = "notes";
+  const folder = "Notes";
   if (!app.vault.getAbstractFileByPath(folder)) await app.vault.createFolder(folder);
   let n = 1, path;
   do { path = `${folder}/未命名笔记 ${n++}.md`; } while (app.vault.getAbstractFileByPath(path));
@@ -217,7 +217,38 @@ const newNote = async () => {
   await app.workspace.getLeaf(true).openFile(file);
 };
 
-const notes = dv.pages('"notes"'), concepts = dv.pages('"concepts"');
+// 日记按 Diary/<年>/<年>-<月>.md 一月一个文件、每天一个 ## 段(见 Diary/README.md),
+// 所以这个按钮不新建文件,只保证当月文件和今天那段存在,然后把光标放到段末
+const newDiary = async () => {
+  const now = new Date();
+  const y = String(now.getFullYear()), m = String(now.getMonth() + 1).padStart(2, "0");
+  const today = `${y}-${m}-${String(now.getDate()).padStart(2, "0")}`;
+  const heading = `## ${today}`;
+  if (!app.vault.getAbstractFileByPath(`Diary/${y}`)) await app.vault.createFolder(`Diary/${y}`);
+  const path = `Diary/${y}/${y}-${m}.md`;
+  let file = app.vault.getAbstractFileByPath(path);
+  if (!file) {
+    file = await app.vault.create(path, `${heading}\n\n`);
+  } else {
+    const text = await app.vault.read(file);
+    if (!new RegExp(`^${heading}\\s*$`, "m").test(text)) {
+      await app.vault.append(file, `${text.endsWith("\n\n") ? "" : text.endsWith("\n") ? "\n" : "\n\n"}${heading}\n\n`);
+    }
+  }
+  const leaf = app.workspace.getLeaf(true);
+  await leaf.openFile(file);
+  const ed = leaf.view?.editor;
+  if (!ed) return;
+  const lines = ed.getValue().split("\n");
+  const start = lines.findIndex((l) => l.trim() === heading);
+  if (start < 0) return;
+  let end = lines.length - 1;
+  for (let i = start + 1; i < lines.length; i++) if (/^## /.test(lines[i])) { end = i - 1; break; }
+  ed.setCursor({ line: end, ch: lines[end].length });
+  ed.scrollIntoView({ from: { line: end, ch: 0 }, to: { line: end, ch: 0 } }, true);
+};
+
+const notes = dv.pages('"Notes"'), concepts = dv.pages('"Concepts"');
 const all = [...notes.array(), ...concepts.array()];
 const edges = all.reduce((n, pg) => n + pg.file.outlinks.length, 0);
 // created 没写 frontmatter 时退回文件系统 ctime,避免本周新增/日期列空白
@@ -259,8 +290,8 @@ const renderRows = (host, arr, rightOf, limit = 8) => {
   }
 };
 
-// 笔记数据库.base 是生成产物(不是用户笔记),每次打开笔记面板都重新整份重写,保证分类跟 notes/ 实际子文件夹同步
-const NOTES_BASE_PATH = "meta/笔记数据库.base";
+// 笔记数据库.base 是生成产物(不是用户笔记),每次打开笔记面板都重新整份重写,保证分类跟 Notes/ 实际子文件夹同步
+const NOTES_BASE_PATH = "Meta/笔记数据库.base";
 const buildNotesBase = async (catGroups) => {
   const esc1 = (s) => s.replace(/'/g, "''"); // YAML 单引号字符串里,单引号本身要写成两个单引号转义
   const esc2 = (s) => s.replace(/"/g, '\\"');
@@ -272,9 +303,9 @@ const buildNotesBase = async (catGroups) => {
     lines.push("      and:");
     lines.push(`        - '${esc1(filterExpr)}'`);
   };
-  pushView("全部笔记", `file.inFolder("notes")`);
+  pushView("全部笔记", `file.inFolder("Notes")`);
   for (const [name] of catGroups) {
-    const filterExpr = name === "未分类" ? `file.folder == "notes"` : `file.inFolder("notes/${name}")`;
+    const filterExpr = name === "未分类" ? `file.folder == "Notes"` : `file.inFolder("Notes/${name}")`;
     pushView(name, filterExpr);
   }
   await app.vault.adapter.write(NOTES_BASE_PATH, lines.join("\n") + "\n");
@@ -393,21 +424,26 @@ linksCard.onclick = openGraph;
 addTab("🌱", weekNewPages.length, "本周新增", weekPanel);
 addTab("🕘", "", "最近编辑", recentPanel);
 
-const plus = bar.createEl("div", { cls: "wb-card wb-newnote" });
-const plusGlyph = plus.createEl("span", { cls: "wb-num wb-newnote-glyph", text: "＋" });
-plus.createEl("span", { cls: "wb-lbl", text: "新建笔记" });
-plus.onclick = async () => {
-  if (plus.classList.contains("is-busy")) return;
-  plus.classList.add("is-busy");
-  const anim = plusGlyph.animate(
-    [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
-    { duration: 450, easing: "ease" }
-  );
-  try { await anim.finished; } catch (_) { /* 动画被打断也照样建笔记 */ }
-  plusGlyph.style.removeProperty("transform");
-  plus.classList.remove("is-busy");
-  newNote();
+const addAction = (glyph, label, cls, run) => {
+  const card = bar.createEl("div", { cls: `wb-card ${cls}` });
+  const g = card.createEl("span", { cls: "wb-num wb-newnote-glyph", text: glyph });
+  card.createEl("span", { cls: "wb-lbl", text: label });
+  card.onclick = async () => {
+    if (card.classList.contains("is-busy")) return;
+    card.classList.add("is-busy");
+    const anim = g.animate(
+      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+      { duration: 450, easing: "ease" }
+    );
+    try { await anim.finished; } catch (_) { /* 动画被打断也照样执行 */ }
+    g.style.removeProperty("transform");
+    card.classList.remove("is-busy");
+    run();
+  };
 };
+
+addAction("＋", "新建笔记", "wb-newnote", newNote);
+addAction("📔", "写日记", "wb-newdiary", newDiary);
 ```
 
 > [!clash] 🥊 碰撞 · 问题1 回顾
