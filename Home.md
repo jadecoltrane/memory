@@ -121,9 +121,15 @@ if (ageH > 48) dv.container.createEl("div", {
 // 随机重逢:选中的笔记存 localStorage,重开页面保持不变,只有点↻才换一篇(存的那篇被删/改名则退回随机一篇)
 const REUNION_KEY = "wb-reunion-pick";
 const open = (path) => app.workspace.openLinkText(path, "/", false);
+// 不走 dv.pages('"Notes"') 这种文件夹源:macOS 文件系统不分大小写,只改大小写的重命名
+// Obsidian 监听不到,内存索引里的路径大小写会跟磁盘对不上,文件夹源就静默匹配不到任何东西
+const pagesIn = (top) => {
+  const prefix = top.toLowerCase() + "/";
+  return dv.pages().where((p) => p.file.path.toLowerCase().startsWith(prefix));
+};
 const renderReunion = async (container, forceNew = false) => {
   container.innerHTML = "";
-  const arr = dv.pages('"Notes"').array();
+  const arr = pagesIn("Notes").array();
   if (!arr.length) return;
   let pick;
   const cur = window.localStorage.getItem(REUNION_KEY);
@@ -248,7 +254,12 @@ const newDiary = async () => {
   ed.scrollIntoView({ from: { line: end, ch: 0 }, to: { line: end, ch: 0 } }, true);
 };
 
-const notes = dv.pages('"Notes"'), concepts = dv.pages('"Concepts"');
+// 同上:文件夹源对大小写敏感,靠不住,统一用小写前缀比
+const pagesIn = (top) => {
+  const prefix = top.toLowerCase() + "/";
+  return dv.pages().where((p) => p.file.path.toLowerCase().startsWith(prefix));
+};
+const notes = pagesIn("Notes"), concepts = pagesIn("Concepts");
 const all = [...notes.array(), ...concepts.array()];
 const edges = all.reduce((n, pg) => n + pg.file.outlinks.length, 0);
 // created 没写 frontmatter 时退回文件系统 ctime,避免本周新增/日期列空白
@@ -443,7 +454,25 @@ const addAction = (glyph, label, cls, run) => {
 };
 
 addAction("＋", "新建笔记", "wb-newnote", newNote);
-addAction("📔", "写日记", "wb-newdiary", newDiary);
+
+// 「写日记」挂进页面最后那个 📔 今日日记 井,而不是写进 markdown——日更每天会重写这个井,
+// 写进去的按钮会被当成用户手写的日记正文原文归档掉(见 Meta/WORKBENCH.md 归档流程第 2 条)
+const mountDiaryBtn = (triesLeft = 34) => {
+  const root = dv.container.closest(".workbench") ?? document;
+  const well = [...root.querySelectorAll('.callout[data-callout="write"]')].find((el) =>
+    el.querySelector(".callout-title-inner")?.textContent.includes("今日日记")
+  );
+  if (!well) {
+    if (triesLeft > 0) setTimeout(() => mountDiaryBtn(triesLeft - 1), 150);
+    else console.warn("[工作台] 没找到 📔 今日日记 井,写日记按钮没挂上——井被改名或删了?");
+    return;
+  }
+  const host = well.querySelector(".callout-content") ?? well;
+  if (host.querySelector(".wb-diary-btn")) return;
+  const btn = host.createEl("button", { cls: "wb-diary-btn", text: "📔 写日记" });
+  btn.onclick = (e) => { e.stopPropagation(); newDiary(); };
+};
+mountDiaryBtn();
 ```
 
 > [!clash] 🥊 碰撞 · 问题1 回顾
