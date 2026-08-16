@@ -58,9 +58,45 @@
   padding-top: 0;
   border-top: none;
 }
-.nav-files-container .tree-item:has(> [data-path="Notes"])::before { content: "记忆"; }
+.nav-files-container .tree-item:has(> [data-path="Notes"])::before { content: "资料库"; }
 .nav-files-container .tree-item:has(> [data-path="Works"])::before { content: "产出"; }
-.nav-files-container .tree-item:has(> [data-path="Meta"])::before  { content: "底层"; }
+.nav-files-container .tree-item:has(> [data-path="Meta"])::before  { content: "▸ 底层"; }
+
+/* ---------- 底层默认收起 ---------- */
+
+/* 平时只露出「底层」标题和 Meta 一行,鼠标移到这一组上才展开其余四个。
+   纯 CSS 做不出点击折叠(要能跑 JS 的插件才行),悬停是唯一的路。
+   Meta 这行必须留着当把手:它是唯一始终可见、可以被 hover 的触发点,
+   全藏掉就再也展不开了。
+   注意 :has() 里不能再套 :has(),所以触发条件写成 [data-path]:hover
+   ——data-path 在标题那层元素上,不是外面的 .tree-item */
+.nav-files-container .tree-item:has(> [data-path="Sources"]),
+.nav-files-container .tree-item:has(> [data-path="Archive"]),
+.nav-files-container .tree-item:has(> [data-path="CLAUDE.md"]),
+.nav-files-container .tree-item:has(> [data-path="AGENTS.md"]) {
+  display: none;
+}
+
+.nav-files-container > div:has(:is(
+    [data-path="Meta"], [data-path="Sources"], [data-path="Archive"],
+    [data-path="CLAUDE.md"], [data-path="AGENTS.md"]
+  ):hover) :is(
+    .tree-item:has(> [data-path="Sources"]),
+    .tree-item:has(> [data-path="Archive"]),
+    .tree-item:has(> [data-path="CLAUDE.md"]),
+    .tree-item:has(> [data-path="AGENTS.md"])
+  ) {
+  display: block;
+}
+
+/* 展开时箭头转向,标题也不再是灰的 */
+.nav-files-container > div:has(:is(
+    [data-path="Meta"], [data-path="Sources"], [data-path="Archive"],
+    [data-path="CLAUDE.md"], [data-path="AGENTS.md"]
+  ):hover) .tree-item:has(> [data-path="Meta"])::before {
+  content: "\25be 底层";
+  color: var(--text-muted);
+}
 
 /* ---------- 隐藏 ---------- */
 
