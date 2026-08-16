@@ -712,11 +712,10 @@
   text-underline-offset: 3px;
   transition: text-decoration-color 0.2s ease, color 0.2s ease;
 }
-/* 链接统一走 --wb-tint(页面底色借的同一个色相),别再多出一个蓝。
-   整页有色的东西就两样:链接和各 callout 的身份胶囊 */
+/* 链接颜色不接管,交回主题(用户要保留原来的蓝)。这里只管下划线的表现:
+   静止不带线,悬停才出现,免得正文里一堆链接时满屏都是横线 */
 .workbench .callout a,
 .workbench .callout a.internal-link {
-  color: var(--wb-tint);
   text-decoration: none;
 }
 @media (hover: hover) and (pointer: fine) {
