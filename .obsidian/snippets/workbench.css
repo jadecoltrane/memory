@@ -634,24 +634,23 @@
 /* 碰撞这一块原来在四个地方同时喊颜色:卡片左边 4px 橘条、标题胶囊、结论段的橘色引用条,
    再加正文里的蓝链接。改成整张卡只带一层极淡的暖色底,饱和的橘只留给胶囊一个地方,
    卡片内所有文字一律中性——有色的东西越少,那一个颜色越有分量 */
+/* 碰撞不再用橘色。整页只剩一个色相,那它靠什么跟普通 callout 区分?靠同一个紫的
+   份量差:别的标签是浅紫底 + 紫字,碰撞是实心紫底 + 白字。同色不同重量,
+   比再引进一个色相干净——卡片本身就是普通白卡,不再单独染底 */
 .workbench .callout[data-callout="clash"] {
-  --wb-clash-hue: #c2664a;
   border-left: none;
-  background: color-mix(in srgb, var(--wb-clash-hue) 4%, var(--wb-surface));
+  background: var(--wb-surface);
 }
 .theme-dark .workbench .callout[data-callout="clash"] {
-  background: color-mix(in srgb, var(--wb-clash-hue) 9%, var(--wb-card-bg));
-}
-.theme-dark .workbench .callout[data-callout="clash"] {
-  --wb-clash-hue: #e08a72;
+  background: var(--wb-card-bg);
 }
 .workbench .callout[data-callout="clash"] > .callout-title {
   display: inline-flex;
   font-size: 0.78em;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: var(--wb-clash-hue);
-  background: color-mix(in srgb, var(--wb-clash-hue) 14%, transparent);
+  color: #fff;
+  background: var(--wb-tint);
   padding: 3px 12px;
   border-radius: 999px;
   margin-bottom: 0.3em;
