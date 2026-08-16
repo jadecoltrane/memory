@@ -631,9 +631,16 @@
   margin-bottom: 0.3em;
 }
 
+/* 碰撞这一块原来在四个地方同时喊颜色:卡片左边 4px 橘条、标题胶囊、结论段的橘色引用条,
+   再加正文里的蓝链接。改成整张卡只带一层极淡的暖色底,饱和的橘只留给胶囊一个地方,
+   卡片内所有文字一律中性——有色的东西越少,那一个颜色越有分量 */
 .workbench .callout[data-callout="clash"] {
   --wb-clash-hue: #c2664a;
-  border-left: 4px solid var(--wb-clash-hue);
+  border-left: none;
+  background: color-mix(in srgb, var(--wb-clash-hue) 4%, var(--wb-surface));
+}
+.theme-dark .workbench .callout[data-callout="clash"] {
+  background: color-mix(in srgb, var(--wb-clash-hue) 9%, var(--wb-card-bg));
 }
 .theme-dark .workbench .callout[data-callout="clash"] {
   --wb-clash-hue: #e08a72;
@@ -652,19 +659,26 @@
 .workbench .markdown-preview-sizer > *:has(.callout[data-callout="clash"]) {
   flex: 1 1 100%;
 }
-.workbench .callout[data-callout="clash"] > .callout-content > p:first-of-type {
+/* em/strong 也一起点名:主题会给斜体、加粗单独上色,只写在 p 上会被子元素盖掉 */
+.workbench .callout[data-callout="clash"] > .callout-content > p:first-of-type,
+.workbench .callout[data-callout="clash"] > .callout-content > p:first-of-type em,
+.workbench .callout[data-callout="clash"] > .callout-content > p:first-of-type strong {
   font-style: italic;
+  font-weight: 400;
   color: var(--text-muted);
   font-size: 0.9em;
 }
+/* 原来是 opacity: 0.72,那会把背景填充一起变淡——同样是 --wb-sunken,
+   「我的看法」看着发灰、「你的回答」看着发紫,一块里凭空多出一个颜色。
+   要压的只是文字,就只调文字颜色 */
 .workbench .callout[data-callout="clash"] .callout[data-callout="note"] {
-  opacity: 0.72;
   font-size: 0.92em;
+  color: var(--text-faint);
 }
 .workbench .callout[data-callout="clash"] > .callout-content > p:last-of-type {
   margin-top: 0.9em;
   padding-left: 14px;
-  border-left: 3px solid var(--wb-clash-hue);
+  border-left: 2px solid var(--wb-hairline);
   font-size: 1.03em;
   font-weight: 500;
   color: var(--text-normal);
@@ -696,9 +710,18 @@
   text-underline-offset: 3px;
   transition: text-decoration-color 0.2s ease, color 0.2s ease;
 }
+/* 链接统一走 --wb-tint(页面底色借的同一个色相),别再多出一个蓝。
+   整页有色的东西就两样:链接和各 callout 的身份胶囊 */
+.workbench .callout a,
+.workbench .callout a.internal-link {
+  color: var(--wb-tint);
+  text-decoration: none;
+}
 @media (hover: hover) and (pointer: fine) {
   .workbench .callout a:hover {
+    text-decoration: underline;
     text-decoration-color: currentColor;
+    text-underline-offset: 3px;
   }
 }
 
