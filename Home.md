@@ -398,26 +398,33 @@ addAction("＋", "新建笔记", "wb-newnote", newNote);
 
 // 「写日记」挂进页面最后那个 📔 今日日记 井,而不是写进 markdown——日更每天会重写这个井,
 // 写进去的按钮会被当成用户手写的日记正文原文归档掉(见 Meta/WORKBENCH.md 归档流程第 2 条)
-const mountDiaryBtn = (triesLeft = 34) => {
-  const root = dv.container.closest(".workbench") ?? document;
-  const well = [...root.querySelectorAll('.callout[data-callout="write"]')].find((el) =>
+const wbRoot = dv.container.closest(".workbench") ?? document;
+const mountDiaryBtn = () => {
+  const well = [...wbRoot.querySelectorAll('.callout[data-callout="write"]')].find((el) =>
     el.querySelector(".callout-title-inner")?.textContent.includes("今日日记")
   );
-  if (!well) {
-    if (triesLeft > 0) setTimeout(() => mountDiaryBtn(triesLeft - 1), 150);
-    else console.warn("[工作台] 没找到 📔 今日日记 井,写日记按钮没挂上——井被改名或删了?");
-    return;
-  }
+  if (!well) return false;
   const host = well.querySelector(".callout-content") ?? well;
-  if (host.querySelector(".wb-diary-btn")) return;
+  if (host.querySelector(".wb-diary-btn")) return true;
   // 文案说"打开"而不是"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
   // 两个入口叠在一起不写清楚会让人以为点了才能在上面的井里写
   const btn = host.createEl("button", { cls: "wb-diary-btn" });
   btn.createEl("span", { text: "📔 打开今天的日记" });
   btn.createEl("span", { cls: "wb-diary-btn-arrow", text: "→" });
   btn.onclick = (e) => { e.stopPropagation(); newDiary(); };
+  return true;
 };
+
+// 原来是轮询 34 次(约 5 秒)找不到就放弃,结果按钮经常不出现:阅读视图对屏幕外的内容是
+// 懒渲染的,而这个井在整页最底下——不滚到那儿它根本不在 DOM 里,5 秒当然等不到。
+// 改成 MutationObserver 一直盯着,井什么时候进 DOM 就什么时候挂;而且不 disconnect,
+// 滚走再滚回来井被重新渲染时还能再挂一次(mountDiaryBtn 自身幂等,不会挂重复)
 mountDiaryBtn();
+if (window.MutationObserver) {
+  const mo = new MutationObserver(() => mountDiaryBtn());
+  mo.observe(wbRoot, { childList: true, subtree: true });
+  dv.component.register(() => mo.disconnect());
+}
 ```
 
 > [!clash] 🥊 碰撞 · 问题1 回顾

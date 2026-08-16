@@ -1,7 +1,7 @@
 .workbench {
   /* 强调色不再取自当天画作(那样整页配色每天赌一次运气),固定跟着主题强调色走 */
   --wb-accent: var(--wb-tint);
-  --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, white);
+  --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 9%, white);
   --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
   --wb-accent-text: var(--wb-accent);
   /* 分层(苹果那套):页面带一丝紫的近中性色 → 卡片纯白 → 卡片内的槽位再压深一档。
@@ -45,7 +45,7 @@
     --wb-page: oklch(from var(--wb-tint) 0.972 0.007 h);
     --wb-hairline: oklch(from var(--wb-tint) 0.62 0.02 h / 0.14);
     --wb-accent-text: oklch(from var(--wb-accent) 0.5 min(c, 0.11) h);
-    --wb-accent-soft: oklch(from var(--wb-accent) 0.93 0.035 h);
+    --wb-accent-soft: oklch(from var(--wb-accent) 0.962 0.019 h);
     --wb-accent-line: oklch(from var(--wb-accent) 0.72 min(c, 0.1) h / 0.6);
   }
   .theme-dark .workbench {
