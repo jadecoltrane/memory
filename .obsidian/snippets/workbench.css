@@ -179,6 +179,7 @@
   margin: 0;
 }
 .workbench .markdown-preview-sizer {
+  container-type: inline-size;
   display: flex;
   flex-wrap: wrap;
   gap: 20px 16px;
@@ -200,10 +201,17 @@
   flex: 1 1 max(280px, 26%);
   position: relative;
 }
-.workbench .markdown-preview-sizer > *:has(.wb-reunion) > .wb-reunion,
-.workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(> .wb-reunion) {
-  position: absolute;
-  inset: 0;
+/* 只在两张卡真的并排时才绝对定位。换行之后各占一行,绝对定位会让容器塌成 0 高、
+   压住下面的内容(2026-08-16 开 Git 侧栏时真实发生)。这里必须用容器查询而不是媒体
+   查询:决定换不换行的是笔记面板的宽度,开个侧栏窗口宽度根本不变。
+   706px 是算出来的换行临界点——画作基准 58%W、随机重逢基准 280px、间距 16px,
+   0.58W + 296 > W 时换行,解得 W < 705 */
+@container (min-width: 706px) {
+  .workbench .markdown-preview-sizer > *:has(.wb-reunion) > .wb-reunion,
+  .workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(> .wb-reunion) {
+    position: absolute;
+    inset: 0;
+  }
 }
 
 /* 原本是半透明白 + backdrop-filter 的毛玻璃,靠身后的彩色渐变才看得出来。
@@ -843,14 +851,5 @@
   .workbench .markdown-preview-sizer > *,
   .workbench .cm-sizer > * {
     animation: none !important;
-  }
-}
-
-/* 窄屏会 flex-wrap 成上下两行,这时不存在"对齐"问题,绝对定位反而会让容器塌成 0 高 */
-@media (max-width: 576px) {
-  .workbench .markdown-preview-sizer > *:has(.wb-reunion) > .wb-reunion,
-  .workbench .markdown-preview-sizer > *:has(.wb-reunion) *:has(> .wb-reunion) {
-    position: static;
-    inset: auto;
   }
 }
