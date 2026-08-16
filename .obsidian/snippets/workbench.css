@@ -3,17 +3,27 @@
   --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, white);
   --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
   --wb-accent-text: var(--wb-accent);
-  --wb-radius: 20px;
-  --wb-radius-sm: 14px;
-  --wb-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --wb-shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.13);
-  --wb-shadow-flat: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --wb-shadow-hover-subtle: 0 6px 18px rgba(0, 0, 0, 0.1);
-  --wb-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --wb-card-bg: var(--background-secondary-alt, var(--background-secondary));
+  /* 分层(苹果那套):页面浅灰 → 卡片纯白 → 卡片内的槽位再回到浅灰。
+     卡片靠"比背景亮"被看见,不靠描边和重投影,所以页面绝不能是纯白 */
+  --wb-page: #f5f5f7;
+  --wb-surface: #ffffff;
+  --wb-sunken: rgba(0, 0, 0, 0.045);
+  --wb-hairline: rgba(0, 0, 0, 0.07);
+  --wb-radius: 18px;
+  --wb-radius-sm: 12px;
+  /* 双层投影:一层紧贴边缘勾轮廓,一层大范围铺开做距离感。单层要么糊要么脏 */
+  --wb-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --wb-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.05), 0 16px 40px rgba(0, 0, 0, 0.1);
+  --wb-shadow-flat: 0 1px 2px rgba(0, 0, 0, 0.04), 0 3px 10px rgba(0, 0, 0, 0.04);
+  --wb-shadow-hover-subtle: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 28px rgba(0, 0, 0, 0.07);
+  /* 无回弹:苹果只在手势跟随时用弹簧,界面元素的悬停/展开一律是纯减速 */
+  --wb-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --wb-card-bg: var(--wb-surface);
 }
 
 .theme-dark .workbench {
+  --wb-sunken: rgba(0, 0, 0, 0.22);
+  --wb-hairline: rgba(255, 255, 255, 0.09);
   --wb-card-bg: rgba(255, 255, 255, 0.07);
   --wb-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 8px 24px rgba(0, 0, 0, 0.35);
   --wb-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 14px 34px rgba(0, 0, 0, 0.45);
@@ -42,13 +52,11 @@
 
 .markdown-preview-view.workbench,
 .markdown-source-view.workbench {
-  /* 2026-08-16 用户要求:去掉每日渐变,底色纯白。噪点层也一并删了——它是 5% 不透明度的
-     黑铺满整个面,实测叠在纯白上平均只有 248.6/255(#f9f9f9)、最暗 244,没有一个像素是
-     纯白,肉眼就是一层灰。想要纸感只能换成更淡的噪点,不能靠调 background-color 补救。
-     白色写死(Border 主题浅色下的 --background-primary 是偏灰的米白),所以深色模式
-     必须在下面那条规则里把底色抢回去,否则跟着一起变白 */
+  /* 2026-08-16:去掉每日渐变和噪点层(噪点是 5% 的黑铺满整个面,实测叠在纯白上平均
+     只有 248.6/255、最暗 244,肉眼就是一层灰)。底色改用 --wb-page 的浅灰而不是纯白
+     ——纯白页面上白卡片会彻底消失,白留给卡片。深色模式在下面那条规则里抢回主题值 */
   background-image: none;
-  background-color: #fff;
+  background-color: var(--wb-page);
 }
 
 .theme-dark .markdown-preview-view.workbench,
@@ -179,35 +187,26 @@
   flex: 1 1 max(280px, 26%);
 }
 
+/* 原本是半透明白 + backdrop-filter 的毛玻璃,靠身后的彩色渐变才看得出来。
+   渐变去掉之后白底上叠半透明白等于什么都没有,所以整套换成实心白 + 发丝边 + 双层投影 */
 .workbench .wb-daily-painting {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
-  box-shadow: none;
-  transition: background 0.3s var(--wb-ease);
+  box-shadow: var(--wb-shadow);
+  transition: box-shadow 0.4s var(--wb-ease), transform 0.4s var(--wb-ease);
 }
 .theme-dark .workbench .wb-daily-painting {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: var(--wb-shadow);
+  background: var(--wb-card-bg);
+  border-color: var(--wb-hairline);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .workbench .wb-daily-painting:hover {
-    background: rgba(255, 255, 255, 0.45);
+    box-shadow: var(--wb-shadow-hover);
+    transform: translateY(-2px);
   }
-  .theme-dark .workbench .wb-daily-painting:hover {
-    background: rgba(255, 255, 255, 0.11);
-  }
-}
-.workbench .wb-daily-painting:active {
-  background: rgba(255, 255, 255, 0.3);
-}
-.theme-dark .workbench .wb-daily-painting:active {
-  background: rgba(255, 255, 255, 0.05);
 }
 .workbench .wb-daily-painting-name {
   font-weight: 600;
@@ -235,33 +234,25 @@
   box-sizing: border-box;
   margin: 0;
   padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
-  box-shadow: none;
+  box-shadow: var(--wb-shadow);
   cursor: pointer;
-  transition: background 0.3s var(--wb-ease);
+  transition: box-shadow 0.4s var(--wb-ease), transform 0.4s var(--wb-ease);
 }
 .theme-dark .workbench .wb-reunion {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: var(--wb-shadow);
+  background: var(--wb-card-bg);
 }
 @media (hover: hover) and (pointer: fine) {
   .workbench .wb-reunion:hover {
-    background: rgba(255, 255, 255, 0.45);
-  }
-  .theme-dark .workbench .wb-reunion:hover {
-    background: rgba(255, 255, 255, 0.11);
+    box-shadow: var(--wb-shadow-hover);
+    transform: translateY(-2px);
   }
 }
 .workbench .wb-reunion:active {
-  background: rgba(255, 255, 255, 0.3);
-}
-.theme-dark .workbench .wb-reunion:active {
-  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(0) scale(0.995);
+  box-shadow: var(--wb-shadow-flat);
 }
 
 .workbench .wb-reunion-excerpt {
@@ -312,31 +303,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 2px solid transparent;
+  /* 原本是拟物风:五层彩色投影 + 渐变描边 + 文字渐变。苹果这一层一律是
+     纯色圆形填充按钮,没有内阴影、没有彩色光晕,只靠一点点灰度区分层次 */
+  width: 32px;
+  height: 32px;
+  border: none;
   border-radius: 50%;
-  background:
-    linear-gradient(135deg, #ebf2fa 0%, #f8f3ff 75%, #ffffff 100%) padding-box,
-    linear-gradient(135deg, #d9e4f2, #fef9fd) border-box;
-  box-shadow:
-    inset 1px 1px 1px rgba(255, 255, 255, 1),
-    -4px -4px 10px rgba(255, 255, 255, 0.85),
-    5px 7px 14px rgba(99, 110, 146, 0.16),
-    -5px 4px 10px rgba(180, 214, 242, 0.5),
-    5px 4px 10px rgba(243, 205, 240, 0.45);
-  font-size: 1.15em;
+  background: var(--wb-sunken);
+  box-shadow: none;
+  font-size: 1em;
   line-height: 1;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: box-shadow 0.25s ease, transform 0.15s var(--wb-ease);
+  transition: background 0.25s var(--wb-ease), transform 0.2s var(--wb-ease);
 }
 .workbench .wb-reroll-glyph {
   display: inline-block;
-  background: linear-gradient(135deg, #cec6d5 0%, #e8e1ee 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
   transition: transform 0.4s var(--wb-ease);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -344,24 +326,17 @@
     transform: rotate(360deg);
   }
   .workbench .wb-reunion-reroll:hover {
-    box-shadow:
-      inset 1px 1px 1px rgba(255, 255, 255, 1),
-      -4px -4px 10px rgba(255, 255, 255, 0.9),
-      6px 9px 18px rgba(99, 110, 146, 0.2),
-      -6px 5px 12px rgba(180, 214, 242, 0.65),
-      6px 5px 12px rgba(243, 205, 240, 0.6);
+    background: rgba(0, 0, 0, 0.09);
   }
 }
 .workbench .wb-reunion-reroll:active {
-  transform: scale(0.92);
-  box-shadow:
-    inset 2px 3px 6px rgba(99, 110, 146, 0.22),
-    inset -2px -2px 5px rgba(255, 255, 255, 0.9);
+  transform: scale(0.9);
 }
 .theme-dark .workbench .wb-reunion-reroll {
-  border: none;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+}
+.theme-dark .workbench .wb-reunion-reroll:hover {
+  background: rgba(255, 255, 255, 0.16);
 }
 .theme-dark .workbench .wb-reroll-glyph {
   background: none;
@@ -392,6 +367,7 @@
   gap: 5px;
   flex: none;
   background: var(--wb-card-bg);
+  border: 1px solid var(--wb-hairline);
   border-radius: 999px;
   padding: 7px 15px;
   box-shadow: var(--wb-shadow);
@@ -480,6 +456,7 @@
   margin: -6px 0 4px;
   padding: 12px 14px;
   background: var(--wb-card-bg);
+  border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
   box-shadow: var(--wb-shadow);
   animation: wb-rise-in 0.35s var(--wb-ease) backwards;
@@ -494,10 +471,10 @@
   padding: 8px 12px;
   font-size: 0.88em;
   color: var(--text-normal);
-  background: var(--background-secondary);
+  background: var(--wb-sunken);
   border: none;
   border-radius: var(--wb-radius-sm);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.07);
+  box-shadow: none;
 }
 .theme-dark .workbench .wb-panel-search-input {
   background: rgba(0, 0, 0, 0.18);
@@ -569,8 +546,8 @@
   padding: 12px 10px;
   text-align: center;
   border-radius: var(--wb-radius-sm);
-  background: var(--background-secondary);
-  box-shadow: var(--wb-shadow-flat);
+  background: var(--wb-sunken);
+  box-shadow: none;
   cursor: pointer;
   transition: box-shadow 0.3s var(--wb-ease), transform 0.3s var(--wb-ease), background 0.3s var(--wb-ease);
 }
@@ -606,8 +583,9 @@
   padding: 1.05em 1.3em;
   margin: 0;
   background: var(--wb-card-bg);
+  border: 1px solid var(--wb-hairline);
   box-shadow: var(--wb-shadow);
-  transition: box-shadow 0.3s var(--wb-ease);
+  transition: box-shadow 0.4s var(--wb-ease);
 }
 @media (hover: hover) and (pointer: fine) {
   .workbench .callout:hover {
@@ -704,7 +682,7 @@
 }
 
 .workbench .callout[data-callout="write"] {
-  background: var(--background-secondary);
+  background: var(--wb-surface);
   box-shadow: var(--wb-shadow-flat);
 }
 @media (hover: hover) and (pointer: fine) {
@@ -723,7 +701,7 @@
 .workbench .callout[data-callout="feed"] ol li { margin: 7px 0; line-height: 1.65; }
 
 .workbench .callout[data-callout="note"] {
-  background: var(--background-secondary);
+  background: var(--wb-surface);
   box-shadow: var(--wb-shadow-flat);
   transition: box-shadow 0.3s var(--wb-ease);
 }
@@ -737,6 +715,8 @@
 .workbench .callout .callout[data-callout="note"] {
   margin-top: 0.8em;
   border-radius: var(--wb-radius-sm);
+  background: var(--wb-sunken);
+  border: none;
   box-shadow: none;
 }
 .workbench .callout .callout[data-callout="note"]:hover {
@@ -747,7 +727,9 @@
 .workbench .callout .callout[data-callout="write"]:hover {
   margin-top: 0.8em;
   border-radius: var(--wb-radius-sm);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.07);
+  background: var(--wb-sunken);
+  border: none;
+  box-shadow: none;
 }
 .theme-dark .workbench .callout .callout[data-callout="write"],
 .theme-dark .workbench .callout .callout[data-callout="write"]:hover {
