@@ -61,6 +61,12 @@ for dirname, title in SECTIONS:
     files = [f for f in files if f.name not in SKIP_NAMES]
     if not files:
         continue
+    older = []
+    if dirname == "日记":
+        # 2026-08-16 用户要求:索引里只列最近一个月。日记按 年/年-月.md 命名,
+        # 文件名排序即时间序,取最后一个。更早的不列但要留一句话说明它们存在,
+        # 否则"日记进索引"就退化成"只有这个月的日记存在过"。
+        older, files = files[:-1], files[-1:]
     lines += [f"## {title}", ""]
     if dirname == "notes":
         # 分层展示:🧠 核心先行,📖 参考垫底——想淡出参考层时,直接从最后一段往下看/折叠
@@ -93,6 +99,11 @@ for dirname, title in SECTIONS:
         rel = f.relative_to(ROOT).with_suffix("").as_posix()
         lines.append(f"- [[{rel}|{f.stem}]]{suffix}")
         total += 1
+    if older:
+        lines.append(
+            f"- *更早的 {len(older)} 个月在 `日记/` 下(最早 {older[0].stem}),"
+            "刻意不列进索引;要看更早的自己去翻那个目录。*"
+        )
     lines.append("")
 lines.append(f"共 {total} 条记忆。")
 
