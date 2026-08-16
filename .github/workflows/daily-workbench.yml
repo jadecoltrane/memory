@@ -33,10 +33,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 每日渐变直接写死进 CSS(静态加载零跳变,JS 动态生成已否决),
-      # 改动会随最后的机械提交步骤一起提交
-      - name: 写入今日页面渐变
-        run: python3 Meta/scripts/update_daily_gradient.py
+      # 2026-08-16 删掉「写入今日页面渐变」这一步:用户要求页面背景不要渐变。
+      # update_daily_gradient.py 一并删了(它找不到 CSS 里的标记行会 exit 1,留着日更天天红)
 
       # generated 是心跳报警的依据,不靠 prompt 遵守,前置机械写入(兜底优先)
       - name: 写入今日 generated 日期

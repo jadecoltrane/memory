@@ -29,22 +29,6 @@ const p = dv.current();
 // closest(".workbench") 而非 querySelector——reading/source 两个视图容器都在 DOM 里,querySelector 只会拿第一个,可能拿到隐藏的那个
 const root = dv.container.closest(".workbench");
 
-// 页面纸感渐变:完全独立于画作/网络生成(按当天日期做种子),避免等画作异步加载完取色导致背景先出现兜底色再跳变
-let seed = Math.floor(Date.now() / 86400000);
-const rand = () => {
-  seed = (seed + 0x6D2B79F5) | 0;
-  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-};
-const pastel = (h) => `hsl(${Math.round((h % 360 + 360) % 360)}, ${Math.round(60 + rand() * 35)}%, ${Math.round(89 + rand() * 5)}%)`;
-// 三色按三角配色(约 120° 间隔)取,避免第二三色挤在同一段弧上漂移出一坨同色系
-const triadGradient = (h0) => {
-  const stops = [pastel(h0), pastel(h0 + 100 + rand() * 40), pastel(h0 + 220 + rand() * 40)];
-  return `linear-gradient(135deg, ${stops[0]} 0%, ${stops[1]} ${Math.round(40 + rand() * 20)}%, ${stops[2]} 100%)`;
-};
-root?.style.setProperty("--wb-page-gradient", triadGradient(rand() * 360));
-
 const banner = dv.container.createEl("div", { cls: "wb-daily-painting" });
 const narrowScreen = window.matchMedia("(max-width: 520px)").matches;
 banner.style.cssText = [
