@@ -1,6 +1,13 @@
 # 兜底:工作台日更 / 每周 Memory GC 遇到 Claude OAuth 或 runner 的瞬时故障时自动重跑。
 # Claude 步骤不负责提交;待裁决 issue 按日期去重,所以重跑可安全恢复。
 # run_attempt < 3 防死循环。
+#
+# 文件名:2026-08-16 从 rerun-on-failure.yml 改过来的。旧路径那条 workflow
+# 2026-07-16 调试时被手动 disable 了,之后整整一个月零运行——**GitHub 的
+# 启用/停用状态绑在文件路径上,不写进文件里,所以 git diff 里什么都看不出来**,
+# 日更和 GC 这一个月其实是裸奔的。API 侧 enable 需要 actions:write,当时手上的
+# token 给不了,改名等于注册成一条新的、默认启用的 workflow。
+# **别把文件名改回去**——改回去就又指向那条被停用的记录了。
 name: 失败自动重跑
 
 on:

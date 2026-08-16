@@ -10,7 +10,7 @@
 # - 冲突能靠 rebase 自动解决(改的是不同文件)→ 静默解决,继续推
 # - 真冲突(同一文件同一处)→ **abort 并退出非 0**,不自作主张选一边。
 #   机器人的产物都是可重新生成的(工作台重跑一次、索引重建一次、GC 重跑一次),
-#   让整个 job 失败重来,比让机器人猜哪边对要安全。rerun-on-failure.yml 会接手重跑。
+#   让整个 job 失败重来,比让机器人猜哪边对要安全。auto-rerun.yml 会接手重跑。
 #
 # 用法:bash meta/scripts/git_push_retry.sh <push-url> <branch>
 
