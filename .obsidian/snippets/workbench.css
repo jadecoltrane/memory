@@ -3,12 +3,15 @@
   --wb-accent-soft: color-mix(in srgb, var(--wb-accent) 16%, white);
   --wb-accent-line: color-mix(in srgb, var(--wb-accent) 38%, transparent);
   --wb-accent-text: var(--wb-accent);
-  /* 分层(苹果那套):页面浅灰 → 卡片纯白 → 卡片内的槽位再回到浅灰。
-     卡片靠"比背景亮"被看见,不靠描边和重投影,所以页面绝不能是纯白 */
-  --wb-page: #f5f5f7;
+  /* 分层(苹果那套):页面淡紫 → 卡片纯白 → 卡片内的槽位再回到淡紫。
+     卡片靠"比背景亮"被看见,不靠描边和重投影,所以页面绝不能是纯白。
+     淡紫不写死,从主题的 --color-accent 兑出来——换强调色时背景自动跟着走。
+     兜底值是 Obsidian 的默认强调色,主题没给 --color-accent 时不至于掉回灰 */
+  --wb-tint: var(--color-accent, #7852ee);
+  --wb-page: color-mix(in srgb, var(--wb-tint) 9%, #fdfdff);
   --wb-surface: #ffffff;
-  --wb-sunken: rgba(0, 0, 0, 0.045);
-  --wb-hairline: rgba(0, 0, 0, 0.07);
+  --wb-sunken: color-mix(in srgb, var(--wb-tint) 11%, #f7f6fc);
+  --wb-hairline: color-mix(in srgb, var(--wb-tint) 14%, rgba(0, 0, 0, 0.06));
   --wb-radius: 18px;
   --wb-radius-sm: 12px;
   /* 双层投影:一层紧贴边缘勾轮廓,一层大范围铺开做距离感。单层要么糊要么脏 */

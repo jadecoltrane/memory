@@ -244,6 +244,17 @@ const pagesIn = (top) => {
   return dv.pages().where((p) => p.file.path.toLowerCase().startsWith(prefix));
 };
 const notes = pagesIn("Notes"), concepts = pagesIn("Concepts");
+
+// Dataview 的索引偶尔会整批漏掉文件(外部批量改名/移动时最容易发生,2026-08-16 就整个
+// Notes/ 掉了),表现是笔记数变 0、随机重逢变白卡,而且不报任何错。跟 Obsidian 自己的
+// 文件列表对一下,对不上就把话说明白,别让页面默默空着让人以为是没笔记
+const vaultNotes = app.vault.getMarkdownFiles().filter((f) => f.path.toLowerCase().startsWith("notes/")).length;
+if (vaultNotes > notes.length) {
+  dv.container.createEl("div", {
+    cls: "wb-heartbeat",
+    text: `⚠️ Dataview 索引里少了 ${vaultNotes - notes.length} 篇笔记(库里 ${vaultNotes} 篇,索引里只有 ${notes.length} 篇)——按 Cmd+R 重启 Obsidian 重建索引`,
+  });
+}
 const all = [...notes.array(), ...concepts.array()];
 const edges = all.reduce((n, pg) => n + pg.file.outlinks.length, 0);
 // created 没写 frontmatter 时退回文件系统 ctime,避免本周新增/日期列空白
