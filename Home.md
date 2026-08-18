@@ -406,10 +406,10 @@ const mountDiaryBtn = () => {
   if (!well) return false;
   const host = well.querySelector(".callout-content") ?? well;
   if (host.querySelector(".wb-diary-btn")) return true;
-  // 文案说"打开"而不是"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
-  // 两个入口叠在一起不写清楚会让人以为点了才能在上面的井里写
+  // 不写"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
+  // 两个入口叠在一起容易让人以为点了才能在上面的井里写
   const btn = host.createEl("button", { cls: "wb-diary-btn" });
-  btn.createEl("span", { text: "📔 打开今天的日记" });
+  btn.createEl("span", { text: "📔 今天的日记" });
   btn.createEl("span", { cls: "wb-diary-btn-arrow", text: "→" });
   btn.onclick = (e) => { e.stopPropagation(); newDiary(); };
   return true;
@@ -428,15 +428,18 @@ if (window.MutationObserver) {
 ```
 
 ```dataviewjs
-// ✅ 每日习惯:清单和打卡记录都在 Meta/习惯打卡.md,纯 markdown。
+// ✅ 每日习惯:清单、频率、已练成、打卡记录全在 Meta/习惯打卡.md,纯 markdown。
 // 不用 localStorage——换设备就没了,而且 AI 看不见;工作台只是它的一个界面
 const HABITS_PATH = "Meta/习惯打卡.md";
+const DAY = 86400000;
 const d2s = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const TODAY = d2s(new Date());
+const gap = (a, b) => Math.round((new Date(a) - new Date(b)) / DAY); // a 比 b 晚几天
 
-// 「习惯」区的裸条目是习惯名,「记录」区的条目形如 `- 2026-08-17 | 维生素, 冥想`
+// 「习惯」区:`- 名称` 或 `- 名称 | 每N天`;「已练成」区原样留着只作展示;
+// 「记录」区:`- 日期 | 当天勾掉的习惯`
 const parse = (text) => {
-  const habits = [], done = new Map();
+  const habits = [], graduated = [], done = new Map();
   let sec = "";
   for (const line of text.split("\n")) {
     const h2 = line.match(/^##\s+(.+?)\s*$/);
@@ -444,31 +447,67 @@ const parse = (text) => {
     const rec = line.match(/^-\s*(\d{4}-\d{2}-\d{2})\s*\|\s*(.*)$/);
     if (rec) { done.set(rec[1], rec[2].split(",").map((x) => x.trim()).filter(Boolean)); continue; }
     const item = line.match(/^-\s+(.+?)\s*$/);
-    if (item && sec === "习惯") habits.push(item[1]);
+    if (!item) continue;
+    if (sec === "习惯") {
+      const [name, spec = ""] = item[1].split("|").map((x) => x.trim());
+      const n = spec.match(/(\d+)\s*天/);
+      habits.push({ name, every: n ? Math.max(1, Number(n[1])) : 1 });
+    } else if (sec === "已练成") {
+      graduated.push(item[1]);
+    }
   }
-  return { habits, done };
+  return { habits, graduated, done };
 };
 
-// 整段重写「记录」,按日期排序——比在原地插一行稳,不怕用户手改过格式
-const serialize = (text, done) => {
+// 三个区整段重写,比在原地插行稳。所以正文只写在第一个 ## 之前
+const serialize = (text, st) => {
   const lines = text.split("\n");
-  const head = lines.findIndex((l) => /^##\s+记录\s*$/.test(l));
-  if (head < 0) return null;
-  const kept = lines.slice(0, head + 1);
-  const rows = [...done.entries()]
-    .filter(([, v]) => v.length)
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([k, v]) => `- ${k} | ${v.join(", ")}`);
-  return [...kept, "", ...rows, ""].join("\n");
+  const start = lines.findIndex((l) => /^##\s+习惯\s*$/.test(l));
+  if (start < 0) return null;
+  const out = lines.slice(0, start);
+  out.push("## 习惯", "");
+  for (const h of st.habits) out.push(h.every > 1 ? `- ${h.name} | 每${h.every}天` : `- ${h.name}`);
+  out.push("", "## 已练成", "");
+  for (const g of st.graduated) out.push(`- ${g}`);
+  out.push("", "## 记录", "");
+  for (const [k, v] of [...st.done.entries()].filter(([, v]) => v.length).sort((a, b) => a[0].localeCompare(b[0]))) {
+    out.push(`- ${k} | ${v.join(", ")}`);
+  }
+  out.push("");
+  return out.join("\n");
 };
 
-// 今天还没勾不算断,从昨天接着数;断一天就停
-const streakOf = (name, done) => {
-  const d = new Date();
-  if (!(done.get(TODAY) ?? []).includes(name)) d.setDate(d.getDate() - 1);
-  let n = 0;
-  while ((done.get(d2s(d)) ?? []).includes(name)) { n++; d.setDate(d.getDate() - 1); }
+const daysOf = (name, done) =>
+  [...done.entries()].filter(([, v]) => v.includes(name)).map(([k]) => k).sort();
+
+// 连续多少次。每天型:间隔 1 天算连上;每 N 天型:间隔 ≤ N 天就算连上。
+// 最后一次打卡离今天超过 N 天才算断——所以"今天还没勾"不会让它归零
+const streakOf = (name, every, done) => {
+  const days = daysOf(name, done).reverse();
+  if (!days.length || gap(TODAY, days[0]) > every) return 0;
+  let n = 1;
+  for (let i = 1; i < days.length; i++) {
+    if (gap(days[i - 1], days[i]) <= every) n++; else break;
+  }
   return n;
+};
+
+// 今天该不该做:每天型天天该做;每 N 天型要等上次打卡满 N 天
+const dueToday = (name, every, done) => {
+  const days = daysOf(name, done);
+  const last = days[days.length - 1];
+  return !last || gap(TODAY, last) >= every;
+};
+
+const statsOf = (name, done) => {
+  const days = daysOf(name, done);
+  if (!days.length) return null;
+  let best = 1, cur = 1;
+  for (let i = 1; i < days.length; i++) {
+    cur = gap(days[i], days[i - 1]) === 1 ? cur + 1 : 1;
+    if (cur > best) best = cur;
+  }
+  return { first: days[0], last: days[days.length - 1], total: days.length, best };
 };
 
 const file = app.vault.getAbstractFileByPath(HABITS_PATH);
@@ -480,39 +519,70 @@ if (!file) {
   head.createEl("span", { cls: "wb-reunion-tag", text: "✅ 每日习惯" });
   const counter = head.createEl("span", { cls: "wb-habits-count" });
   const list = card.createEl("div", { cls: "wb-habit-list" });
+  const foot = card.createEl("div", { cls: "wb-habit-grads" });
 
-  const draw = (habits, done) => {
-    const todays = done.get(TODAY) ?? [];
-    counter.textContent = `${todays.length} / ${habits.length}`;
+  const write = async (st) => {
+    const out = serialize(await app.vault.read(file), st);
+    if (out == null) {
+      card.createEl("div", { cls: "wb-heartbeat", text: "习惯打卡.md 里找不到「## 习惯」那一段,没敢写" });
+      return false;
+    }
+    await app.vault.modify(file, out);
+    return true;
+  };
+
+  const draw = (st) => {
+    const todays = st.done.get(TODAY) ?? [];
+    const due = st.habits.filter((h) => todays.includes(h.name) || dueToday(h.name, h.every, st.done));
+    counter.textContent = `${todays.length} / ${due.length}`;
     list.empty();
-    for (const name of habits) {
-      const on = todays.includes(name);
-      const row = list.createEl("label", { cls: `wb-habit${on ? " is-done" : ""}` });
+    for (const h of st.habits) {
+      const on = todays.includes(h.name);
+      const off = !on && !dueToday(h.name, h.every, st.done); // 今天轮空
+      const row = list.createEl("label", { cls: `wb-habit${on ? " is-done" : ""}${off ? " is-off" : ""}` });
       const box = row.createEl("input", { type: "checkbox" });
       box.checked = on;
-      row.createEl("span", { cls: "wb-habit-name", text: name });
-      const n = streakOf(name, done);
-      row.createEl("span", { cls: "wb-habit-streak", text: n ? `🔥 ${n} 天` : "" });
-      box.onchange = async () => {
-        const text = await app.vault.read(file);
-        const cur = parse(text);
-        const day = new Set(cur.done.get(TODAY) ?? []);
-        box.checked ? day.add(name) : day.delete(name);
-        cur.done.set(TODAY, [...day]);
-        const out = serialize(text, cur.done);
-        if (out == null) {
-          box.checked = on;
-          card.createEl("div", { cls: "wb-heartbeat", text: "习惯打卡.md 里找不到「## 记录」那一段,没敢写" });
-          return;
-        }
-        await app.vault.modify(file, out);
-        draw(cur.habits, cur.done);
+      const name = row.createEl("span", { cls: "wb-habit-name", text: h.name });
+      if (h.every > 1) name.createEl("span", { cls: "wb-habit-every", text: ` 每${h.every}天` });
+      const n = streakOf(h.name, h.every, st.done);
+      row.createEl("span", {
+        cls: "wb-habit-streak",
+        text: off ? "今天轮空" : n ? `🔥 ${n} ${h.every > 1 ? "次" : "天"}` : "",
+      });
+      // 练成了就毕业:从清单移进「已练成」,打卡记录原样留着,统计从记录里算
+      const grad = row.createEl("button", { cls: "wb-habit-grad", text: "🎓" });
+      grad.setAttr("title", "标记为已练成");
+      grad.onclick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const s = statsOf(h.name, st.done);
+        st.graduated.push(
+          s
+            ? `${h.name} | ${s.first} → ${s.last} · 打卡 ${s.total} 天 · 最长连续 ${s.best} 天 · ${TODAY} 练成`
+            : `${h.name} | 没留下打卡记录 · ${TODAY} 练成`
+        );
+        st.habits = st.habits.filter((x) => x.name !== h.name);
+        if (await write(st)) draw(st);
       };
+      box.onchange = async () => {
+        const st2 = parse(await app.vault.read(file));
+        const day = new Set(st2.done.get(TODAY) ?? []);
+        box.checked ? day.add(h.name) : day.delete(h.name);
+        st2.done.set(TODAY, [...day]);
+        if (await write(st2)) draw(st2); else box.checked = on;
+      };
+    }
+    foot.empty();
+    if (st.graduated.length) {
+      foot.createEl("span", { text: `🎓 已练成 ${st.graduated.length}:` });
+      foot.createEl("span", {
+        cls: "wb-habit-grads-names",
+        text: st.graduated.map((g) => g.split("|")[0].trim()).join(" · "),
+      });
     }
   };
 
-  const boot = async () => { const t = await app.vault.read(file); const { habits, done } = parse(t); draw(habits, done); };
-  boot();
+  (async () => draw(parse(await app.vault.read(file))))();
 }
 ```
 

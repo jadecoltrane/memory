@@ -688,16 +688,14 @@
   color: var(--text-normal);
 }
 
-.workbench .markdown-preview-sizer,
-.workbench .cm-sizer {
-  counter-reset: wb-ask;
-}
+/* 这里原来用 CSS counter 编号,实测两道问题都显示 1:阅读视图给每个顶层块单独做了
+   隔离(contain / content-visibility 那一类),计数器作用域被逐块切断,每块都从头数。
+   改成数"前面有几个带 ask 的兄弟块",不依赖计数器 */
 .workbench .callout[data-callout="ask"] {
   position: relative;
-  counter-increment: wb-ask;
 }
 .workbench .callout[data-callout="ask"]::after {
-  content: counter(wb-ask);
+  content: "1";
   position: absolute;
   top: 2px;
   right: 20px;
@@ -707,6 +705,15 @@
   color: var(--wb-accent-text);
   opacity: 0.07;
   pointer-events: none;
+}
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"])
+  ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]::after {
+  content: "2";
+}
+.workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"])
+  ~ *:has(.callout[data-callout="ask"])
+  ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]::after {
+  content: "3";
 }
 
 .workbench .callout a {
@@ -928,6 +935,39 @@
   font-variant-numeric: tabular-nums;
 }
 .workbench .wb-habit.is-done .wb-habit-streak { color: var(--wb-accent-text); }
+
+/* 每 N 天的习惯,轮空那天整行压淡——想提前做照样能勾,所以不禁用 */
+.workbench .wb-habit.is-off { opacity: 0.5; }
+.workbench .wb-habit-every {
+  font-size: 0.82em;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 🎓 平时藏着,悬停到那一行才出来——它是低频操作,不该天天占着视线 */
+.workbench .wb-habit-grad {
+  flex: none;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  box-shadow: none;
+  font-size: 0.85em;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s var(--wb-ease);
+}
+.workbench .wb-habit:hover .wb-habit-grad,
+.workbench .wb-habit-grad:focus-visible { opacity: 0.75; }
+.workbench .wb-habit-grad:hover { opacity: 1; }
+
+.workbench .wb-habit-grads {
+  margin-top: 10px;
+  font-size: 0.76em;
+  color: var(--text-faint);
+}
+.workbench .wb-habit-grads:empty { display: none; }
+.workbench .wb-habit-grads-names { color: var(--text-muted); }
 
 @media (prefers-reduced-motion: reduce) {
   .workbench .wb-habits { animation: none !important; }
