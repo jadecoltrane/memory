@@ -27,5 +27,14 @@
     "lucideIconPackType": "native",
     "debugMode": false,
     "useInternalPlugins": false
-  }
+  },
+  "Notes": "📓",
+  "Concepts": "🧠",
+  "Diary": "🌙",
+  "Works": "🎨",
+  "Archive": "📦",
+  "Meta": "⚙️",
+  "Profile": "👤",
+  "Sources": "📥",
+  "Home.md": "🏠"
 }
