@@ -15,10 +15,10 @@
    ============================================================ */
 
 /* 两条线:Archive 上边缘分出「底层」那一层(Archive/Meta/Profile/Sources),
-   AGENTS.md 上边缘分开文件夹和根目录那几个 .md。
+   Home.md 上边缘分开文件夹和根目录的文件(AGENTS/CLAUDE 已在 sortspec 里藏掉)。
    要在别处加线,照抄这一段换 data-path 即可 */
 .nav-files-container .tree-item:has(> [data-path="Archive"]),
-.nav-files-container .tree-item:has(> [data-path="AGENTS.md"]) {
+.nav-files-container .tree-item:has(> [data-path="Home.md"]) {
   position: relative;
   /* 这是整份 snippet 里唯一会改行高的一条(上下各留出空隙,线落在正中)。
      虚拟滚动按它自己的模型估高度,多出来的这点会让滚动高度偏差二三十像素——
@@ -26,7 +26,7 @@
   margin-top: 16px;
 }
 .nav-files-container .tree-item:has(> [data-path="Archive"])::before,
-.nav-files-container .tree-item:has(> [data-path="AGENTS.md"])::before {
+.nav-files-container .tree-item:has(> [data-path="Home.md"])::before {
   content: "";
   position: absolute;
   left: 10px;
@@ -49,7 +49,9 @@
   mask-image: none;
   background-color: transparent;
 }
+/* !important 是因为主题那条选择器权重更高(body:not(...) 开头,足足 6 个类):
+   同样是撤贴图,文件夹那条我压得过,文件这条压不过 */
 .workspace-leaf-content[data-type="file-explorer"]
   .nav-file-title:has(.iconize-icon)::before {
-  content: none;
+  display: none !important;
 }

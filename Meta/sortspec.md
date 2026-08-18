@@ -1,6 +1,8 @@
 ---
 sorting-spec: |
   target-folder: /
+  /--hide: AGENTS.md
+  /--hide: CLAUDE.md
   /folders Notes
   /folders Concepts
   /folders Diary
@@ -21,6 +23,7 @@ sorting-spec: |
 **怎么改顺序**:上面每行一个条目,从上到下就是显示顺序。
 
 - `/folders 名字` 只匹配文件夹,`/:files 名字` 只匹配文件。
+- `/--hide: 文件名.md` 把条目从文件栏藏起来(**要带扩展名**)。AGENTS.md 和 CLAUDE.md 是给 AI 读的规则文件,人不用点开,所以藏了;文件本身照常在仓库里,搜索也照样找得到。**藏东西必须走这里,不要用 CSS 的 display:none**——文件栏是虚拟滚动,CSS 藏行会让滚动高度算错,末尾几项永远不挂载(2026-08-17 实测)。
 - 最后那行光秃秃的 `/:files` 是"其余的文件"兜底组,没点名的文件(AGENTS、CLAUDE、Home)按原顺序排在最后。**这行别删**,删了它们会跑到最前面。
 - 新建了顶层文件夹却没写进上面,它会落到没被点名的那一档;想让它排在指定位置就补一行。
 
