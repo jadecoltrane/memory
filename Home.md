@@ -436,7 +436,33 @@ const d2s = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0
 const TODAY = d2s(new Date());
 const gap = (a, b) => Math.round((new Date(a) - new Date(b)) / DAY); // a 比 b 晚几天
 
-// 「习惯」区:`- 名称` 或 `- 名称 | 每N天`;「已练成」区原样留着只作展示;
+// 频率两种写法:`每N天`(间隔型)、`周二周四`(星期型,写几个算几个)。
+// 都不写就是每天。原始 spec 字符串原样留着,回写时照抄,不做重新拼装
+const WEEKDAY = { 日: 0, 天: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6 };
+const WEEKNAME = ["日", "一", "二", "三", "四", "五", "六"];
+const parseSpec = (spec) => {
+  const n = spec.match(/每?\s*(\d+)\s*天/);
+  if (n) return { every: Math.max(1, Number(n[1])), days: null };
+  const num = (c) => (c in WEEKDAY ? WEEKDAY[c] : Number(c) % 7);
+  const days = [];
+  // 「周一到周五」这种区间要展开,否则会被当成"周一和周五"两天,还不报错
+  const range = spec.match(/([日天一二三四五六1-7])\s*[-~—到至]\s*[周週礼拜]*\s*([日天一二三四五六1-7])/);
+  if (range) {
+    for (let d = num(range[1]), guard = 0; guard < 7; guard++) {
+      days.push(d);
+      if (d === num(range[2])) break;
+      d = (d + 1) % 7;
+    }
+    return { every: 1, days: days.sort() };
+  }
+  for (const m of spec.matchAll(/([日天一二三四五六])|([1-7])/g)) {
+    const v = num(m[1] !== undefined ? m[1] : m[2]);
+    if (!days.includes(v)) days.push(v);
+  }
+  return days.length ? { every: 1, days: days.sort() } : { every: 1, days: null };
+};
+
+// 「习惯」区:`- 名称`、`- 名称 | 每N天` 或 `- 名称 | 周二周四`;「已练成」区原样展示;
 // 「记录」区:`- 日期 | 当天勾掉的习惯`
 const parse = (text) => {
   const habits = [], graduated = [], done = new Map();
@@ -450,8 +476,7 @@ const parse = (text) => {
     if (!item) continue;
     if (sec === "习惯") {
       const [name, spec = ""] = item[1].split("|").map((x) => x.trim());
-      const n = spec.match(/(\d+)\s*天/);
-      habits.push({ name, every: n ? Math.max(1, Number(n[1])) : 1 });
+      habits.push({ name, spec, ...parseSpec(spec) });
     } else if (sec === "已练成") {
       graduated.push(item[1]);
     }
@@ -466,7 +491,7 @@ const serialize = (text, st) => {
   if (start < 0) return null;
   const out = lines.slice(0, start);
   out.push("## 习惯", "");
-  for (const h of st.habits) out.push(h.every > 1 ? `- ${h.name} | 每${h.every}天` : `- ${h.name}`);
+  for (const h of st.habits) out.push(h.spec ? `- ${h.name} | ${h.spec}` : `- ${h.name}`);
   out.push("", "## 已练成", "");
   for (const g of st.graduated) out.push(`- ${g}`);
   out.push("", "## 记录", "");
@@ -480,23 +505,37 @@ const serialize = (text, st) => {
 const daysOf = (name, done) =>
   [...done.entries()].filter(([, v]) => v.includes(name)).map(([k]) => k).sort();
 
-// 连续多少次。每天型:间隔 1 天算连上;每 N 天型:间隔 ≤ N 天就算连上。
-// 最后一次打卡离今天超过 N 天才算断——所以"今天还没勾"不会让它归零
-const streakOf = (name, every, done) => {
-  const days = daysOf(name, done).reverse();
-  if (!days.length || gap(TODAY, days[0]) > every) return 0;
+// 连续多少次。每天型:间隔 1 天算连上;每 N 天型:间隔 ≤ N 天就算连上;
+// 星期型:只看该做的那几天,漏掉一个应做日才算断。
+// 三种都遵守同一条:今天还没勾不算断,从上一个应做日往回数
+const streakOf = (h, done) => {
+  if (h.days) {
+    const d = new Date();
+    if (!(done.get(TODAY) ?? []).includes(h.name)) d.setDate(d.getDate() - 1);
+    let n = 0;
+    for (let guard = 0; guard < 400; guard++) {
+      if (h.days.includes(d.getDay())) {
+        if ((done.get(d2s(d)) ?? []).includes(h.name)) n++; else break;
+      }
+      d.setDate(d.getDate() - 1);
+    }
+    return n;
+  }
+  const days = daysOf(h.name, done).reverse();
+  if (!days.length || gap(TODAY, days[0]) > h.every) return 0;
   let n = 1;
   for (let i = 1; i < days.length; i++) {
-    if (gap(days[i - 1], days[i]) <= every) n++; else break;
+    if (gap(days[i - 1], days[i]) <= h.every) n++; else break;
   }
   return n;
 };
 
-// 今天该不该做:每天型天天该做;每 N 天型要等上次打卡满 N 天
-const dueToday = (name, every, done) => {
-  const days = daysOf(name, done);
+// 今天该不该做:每天型天天该做;每 N 天型要等上次打卡满 N 天;星期型看今天星期几
+const dueToday = (h, done) => {
+  if (h.days) return h.days.includes(new Date().getDay());
+  const days = daysOf(h.name, done);
   const last = days[days.length - 1];
-  return !last || gap(TODAY, last) >= every;
+  return !last || gap(TODAY, last) >= h.every;
 };
 
 const statsOf = (name, done) => {
@@ -533,21 +572,22 @@ if (!file) {
 
   const draw = (st) => {
     const todays = st.done.get(TODAY) ?? [];
-    const due = st.habits.filter((h) => todays.includes(h.name) || dueToday(h.name, h.every, st.done));
+    const due = st.habits.filter((h) => todays.includes(h.name) || dueToday(h, st.done));
     counter.textContent = `${todays.length} / ${due.length}`;
     list.empty();
     for (const h of st.habits) {
       const on = todays.includes(h.name);
-      const off = !on && !dueToday(h.name, h.every, st.done); // 今天轮空
+      const off = !on && !dueToday(h, st.done); // 今天轮空
       const row = list.createEl("label", { cls: `wb-habit${on ? " is-done" : ""}${off ? " is-off" : ""}` });
       const box = row.createEl("input", { type: "checkbox" });
       box.checked = on;
       const name = row.createEl("span", { cls: "wb-habit-name", text: h.name });
-      if (h.every > 1) name.createEl("span", { cls: "wb-habit-every", text: ` 每${h.every}天` });
-      const n = streakOf(h.name, h.every, st.done);
+      const tag = h.days ? `周${h.days.map((d) => WEEKNAME[d]).join("·")}` : h.every > 1 ? `每${h.every}天` : "";
+      if (tag) name.createEl("span", { cls: "wb-habit-every", text: ` ${tag}` });
+      const n = streakOf(h, st.done);
       row.createEl("span", {
         cls: "wb-habit-streak",
-        text: off ? "今天轮空" : n ? `🔥 ${n} ${h.every > 1 ? "次" : "天"}` : "",
+        text: off ? "今天轮空" : n ? `🔥 ${n} ${h.days || h.every > 1 ? "次" : "天"}` : "",
       });
       // 练成了就毕业:从清单移进「已练成」,打卡记录原样留着,统计从记录里算
       const grad = row.createEl("button", { cls: "wb-habit-grad", text: "🎓" });
