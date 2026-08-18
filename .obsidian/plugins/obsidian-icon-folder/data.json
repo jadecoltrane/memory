@@ -5,7 +5,9 @@
     "fontSize": 16,
     "emojiStyle": "native",
     "iconColor": null,
-    "recentlyUsedIcons": [],
+    "recentlyUsedIcons": [
+      "LiDatabase"
+    ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
     "extraMargin": {
@@ -33,7 +35,6 @@
   "Diary": "🌙",
   "Works": "🎨",
   "Archive": "📦",
-  "Meta": "⚙️",
   "Profile": "👤",
   "Sources": "📥",
   "Home.md": "🏠"
