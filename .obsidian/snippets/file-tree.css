@@ -1,0 +1,28 @@
+/* ============================================================
+   File Tree — 左侧文件栏
+
+   ⚠️ 排序和分组这条路已经废掉,别再重来一遍(2026-08-17 实测 1.13.7):
+   文件栏是**虚拟滚动**,只挂载 DOM 顺序靠前、按它自己的模型算在视口内的那几项。
+   flex order 只能改"画在哪",改不了"挂不挂载"——把 DOM 末尾的 Home.md 用 order
+   挪到视觉最上面,面板一变矮整组就消失;display:none 同样有害,滚动高度按内部模型算,
+   实际内容变短之后根本滚不到底,末尾几项永远不挂载(光藏 Sources/raw 就能触发)。
+
+   所以这里只做**不占高度、不改挂载**的装饰:分割线用绝对定位的伪元素画,
+   既不给行加 padding 也不加 border(那都会改变行高,又会喂错虚拟滚动的高度估算)。
+   ============================================================ */
+
+/* 文件夹和根目录那几个 .md 之间画一条线。AGENTS.md 是第一个文件,线画在它上边缘。
+   要在别处加线,照抄这一段换 data-path 即可 */
+.nav-files-container .tree-item:has(> [data-path="AGENTS.md"]) {
+  position: relative;
+}
+.nav-files-container .tree-item:has(> [data-path="AGENTS.md"])::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: -3px;
+  height: 1px;
+  background: var(--background-modifier-border);
+  pointer-events: none;
+}

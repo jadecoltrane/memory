@@ -10,16 +10,11 @@
 
 /* ---------- 颜色：全局变量，适合在整个 Obsidian 里生效 ---------- */
 .theme-light {
-  /* 全库统一的紫。工作台的 --wb-tint 会 var() 引用它,两处共用一个源头。
-     链接色不是 --jade-tint 本身,而是它压暗一档的版本(oklch L=0.5),
-     跟工作台胶囊上的文字是同一个值——原色 #7b5cf0 在白底上对比度不够。
-     数值是渲染实测的:#61579e 对白底 6.24:1,#4b3d8f 悬停 8.89:1 */
+  /* 全库统一的紫,只给工作台用(--wb-tint 会 var() 引用它,两处共用一个源头)。
+     2026-08-17:链接色的五个变量撤了,交回主题(Border)自己的默认色。
+     原来那套是这个紫压暗一档的版本(#61579e / 悬停 #4b3d8f,对白底 6.24:1 / 8.89:1),
+     想要回来的话把它们加回这里就行 */
   --jade-tint: #7b5cf0;
-  --link-color: #61579e;
-  --link-color-hover: #4b3d8f;
-  --link-external-color: #61579e;
-  --link-external-color-hover: #4b3d8f;
-  --link-unresolved-color: #61579e;
   --text-normal: #323232;
   --text-muted: #6b6b6b;
   --background-primary: #ffffff;
@@ -35,13 +30,9 @@
 }
 
 .theme-dark {
-  /* 深色下同一个紫提亮到 oklch L=0.8:#bab4fb,对 #1c1c1b 底 8.94:1 */
+  /* 深色下的链接色同样交回主题。原来是这个紫提亮到 oklch L=0.8:
+     #bab4fb / 悬停 #d3cffd,对 #1c1c1b 底 8.94:1 */
   --jade-tint: #7b5cf0;
-  --link-color: #bab4fb;
-  --link-color-hover: #d3cffd;
-  --link-external-color: #bab4fb;
-  --link-external-color-hover: #d3cffd;
-  --link-unresolved-color: #bab4fb;
   --text-normal: #d6d3cd;
   --text-muted: #8a8a8a;
   --background-primary: #1c1c1b;

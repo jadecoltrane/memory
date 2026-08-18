@@ -10,8 +10,8 @@
   /* 这里原本写的是 var(--color-accent),但 Border 主题的强调色是 hsl(232, 96%, 64%),
      偏蓝不是紫,借过来整页都不紫。用户要浅紫,所以直接钉死色相。
      想让它重新跟着主题走,把下面这行换回 var(--color-accent) 即可 */
-  /* 单一源头在 quiet-notes.css 的 --jade-tint(那份 snippet 管全库链接色,
-     两边必须是同一个紫)。写 fallback 是为了那份被关掉时工作台不掉色 */
+  /* 单一源头是 quiet-notes.css 里的 --jade-tint。2026-08-17 链接色交回主题之后,
+     这个紫只剩工作台在用了。写 fallback 是为了那份 snippet 被关掉时工作台不掉色 */
   --wb-tint: var(--jade-tint, #7b5cf0);
   /* 兜底值(不支持 relative oklch 时用):比下面 oklch 那套略糙,但同样是低彩度 */
   --wb-page: color-mix(in srgb, var(--wb-tint) 4%, #f7f7f9);
@@ -846,4 +846,89 @@
   .workbench .cm-sizer > * {
     animation: none !important;
   }
+}
+
+/* dataviewjs 的卡片是页面渲染完之后才插进来的,那时上面那套入场动画早跑完了,
+   所以画作和随机重逢一直是"啪"地出现。给它们各挂一份,插入的那一刻才开始跑 */
+.workbench .wb-daily-painting,
+.workbench .wb-reunion {
+  animation: wb-rise-in 0.45s var(--wb-ease) backwards;
+}
+
+/* 滑到视口里才渐显。第 9 块往后打开时基本都在折叠线以下,原来那套 load 动画
+   早跑完了,滑下去只会看到它们已经杵在那儿。view() 是滚动驱动时间轴:
+   元素进视口的过程就是动画进度。不支持就整段跳过,不会把内容留在透明状态 */
+@supports (animation-timeline: view()) {
+  .workbench .markdown-preview-sizer > *:nth-child(n+9) {
+    animation: wb-rise-in 1s linear both;
+    animation-delay: 0s;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workbench .wb-daily-painting,
+  .workbench .wb-reunion {
+    animation: none !important;
+  }
+}
+
+/* ---------- ✅ 每日习惯 ---------- */
+
+.workbench .wb-habits {
+  padding: 16px 20px;
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-hairline);
+  border-radius: var(--wb-radius);
+  box-shadow: var(--wb-shadow-flat);
+  animation: wb-rise-in 0.45s var(--wb-ease) backwards;
+}
+.workbench .wb-habits-count {
+  margin-left: auto;
+  font-size: 0.78em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* 习惯多起来会自己排成两三列,不会拉出一条又细又长的清单 */
+.workbench .wb-habit-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 2px 14px;
+  margin-top: 10px;
+}
+.workbench .wb-habit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: var(--wb-radius-sm);
+  cursor: pointer;
+  transition: background 0.2s var(--wb-ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .workbench .wb-habit:hover { background: var(--wb-sunken); }
+}
+.workbench .wb-habit input { flex: none; margin: 0; cursor: pointer; }
+.workbench .wb-habit-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92em;
+  transition: color 0.2s var(--wb-ease);
+}
+.workbench .wb-habit.is-done .wb-habit-name {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--wb-accent-line);
+}
+.workbench .wb-habit-streak {
+  flex: none;
+  font-size: 0.75em;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.workbench .wb-habit.is-done .wb-habit-streak { color: var(--wb-accent-text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .workbench .wb-habits { animation: none !important; }
 }

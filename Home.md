@@ -427,6 +427,96 @@ if (window.MutationObserver) {
 }
 ```
 
+```dataviewjs
+// ✅ 每日习惯:清单和打卡记录都在 Meta/习惯打卡.md,纯 markdown。
+// 不用 localStorage——换设备就没了,而且 AI 看不见;工作台只是它的一个界面
+const HABITS_PATH = "Meta/习惯打卡.md";
+const d2s = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const TODAY = d2s(new Date());
+
+// 「习惯」区的裸条目是习惯名,「记录」区的条目形如 `- 2026-08-17 | 维生素, 冥想`
+const parse = (text) => {
+  const habits = [], done = new Map();
+  let sec = "";
+  for (const line of text.split("\n")) {
+    const h2 = line.match(/^##\s+(.+?)\s*$/);
+    if (h2) { sec = h2[1]; continue; }
+    const rec = line.match(/^-\s*(\d{4}-\d{2}-\d{2})\s*\|\s*(.*)$/);
+    if (rec) { done.set(rec[1], rec[2].split(",").map((x) => x.trim()).filter(Boolean)); continue; }
+    const item = line.match(/^-\s+(.+?)\s*$/);
+    if (item && sec === "习惯") habits.push(item[1]);
+  }
+  return { habits, done };
+};
+
+// 整段重写「记录」,按日期排序——比在原地插一行稳,不怕用户手改过格式
+const serialize = (text, done) => {
+  const lines = text.split("\n");
+  const head = lines.findIndex((l) => /^##\s+记录\s*$/.test(l));
+  if (head < 0) return null;
+  const kept = lines.slice(0, head + 1);
+  const rows = [...done.entries()]
+    .filter(([, v]) => v.length)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([k, v]) => `- ${k} | ${v.join(", ")}`);
+  return [...kept, "", ...rows, ""].join("\n");
+};
+
+// 今天还没勾不算断,从昨天接着数;断一天就停
+const streakOf = (name, done) => {
+  const d = new Date();
+  if (!(done.get(TODAY) ?? []).includes(name)) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while ((done.get(d2s(d)) ?? []).includes(name)) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+};
+
+const file = app.vault.getAbstractFileByPath(HABITS_PATH);
+if (!file) {
+  dv.container.createEl("div", { cls: "wb-heartbeat", text: `找不到 ${HABITS_PATH},习惯卡没数据源` });
+} else {
+  const card = dv.container.createEl("div", { cls: "wb-habits" });
+  const head = card.createEl("div", { cls: "wb-reunion-head" });
+  head.createEl("span", { cls: "wb-reunion-tag", text: "✅ 每日习惯" });
+  const counter = head.createEl("span", { cls: "wb-habits-count" });
+  const list = card.createEl("div", { cls: "wb-habit-list" });
+
+  const draw = (habits, done) => {
+    const todays = done.get(TODAY) ?? [];
+    counter.textContent = `${todays.length} / ${habits.length}`;
+    list.empty();
+    for (const name of habits) {
+      const on = todays.includes(name);
+      const row = list.createEl("label", { cls: `wb-habit${on ? " is-done" : ""}` });
+      const box = row.createEl("input", { type: "checkbox" });
+      box.checked = on;
+      row.createEl("span", { cls: "wb-habit-name", text: name });
+      const n = streakOf(name, done);
+      row.createEl("span", { cls: "wb-habit-streak", text: n ? `🔥 ${n} 天` : "" });
+      box.onchange = async () => {
+        const text = await app.vault.read(file);
+        const cur = parse(text);
+        const day = new Set(cur.done.get(TODAY) ?? []);
+        box.checked ? day.add(name) : day.delete(name);
+        cur.done.set(TODAY, [...day]);
+        const out = serialize(text, cur.done);
+        if (out == null) {
+          box.checked = on;
+          card.createEl("div", { cls: "wb-heartbeat", text: "习惯打卡.md 里找不到「## 记录」那一段,没敢写" });
+          return;
+        }
+        await app.vault.modify(file, out);
+        draw(cur.habits, cur.done);
+      };
+    }
+  };
+
+  const boot = async () => { const t = await app.vault.read(file); const { habits, done } = parse(t); draw(habits, done); };
+  boot();
+}
+```
+
+
 > [!draw] 🎴 今日抽卡 · 外部检验与别人的认可不是一回事
 > [[Notes/思考/哲学与自我/自我认可够不够用-只有要世俗结果的事才需要送外部检验|自我认可够不够用]] —— 源于 2026-08-08 工作台问答,2026-08-09 补处理写入,2026-08-11 又补了一次。
 >
