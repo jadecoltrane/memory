@@ -68,9 +68,16 @@
   line-height: 1;
 }
 
-/* 子文件夹的缩进加大。默认那点缩进(13px)在顶层带了 emoji 之后就显得不够:
-   顶层的文字被图标槽推到右边,子项却还从原来那个 x 起步,看着像没被包进去。
-   这里只改横向,不动行高,和虚拟滚动无关。嫌多/嫌少就调这一个数 */
+/* 子文件夹的缩进加大。默认那点缩进在顶层挂了 emoji 之后就显得不够:
+   顶层文字被图标槽推到右边,子项却还从原来那个 x 起步,看着像没被父级包住。
+   只改横向,不动行高,和虚拟滚动无关。嫌多/嫌少就调这一个数。
+
+   ⚠️ 第一版只改了 --nav-item-children-margin-left 这个变量,没生效——1.13 的文件栏
+   要么用了别的类名、要么把缩进写成了行内样式。所以这里两个类名都点名,并用 !important:
+   author 的 !important 声明能盖过行内样式 */
 .workspace-leaf-content[data-type="file-explorer"] .nav-files-container {
   --nav-item-children-margin-left: 26px;
+}
+.workspace-leaf-content[data-type="file-explorer"] :is(.nav-folder-children, .tree-item-children) {
+  margin-inline-start: 26px !important;
 }
