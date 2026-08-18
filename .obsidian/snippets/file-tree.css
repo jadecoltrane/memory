@@ -67,3 +67,10 @@
   flex: none;
   line-height: 1;
 }
+
+/* 子文件夹的缩进加大。默认那点缩进(13px)在顶层带了 emoji 之后就显得不够:
+   顶层的文字被图标槽推到右边,子项却还从原来那个 x 起步,看着像没被包进去。
+   这里只改横向,不动行高,和虚拟滚动无关。嫌多/嫌少就调这一个数 */
+.workspace-leaf-content[data-type="file-explorer"] .nav-files-container {
+  --nav-item-children-margin-left: 26px;
+}
