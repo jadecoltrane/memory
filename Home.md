@@ -409,7 +409,7 @@ const mountDiaryBtn = () => {
   // 不写"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
   // 两个入口叠在一起容易让人以为点了才能在上面的井里写
   const btn = host.createEl("button", { cls: "wb-diary-btn" });
-  btn.createEl("span", { text: "📔 今天的日记" });
+  btn.createEl("span", { text: "📔 有什么新鲜事呀～" });
   btn.createEl("span", { cls: "wb-diary-btn-arrow", text: "→" });
   btn.onclick = (e) => { e.stopPropagation(); newDiary(); };
   return true;

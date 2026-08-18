@@ -9,13 +9,19 @@
 
    所以这里只做**不占高度、不改挂载**的装饰:分割线用绝对定位的伪元素画,
    既不给行加 padding 也不加 border(那都会改变行高,又会喂错虚拟滚动的高度估算)。
+
+   顺序不归这里管——2026-08-18 起由 custom-sort 插件按 Meta/sortspec.md 排,
+   它改的是文件栏的数据顺序,和虚拟滚动不打架。改分组顺序去改那份 spec,别回来改这里。
    ============================================================ */
 
-/* 文件夹和根目录那几个 .md 之间画一条线。AGENTS.md 是第一个文件,线画在它上边缘。
+/* 两条线:Archive 上边缘分出「底层」那一层(Archive/Meta/Profile/Sources),
+   AGENTS.md 上边缘分开文件夹和根目录那几个 .md。
    要在别处加线,照抄这一段换 data-path 即可 */
+.nav-files-container .tree-item:has(> [data-path="Archive"]),
 .nav-files-container .tree-item:has(> [data-path="AGENTS.md"]) {
   position: relative;
 }
+.nav-files-container .tree-item:has(> [data-path="Archive"])::before,
 .nav-files-container .tree-item:has(> [data-path="AGENTS.md"])::before {
   content: "";
   position: absolute;
