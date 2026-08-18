@@ -55,3 +55,15 @@
   .nav-file-title:has(.iconize-icon)::before {
   display: none !important;
 }
+
+/* emoji 的字面宽度各不相同(🌙 窄、📓 宽、🔧 又是另一个),图标一挨着文字,
+   每行文字的起点就跟着参差。给图标一个固定宽度的槽、居中摆,所有行从同一个 x 开始。
+   只在文件栏里生效,不动正文和链接里的 Iconize 图标 */
+.workspace-leaf-content[data-type="file-explorer"] .iconize-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35em;
+  flex: none;
+  line-height: 1;
+}
