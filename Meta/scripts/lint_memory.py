@@ -308,6 +308,27 @@ def check_append_scars(path: Path):
         )
 
 
+# 「AI 推的…落空了」「AI 别把那句当成…」这类句子记的是 AI 自己,不是用户
+# (CLAUDE.md 判据:去掉"AI"两个字这句还成不成立)。只匹配 AI 后面直接跟动词/限定词
+# 的写法——画像里「AI 交互设计师」「AI 辅助合规审查」是她的岗位和经历,不能误伤。
+AI_SELF = re.compile(
+    r"\bAI\s*(?:推|别|已|当时|之前|那个|这个|说的|的框架|的判断|的推断|的看法|自己)"
+    r"|Claude\s*(?:代写|说|推|问|提|建议)"
+    r"|上一(?:期|版)(?:给出|说|推|的推论)"
+)
+
+
+def check_profile_ai_traces(path: Path):
+    """只管 Profile/:画像里出现"AI 当时怎么想的"就报,那不是用户画像。"""
+    rel = path.relative_to(ROOT).as_posix()
+    hits = sorted(set(AI_SELF.findall(strip_frontmatter(path.read_text(encoding="utf-8")))))
+    if hits:
+        warnings.append(
+            f"{rel}: 画像里记了 AI 自己(「{'」「'.join(h.strip() for h in hits)}」)"
+            f"——把「AI」两个字去掉这句还成立吗?不成立就重写"
+        )
+
+
 def check_profile_body_dates(path: Path):
     """只管 Profile/:画像页正文一个日期都不该有,frontmatter 的 updated 除外。"""
     rel = path.relative_to(ROOT).as_posix()
@@ -354,6 +375,7 @@ def main():
             check_append_scars(p)
             if top == "Profile":
                 check_profile_body_dates(p)
+                check_profile_ai_traces(p)
             if top == "Notes":
                 check_note_links(p)
                 check_naked_concepts(p, concept_names)
