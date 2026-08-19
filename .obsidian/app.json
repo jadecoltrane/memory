@@ -13,7 +13,8 @@
     "index.md",
     "/Sources/",
     "/Archive/",
-    "assets/"
+    "assets/",
+    "LICENSE"
   ],
   "showUnsupportedFiles": true,
   "promptDelete": false,
