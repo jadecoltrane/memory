@@ -4,17 +4,13 @@
 
 **两条设计原则**:①**兜底优先**——可靠性相关的(失败告警、机器校验、边界情况、备份)必须**预先**设计;懒加载只用于内容组织(概念页第二次命中才建、`Notes/` 子文件夹同主题第二篇才建、单篇新主题先放根目录),不用于安全网。②**省 token**——效果相当时选读写成本更低的,但不拿效果去换;发现冗余可以精简,不能牺牲可执行性。
 
-**目录**:`Notes/` 收藏、`Concepts/` 概念枢纽、`Profile/` 画像、`Meta/` 规则与脚本、`Sources/` 导出原文与对照表(**原样未脱敏,所以仓库必须始终 private**;lint 不查可见性,这条线只靠人记得,别在任何场合建议把这个库改成 public 或 fork 出去)、`Archive/` 退役区、`Works/` 成品与草稿、`Diary/` 发生过的事(后两个和 Notes/ 平级:稿子和日记都不是笔记,不需要 tier 和 frontmatter)。`Sources/`、`Archive/`、`Works/` 不进索引/图谱/lint;**`Diary/` 只把最近一个月列进索引**(AI 要看得见、可据此分析;更早的月份索引里只留一行说明,需要时自己翻 `Diary/<年>/`),但不进图谱、不受 lint 管、**GC 绝对不许去重合并**。规则在各自 README。
+**目录**:`Notes/` 收藏、`Concepts/` 概念枢纽、`Profile/` 画像、`Meta/` 规则与脚本、`Sources/` 导出原文与对照表(**原样未脱敏,仓库必须始终 private**)、`Archive/` 退役区、`Works/` 成品与草稿、`Diary/` 发生过的事(后两个和 Notes/ 平级:稿子和日记都不是笔记,不需要 tier 和 frontmatter)。`Sources/`、`Archive/`、`Works/` 不进索引/图谱/lint;**`Diary/` 只把最近一个月列进索引**(AI 要看得见、可据此分析;更早的月份索引里只留一行说明,需要时自己翻 `Diary/<年>/`),但不进图谱、不受 lint 管、**GC 绝对不许去重合并**。规则在各自 README。
 
-**六个 Actions 自动跑,AI 不用手动补**:索引重建、每周 GC、待裁决回复、工作台日更、lint 体检、每周备份(备份=全量 bundle;异地镜像已评估后决定不配,别再建议)。细节在各 `.github/workflows/*.yml` 文件头。另有一个 `auto-rerun.yml` 只在日更/GC 失败时兜底重跑,不产出内容。**不要建静默回滚哨兵**:靠 author email 认机器人不成立——AI 的提交 author 和手动提交完全一样,每次重建索引都会自己报自己,误报一多告警就没人看了。要做得换判据。
-
-**在 shell 里解析 git 输出的文件名时,必须加 `-c core.quotepath=false`**——本库文件名基本全是中文,git 默认转义成 `"Meta/\347\254\224…"`(带引号),`grep '^Meta/'` 之类会静默匹配不上,检查看着在跑其实全空。Python 脚本走 pathlib,不受影响。
-
-**顶层目录是英文首字母大写**(`Notes/ Concepts/ Meta/ Profile/ Sources/ Archive/ Diary/ Works/ Home.md`)。改这批名字时注意:macOS 文件系统不分大小写 + `core.ignorecase=true`,**只改大小写的重命名 git 完全看不见**——`git status` 是干净的,索引里存的还是旧大小写,但 dataview 的路径匹配分大小写,当天就把工作台的笔记数打成 0、随机重逢渲染成一张白卡。要让 git 记录这类改名得走两步 `git mv A tmp && git mv tmp B`;改完全库搜一遍引用,**别只搜带斜杠的 `notes/`**,`dv.pages('"notes"')`、`ROOT / "notes"`、`file.inFolder("notes")` 这些裸字符串才是真正会静默失效的地方。
+**六个 Actions 自动跑,AI 不用手动补**:索引重建、每周 GC、待裁决回复、工作台日更、lint 体检、每周备份(全量 bundle,不做异地镜像)。细节在各 `.github/workflows/*.yml` 文件头。另有一个 `auto-rerun.yml` 只在日更/GC 失败时兜底重跑,不产出内容。没有静默回滚哨兵。
 
 **写完记忆必须跑 `python3 Meta/scripts/lint_memory.py`**(幽灵概念不算断链;警告都是真工单,能修就修,修不动留给 GC)。
 
-**推送冲突分两种。** ①**git 会报的**:机器人侧已兜住(`concurrency` 排队 + `git_push_retry.sh` 先 rebase 再推、真冲突一律 abort 重跑,绝不自己选边)。②**git 不会报的**——Obsidian Git 的 vault backup 可能用旧版工作区覆盖新提交,纯快进、零冲突、pull 一声不吭:删掉的脚本、被撤销的规则、恢复的已删附件,都不会有任何提示。**没有任何自动告警会报这件事**,唯一的防线就是人和 AI 自己看:**用户说「我推了一下」时必须自己 fetch 对一眼 diff**,别只看有没有冲突标记。lint 只能间接兜住其中一部分——被删的笔记如果有人链接它,会以断链的形式亮红;孤立的、没有反向链接的笔记被删掉,不会有任何声音。任何情况下:**先看清对面改了什么再合**,不盲目 pull 或 `--force`。
+**推送冲突分两种。** ①**git 会报的**:机器人侧已兜住(`concurrency` 排队 + `git_push_retry.sh` 先 rebase 再推、真冲突一律 abort 重跑,绝不自己选边)。②**git 不会报的**:Obsidian Git 的 vault backup 可能用旧版工作区覆盖新提交,纯快进、零冲突、pull 一声不吭,没有任何自动告警。**用户说「我推了一下」时必须自己 fetch 对一眼 diff**,别只看有没有冲突标记;**先看清对面改了什么再合**,不盲目 pull 或 `--force`。
 
 ## 开工时(必做)
 
