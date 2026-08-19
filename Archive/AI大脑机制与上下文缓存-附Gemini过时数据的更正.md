@@ -7,6 +7,8 @@ source: Gemini 对话导出(2026-08-02,追问 AI 大脑长什么样、缓存机�
 checkable: true
 verified: false
 tags: [AI, 大模型, 缓存, 上下文窗口, 认知]
+archived: 2026-08-19
+archived-reason: 模型参数类内容(缓存 TTL、上下文长度)半年内即过时,需要时查当期文档更可靠
 ---
 
 # AI 大脑机制与上下文缓存(附 Gemini 过时数据的更正)
