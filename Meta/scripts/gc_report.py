@@ -24,10 +24,10 @@ TODAY = datetime.date.today()
 WIKILINK = re.compile(r"\[\[([^\]|#^]+)")
 
 PROFILE_STALE_DAYS = 90   # 画像页多久没动就提一句
-MAX_NOTE_LINES = 150      # 超过就提示瘦身或拆分
-# 画像页不查行数:一页画像可以又长又全是结论(⚠️ 张力、原话、并列不调和的两条都该在),
-# 拿长度报警等于鼓励删掉该留的。画像真正的病是过程叙述和 AI 自己的推演,
-# 那两样 lint 里有精确检查(check_profile_body_dates / check_profile_ai_traces)
+# 这里曾经有 MAX_NOTE_LINES / MAX_PROFILE_LINES 两个行数阈值,2026-08-19 一起撤掉:
+# 行数和"有没有 AI 铺陈"根本不相关——铺陈可能出现在 80 行的笔记里,300 行的清单
+# 可能一句废话没有。拿长度当入口的实际效果是该压的漏掉、不该动的每周被点名一次。
+# 瘦身的入口改成"这周动过的",判据改成"这段是不是 AI 的论证过程"(Meta/GC.md 3d)
 MERGE_SHARED_CONCEPTS = 3 # 同文件夹内共享这么多概念 → 同族合并候选
 OPEN_Q_BACKLOG = 4        # 单个概念页开放问题堆到这个数 → 提示挑一条推进
 STALE_SURFACED_DAYS = 120 # 这么久没被工作台抽中过 → 列出来(不建议删,只是让它被看见)
@@ -124,15 +124,6 @@ def main():
     section("🗄 归档候选", arch,
             "判据:参考层 + verified: false(来源没核实过)+ 长期没在工作台露面 + 入链 ≤1(没人在用)。"
             "⚠️ 这不是删除名单,也不要自行归档——把这几条写进待裁决 issue 问一句「这几条还要留在库里吗」")
-
-    # 3. 超长笔记
-    fat = []
-    for p in notes:
-        n = len(p.read_text(encoding="utf-8").splitlines())
-        if n > MAX_NOTE_LINES:
-            fat.append(f"{p.relative_to(ROOT).as_posix()}:{n} 行")
-    section("笔记偏长,考虑瘦身或拆分", fat,
-            "瘦身规则:保留用户原话/结论/⚠️张力,把 AI 的论证过程压成一句。手册型笔记可以豁免")
 
     # 4. 同族合并候选
     by_folder = defaultdict(list)
