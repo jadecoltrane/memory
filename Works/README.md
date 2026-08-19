@@ -29,4 +29,4 @@
 
 **这条纯文本路径不只是引用,它就是状态标记。** `publish_candidates.py` 扫 `Works/**/*.md`,把正文里出现的 `Notes/xxx.md`、`Concepts/xxx.md` 认成这篇稿子的来源,那几条笔记就从「可发候选」挪进「✍️ 在写」,GC 不再重复提醒它们。所以**开写时顺手写下来源路径**,不是为了归档好看,是为了候选池自己会收缩。没标来源的稿子会被单独列一行,不算错。
 
-反过来,笔记那侧也可以写 `draft: Works/xxx.md`,脚本两边都认。发出去之后在笔记 frontmatter 加 `published: 渠道 日期`,那条就彻底离开候选池。三种状态和标法见 `Meta/RESOLVER.md`。
+**发出去之后也只在稿子里标**:加一行 `published: 渠道 日期`(`已发:` 也认),`publish_candidates.py --sync` 会把它回写进这篇稿子所有来源笔记的 frontmatter,那几条就彻底离开候选池——不用一条条去笔记里手改。反过来,笔记那侧也可以写 `draft: Works/xxx.md`,脚本两边都认。三种状态和标法见 `Meta/RESOLVER.md`。

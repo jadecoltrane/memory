@@ -74,6 +74,46 @@ def drafted() -> dict:
     return out
 
 
+PUB = re.compile(r"^(?:published|已发)[::]\s*(.+?)\s*$", re.M)
+
+
+def works_published() -> dict:
+    """稿子里写了 `published: 渠道 日期` 的,把它带给这篇稿子的所有来源笔记。
+
+    返回 {笔记路径: (渠道日期, 稿子路径)} —— 让用户只在稿子那边标一次。
+    """
+    out = {}
+    works = ROOT / "Works"
+    if not works.exists():
+        return out
+    for w in sorted(works.rglob("*.md")):
+        if w.name == "README.md":
+            continue
+        text = w.read_text(encoding="utf-8")
+        m = PUB.search(text)
+        if not m:
+            continue
+        rel = w.relative_to(ROOT).as_posix()
+        for ref in set(REF.findall(text)):
+            out.setdefault(ref, (m.group(1), rel))
+    return out
+
+
+def write_published(note: str, value: str) -> bool:
+    """往笔记 frontmatter 补一行 published:。已经有了就不动。"""
+    p = ROOT / note
+    if not p.exists():
+        return False
+    text = p.read_text(encoding="utf-8")
+    if not text.startswith("---\n"):
+        return False
+    end = text.index("\n---", 4)
+    if re.search(r"^published[::]", text[4:end], re.M):
+        return False
+    p.write_text(text[:end] + f"\npublished: {value}" + text[end:], encoding="utf-8")
+    return True
+
+
 def orphan_works() -> list:
     """没标任何来源笔记的稿子 —— 不是错,但值得看得见。"""
     works = ROOT / "Works"
@@ -85,6 +125,19 @@ def orphan_works() -> list:
 
 def main():
     show_all = "--all" in sys.argv
+    do_sync = "--sync" in sys.argv
+
+    pending = {n: v for n, v in works_published().items()
+               if not frontmatter((ROOT / n).read_text(encoding="utf-8")).get("published")
+               and (ROOT / n).exists()}
+    if pending:
+        print(f"\n🔁 稿子里标了已发、笔记还没同步({len(pending)} 篇)\n")
+        for note, (value, src) in pending.items():
+            done = write_published(note, value) if do_sync else False
+            print(f"  {'✅ 已写入' if done else '待写入'}  {note}  ← {value}  ({src})")
+        if not do_sync:
+            print("\n  加 --sync 把这些写进笔记 frontmatter")
+
     notes, published, concepts, writing = [], [], [], []
     drafts = drafted()
 
