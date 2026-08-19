@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """挑出「可以发出去」的候选笔记 —— 机械筛选,不靠人想得起来。
 
-背景(2026-08-02):库里从来只有入口没有出口。同一天写的
-Notes/动机与自我改变/大量输入没有输出 给了三个练习,但那三个全是私下的,
-没有一个会让东西离开硬盘。这个脚本补的就是最后那一步。
+一条笔记有三种状态,这个脚本把它们分开:
+- **未动**:符合筛选标准、`Works/` 里没有稿子、也没发过 → 真正的候选
+- **在写**:`Works/` 里已经有稿子引用了它 → 从候选池里挪走,不再重复提醒
+- **已发**:frontmatter 有 `published:` → 不再进候选
+
+「在写」怎么认出来:扫 `Works/**/*.md` 正文里出现的 `Notes/xxx.md`、
+`Concepts/xxx.md` 纯文本路径(Works/ 引用笔记本来就是这个写法,见
+`Works/README.md`);笔记那侧也可以主动写一行 `draft: Works/xxx.md`,两边都认。
 
 筛选标准(三个都要满足):
 - tier: 核心 —— 只有自己的判断值得发,外部知识发出去没有辨识度
-- 有「开放问题」或 ⚠️ 张力标记 —— 用户的写作定位是「从冲突开始,不要从观点开始」
-  (Notes/写作/小红书写作定位),而张力/未解问题天生就是冲突形状的
-- published 为空 —— 发过的不再进候选
+- 有「开放问题」或 ⚠️ 张力标记 —— 写作定位是「从冲突开始,不要从观点开始」,
+  而张力/未解问题天生就是冲突形状的
+- 没在写、也没发过
 
-概念页单独列一组:一个概念页的「定义 + 开放问题」本身就是一篇短文的骨架,
-而且「同一个概念被我自己评价了三次、三次相反」这种东西全网只有这个库里有。
+概念页单独列一组:一个概念页的「定义 + 开放问题」本身就是一篇短文的骨架。
 
 用法:python3 Meta/scripts/publish_candidates.py [--all]
       --all 连同已发布的一起列出,用来回看发过什么
@@ -52,9 +56,37 @@ def hooks(text: str) -> list:
     return out
 
 
+REF = re.compile(r"(?:Notes|Concepts)/[^\s)）】」』,,;;、\]]+\.md")
+
+
+def drafted() -> dict:
+    """Works/ 里每篇稿子引用了哪些笔记 —— 返回 {笔记路径: [稿子路径, ...]}。"""
+    out = {}
+    works = ROOT / "Works"
+    if not works.exists():
+        return out
+    for w in sorted(works.rglob("*.md")):
+        if w.name == "README.md":
+            continue
+        rel = w.relative_to(ROOT).as_posix()
+        for ref in set(REF.findall(w.read_text(encoding="utf-8"))):
+            out.setdefault(ref, []).append(rel)
+    return out
+
+
+def orphan_works() -> list:
+    """没标任何来源笔记的稿子 —— 不是错,但值得看得见。"""
+    works = ROOT / "Works"
+    if not works.exists():
+        return []
+    return [w.relative_to(ROOT).as_posix() for w in sorted(works.rglob("*.md"))
+            if w.name != "README.md" and not REF.search(w.read_text(encoding="utf-8"))]
+
+
 def main():
     show_all = "--all" in sys.argv
-    notes, published, concepts = [], [], []
+    notes, published, concepts, writing = [], [], [], []
+    drafts = drafted()
 
     for p in sorted((ROOT / "Notes").rglob("*.md")):
         text = p.read_text(encoding="utf-8")
@@ -63,13 +95,24 @@ def main():
         if fm.get("published"):
             published.append((rel, fm["published"]))
             continue
+        # 笔记自己写的 draft: 和 Works/ 里扫出来的引用,合成一份去向
+        where = list(drafts.get(rel, []))
+        if fm.get("draft") and fm["draft"] not in where:
+            where.append(fm["draft"])
+        if where:
+            writing.append((rel, where))
+            continue
         if fm.get("tier") != "核心" or not TENSION.search(text):
             continue
         notes.append((rel, hooks(text)))
 
     for p in sorted((ROOT / "Concepts").glob("*.md")):
         text = p.read_text(encoding="utf-8")
+        rel = p.relative_to(ROOT).as_posix()
         if frontmatter(text).get("published"):
+            continue
+        if rel in drafts:
+            writing.append((rel, drafts[rel]))
             continue
         m = re.search(r"^## 开放问题.*$", text, re.M)
         if not m:
@@ -91,11 +134,24 @@ def main():
         for q in qs[:2]:
             print(f"      ↳ {q[:110]}")
 
+    print(f"\n✍️ 在写:Works/ 里已经有稿子({len(writing)} 篇,不用再提醒)\n")
+    for rel, where in writing:
+        print(f"  {rel}")
+        for w in where:
+            print(f"      → {w}")
+
+    loose = orphan_works()
+    if loose:
+        print(f"\n📄 Works/ 里没标来源笔记的稿子({len(loose)} 篇)\n")
+        for w in loose:
+            print(f"  {w}")
+
     if show_all or published:
         print(f"\n✅ 已发布({len(published)} 篇)\n")
         for rel, where in published:
             print(f"  {where}  {rel}")
-    print("\n发出去之后在那篇 frontmatter 加一行,例:published: 小红书 2026-08-10\n")
+    print("\n开始写就在稿子里写一行来源路径(例:Notes/思考/xxx.md),那篇笔记会从候选挪进「在写」;")
+    print("发出去之后在笔记 frontmatter 加一行,例:published: 小红书 2026-08-10\n")
 
 
 if __name__ == "__main__":
