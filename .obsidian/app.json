@@ -16,7 +16,7 @@
     "assets/",
     "LICENSE"
   ],
-  "showUnsupportedFiles": true,
+  "showUnsupportedFiles": false,
   "promptDelete": false,
   "alwaysUpdateLinks": true,
   "defaultViewMode": "source",
