@@ -278,6 +278,47 @@ def check_extension_cap(path: Path):
         )
 
 
+# 「X 月 X 日补」这类词是"只在末尾接一段、没重读全文"留下的疤。补内容本身没问题,
+# 问题是补完不重排——同一个判断散在三处、后面那段推翻前面那段还都留着。
+# 词表只收那些除了交代"这个文件怎么长出来的"之外没有别的意思的说法。
+APPEND_SCAR = re.compile(
+    r"后续扩编|未改名|已删(?![除掉])|"
+    r"(?:当天|同日|后来|之后|随后|次日)补(?![充偿])|"
+    r"再补一?[条句段]|新增[::]|补记[::]"
+)
+# Profile/ 的规矩最严:只写结论本身,不写依据、日期、出处(CLAUDE.md「用户画像」)。
+# 这里只查日期,因为只有它是机器认得准的;依据和出处交给 GC 人工看
+BODY_DATE = re.compile(r"20\d{2}\s*[-/年]\s*\d{1,2}\s*[-/月]\s*\d{1,2}")
+
+
+def strip_frontmatter(text: str) -> str:
+    m = re.match(r"^---\n.*?\n---\n", text, re.S)
+    return text[m.end():] if m else text
+
+
+def check_append_scars(path: Path):
+    """全库通用:正文里的追加痕迹。"""
+    rel = path.relative_to(ROOT).as_posix()
+    body = strip_frontmatter(path.read_text(encoding="utf-8"))
+    hits = sorted(set(APPEND_SCAR.findall(body)))
+    if hits:
+        warnings.append(
+            f"{rel}: 正文有追加痕迹「{'」「'.join(hits)}」——补完要重读全文重排,"
+            f"不是在末尾接一段(CLAUDE.md「默认不写日期」)"
+        )
+
+
+def check_profile_body_dates(path: Path):
+    """只管 Profile/:画像页正文一个日期都不该有,frontmatter 的 updated 除外。"""
+    rel = path.relative_to(ROOT).as_posix()
+    text = path.read_text(encoding="utf-8")
+    if parse_frontmatter(text).get("type") == "data":
+        return  # 习惯打卡那种数据文件,整篇都是日期
+    n = len(BODY_DATE.findall(strip_frontmatter(text)))
+    if n:
+        warnings.append(f"{rel}: 画像正文里有 {n} 处日期——画像只写结论本身,不写依据、日期、出处")
+
+
 def check_dataviewjs_blocks(path: Path) -> None:
     """dataviewjs 代码块不能以行注释结尾。
 
@@ -310,6 +351,9 @@ def main():
         for p in sorted(d.rglob("*.md")):
             check_links(p, paths, basenames, aliases, archived)
             check_frontmatter(p)
+            check_append_scars(p)
+            if top == "Profile":
+                check_profile_body_dates(p)
             if top == "Notes":
                 check_note_links(p)
                 check_naked_concepts(p, concept_names)
