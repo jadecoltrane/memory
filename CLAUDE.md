@@ -10,6 +10,8 @@
 
 **找东西用 `python3 Meta/scripts/search_memory.py 查询词`**,别拿 grep 硬翻——它按相关度排序,还会顺着概念页的 aliases 扩展查询。
 
+**代码注释只写「这行为什么必须这么写」,不写「上一版错在哪」**——判据同上:把"第一版/当时/我"去掉后这句还成立就是理由,留;不成立就是过程,删。
+
 **写完记忆必须跑 `python3 Meta/scripts/lint_memory.py`**(幽灵概念不算断链;警告都是真工单,能修就修,修不动留给 GC)。
 
 **推送冲突分两种。** ①**git 会报的**:机器人侧已兜住(`concurrency` 排队 + `git_push_retry.sh` 先 rebase 再推、真冲突一律 abort 重跑,绝不自己选边)。②**git 不会报的**:Obsidian Git 的 vault backup 可能用旧版工作区覆盖新提交,纯快进、零冲突、pull 一声不吭,没有任何自动告警。**用户说「我推了一下」时必须自己 fetch 对一眼 diff**,别只看有没有冲突标记;**先看清对面改了什么再合**,不盲目 pull 或 `--force`。
