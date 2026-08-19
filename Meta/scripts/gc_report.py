@@ -94,6 +94,31 @@ def main():
     section("📖 参考层已到期", expired, "问用户一句「这条还要吗」;要就把 expires 往后推,不要就归档。核心/方法层不进这个名单")
     section("📖 参考层还没设 expires", no_exp, "补一个日期即可,不用现在判断内容")
 
+    # 2b. 归档候选:参考层 + 来源没核实过 + 长期没在工作台露过面。
+    #     expires 到期是唯一的机械出口,但两年才到一次;这一档补的是"还没到期、
+    #     但也确实没在被用"的那批。只列,不动 —— 归不归档是用户的决定。
+    corpus = {q: q.read_text(encoding="utf-8")
+              for q in ROOT.rglob("*.md")
+              if not any(x.startswith(".") for x in q.relative_to(ROOT).parts)
+              and q.relative_to(ROOT).parts[0] not in ("Archive", "Sources", "Meta")}
+    arch = []
+    for p_ in notes:
+        f = fm(corpus.get(p_, p_.read_text(encoding="utf-8")))
+        if f.get("tier") != "参考" or str(f.get("verified", "")).lower() != "false":
+            continue
+        seen = date_of(f.get("last-surfaced", ""))
+        if seen is not None and (TODAY - seen).days < 60:
+            continue
+        # 还得没人在用它:入链 ≤1 才算真沉底。只靠"没被抽中过"会把整个参考层都报出来
+        inbound = sum(1 for q, t in corpus.items() if q != p_ and p_.stem in t)
+        if inbound > 1:
+            continue
+        why = "还没被抽中过" if seen is None else f"上次露面 {seen}"
+        arch.append(f"{p_.relative_to(ROOT).as_posix()}({why},入链 {inbound})")
+    section("🗄 归档候选", arch,
+            "判据:参考层 + verified: false(来源没核实过)+ 长期没在工作台露面 + 入链 ≤1(没人在用)。"
+            "⚠️ 这不是删除名单,也不要自行归档——把这几条写进待裁决 issue 问一句「这几条还要留在库里吗」")
+
     # 3. 超长笔记
     fat = []
     for p in notes:

@@ -30,6 +30,10 @@
 2. `git mv Notes/xxx/yyy.md Archive/`,frontmatter 加一行 `archived: YYYY-MM-DD` 和一行 `archived-reason:`(一句话,为什么退役)。
 3. 重跑 `build_memory_index.py`(它只扫 Profile/Concepts/notes,归档的自动从索引消失)+ `lint_memory.py` 确认 0 错。
 
+## 你自己在 Obsidian 里直接拖进来也行
+
+拖完 lint 会警告两件事,按提示补完就行:①这个文件在 `Archive/` 里但缺 `archived:` / `archived-reason:`;②还有双链指着它(短写法 `[[某笔记]]` 也认得出来,不用写全路径)。两条都是警告不是错误,不会拦住 CI,但会一直提醒到补完为止。
+
 ## 找回来
 
 `git mv Archive/yyy.md Notes/对应分类/`,把第 1 步的链接改回去。没有任何东西丢失。

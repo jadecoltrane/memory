@@ -83,7 +83,32 @@ def collect_pages():
     return paths, basenames, aliases
 
 
-def check_links(path: Path, paths, basenames, aliases):
+def archived_pages() -> set:
+    """Archive/ 里的文件名 —— 用来认出"短写法双链其实指着归档件"。"""
+    d = ROOT / "Archive"
+    return {q.stem for q in d.rglob("*.md") if q.name != "README.md"} if d.is_dir() else set()
+
+
+def check_archive_frontmatter():
+    """手动拖进 Archive/ 的文件不会有 archived 字段 —— 这条把它捞出来。
+
+    Obsidian 里直接拖动是零成本的,但归档动作要求补 archived / archived-reason,
+    否则事后没人说得清它是哪天为什么退役的,也分不清是归档还是随手挪错了。
+    """
+    d = ROOT / "Archive"
+    if not d.is_dir():
+        return
+    for q in sorted(d.rglob("*.md")):
+        if q.name == "README.md":
+            continue
+        fm = parse_frontmatter(q.read_text(encoding="utf-8"))
+        missing = [k for k in ("archived", "archived-reason") if not fm.get(k)]
+        if missing:
+            rel = q.relative_to(ROOT).as_posix()
+            warnings.append(f"{rel}: 在 Archive/ 里但缺 {'、'.join(missing)}(手动挪进来的?补上再提交)")
+
+
+def check_links(path: Path, paths, basenames, aliases, archived=frozenset()):
     rel = path.relative_to(ROOT).as_posix()
     for target in WIKILINK.findall(path.read_text(encoding="utf-8")):
         target = target.strip()
@@ -97,6 +122,10 @@ def check_links(path: Path, paths, basenames, aliases):
         if "/" in target:
             if target not in paths:
                 errors.append(f"{rel}: 断链 [[{target}]]")
+        elif target in archived and target not in aliases:
+            # 短写法([[某笔记]] 不带目录)照样能解析到 Archive/ 里,上面那条只拦得住
+            # 写全路径的。Obsidian 默认就用最短写法,不补这条,手动归档是完全静默的。
+            warnings.append(f"{rel}: 双链 [[{target}]] 指着 Archive/ 里的文件,改成纯文本路径并注明「已归档」")
         elif target not in basenames and target not in aliases:
             errors.append(f"{rel}: 断链 [[{target}]](按文件名和 aliases 都没找到)")
 
@@ -246,12 +275,14 @@ def check_dataviewjs_blocks(path: Path) -> None:
 def main():
     paths, basenames, aliases = collect_pages()
     concept_names = collect_concept_names()
+    archived = archived_pages()
+    check_archive_frontmatter()
     for top in ["Notes", "Concepts", "Profile"]:
         d = ROOT / top
         if not d.is_dir():
             continue
         for p in sorted(d.rglob("*.md")):
-            check_links(p, paths, basenames, aliases)
+            check_links(p, paths, basenames, aliases, archived)
             check_frontmatter(p)
             if top == "Notes":
                 check_note_links(p)
@@ -263,7 +294,7 @@ def main():
     for name in LINK_CHECK_FILES:
         p = ROOT / name
         if p.exists():
-            check_links(p, paths, basenames, aliases)
+            check_links(p, paths, basenames, aliases, archived)
             check_dataviewjs_blocks(p)
 
     for w in warnings:
