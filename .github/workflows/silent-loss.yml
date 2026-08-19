@@ -1,0 +1,67 @@
+# 静默丢失哨兵:每次推到 main 后检查有没有大批记忆凭空消失。
+#
+# 防的是 Obsidian Git 的 vault backup 用旧版工作区覆盖新提交——纯快进、零冲突、
+# pull 不报错,没有这个 workflow 就完全没有声音。
+#
+# 判据在 Meta/scripts/check_silent_loss.py 里,只看两个机械事实(删除数、索引里
+# 解释不了的跌幅),不看是谁提交的。上一代哨兵靠 author email 认机器人,而 AI 的
+# 提交 author 和手动提交一模一样,于是每次重建索引都自己报自己,误报把真报警淹了。
+#
+# 触发了只开 issue、不拦任何东西:这是提醒人去看一眼,不是质量门禁。
+
+name: 静默丢失哨兵
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 要能访问 before 那个提交,浅克隆不够
+
+      - name: 比对这次推送
+        id: check
+        run: |
+          BEFORE="${{ github.event.before }}"
+          # 新分支或强推时 before 可能是全 0 或已不可达,退回到 HEAD~1
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            BEFORE="HEAD~1"
+          fi
+          set +e
+          OUT=$(python3 Meta/scripts/check_silent_loss.py "$BEFORE" "${{ github.sha }}")
+          CODE=$?
+          set -e
+          echo "$OUT"
+          {
+            echo "report<<EOF"
+            echo "$OUT"
+            echo "EOF"
+            echo "hit=$CODE"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 开 issue
+        if: steps.check.outputs.hit == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 不 @ 的话 bot 用 GITHUB_TOKEN 开的 issue 不会推送通知给仓库主人
+          {
+            echo "cc @${{ github.repository_owner }}"
+            echo
+            echo "${{ steps.check.outputs.report }}"
+            echo
+            echo "提交:${{ github.sha }}"
+          } > body.md
+          gh issue create \
+            --title "⚠️ 疑似静默覆盖:$(date -u +%Y-%m-%d)" \
+            --repo "${{ github.repository }}" \
+            --body-file body.md
