@@ -27,6 +27,11 @@
 # 所以上面那条"按 backup 前扫一眼改动列表"现在是唯一的防线,别省。
 .obsidian/plugins/obsidian-git/data.json
 
+# recent-files 插件的「最近打开」列表:点开任何一个笔记它就重写一次,和上面
+# workspace.json 同类——纯设备本地状态,两台设备各是各的。2026-08-19 它实际挡住过
+# 一次 git merge --abort(index not uptodate),而且每次 vault backup 都跟着提交一次
+.obsidian/plugins/recent-files-obsidian/data.json
+
 # Claudian 插件的本地配置与会话缓存,不是记忆内容,不入库
 claudian-settings.json
 conv-*.json
