@@ -396,12 +396,14 @@ const addAction = (glyph, label, cls, run) => {
 
 addAction("＋", "新建笔记", "wb-newnote", newNote);
 
-// 「写日记」挂进页面最后那个 📔 今日日记 井,而不是写进 markdown——日更每天会重写这个井,
+// 「写日记」挂进页面最后那个 📔 日记井,而不是写进 markdown——日更每天会重写这个井,
 // 写进去的按钮会被当成用户手写的日记正文原文归档掉(见 Meta/WORKBENCH.md 归档流程第 2 条)
 const wbRoot = dv.container.closest(".workbench") ?? document;
 const mountDiaryBtn = () => {
   const well = [...wbRoot.querySelectorAll('.callout[data-callout="write"]')].find((el) =>
-    el.querySelector(".callout-title-inner")?.textContent.includes("今日日记")
+    // 认 📔 而不是认标题文字:标题改过一次措辞(今日日记 → 今天有什么新鲜事呀),
+    // 认死文字的话按钮会静默不出现。write 类 callout 里只有日记井带这个 emoji
+    el.querySelector(".callout-title-inner")?.textContent.includes("📔")
   );
   if (!well) return false;
   const host = well.querySelector(".callout-content") ?? well;
@@ -679,6 +681,6 @@ if (!file) {
 > > [!note]- 💬 我的看法
 > > 我倾向于觉得光问"我现在爽不爽"靠不住,真正该看的是控制感:面对同一个以前会让你刷到停不下来的东西(同一个游戏、同一类短视频),现在能不能主动关掉,还是照样上头。阈值真的降低了,应该是先松动失控感,而不是爽感变淡——爽感变淡也可能只是因为你已经开始有意回避这类东西,不代表阈值真的变了。[推论]
 
-> [!write] 📔 今日日记
+> [!write] 📔 今天有什么新鲜事呀
 >
 >
