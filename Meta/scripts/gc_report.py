@@ -25,7 +25,9 @@ WIKILINK = re.compile(r"\[\[([^\]|#^]+)")
 
 PROFILE_STALE_DAYS = 90   # 画像页多久没动就提一句
 MAX_NOTE_LINES = 150      # 超过就提示瘦身或拆分
-MAX_PROFILE_LINES = 40    # 画像页超过就提示瘦身——它只该有结论,长了必然是混进了过程
+# 画像页不查行数:一页画像可以又长又全是结论(⚠️ 张力、原话、并列不调和的两条都该在),
+# 拿长度报警等于鼓励删掉该留的。画像真正的病是过程叙述和 AI 自己的推演,
+# 那两样 lint 里有精确检查(check_profile_body_dates / check_profile_ai_traces)
 MERGE_SHARED_CONCEPTS = 3 # 同文件夹内共享这么多概念 → 同族合并候选
 OPEN_Q_BACKLOG = 4        # 单个概念页开放问题堆到这个数 → 提示挑一条推进
 STALE_SURFACED_DAYS = 120 # 这么久没被工作台抽中过 → 列出来(不建议删,只是让它被看见)
@@ -123,20 +125,12 @@ def main():
             "判据:参考层 + verified: false(来源没核实过)+ 长期没在工作台露面 + 入链 ≤1(没人在用)。"
             "⚠️ 这不是删除名单,也不要自行归档——把这几条写进待裁决 issue 问一句「这几条还要留在库里吗」")
 
-    # 3. 超长笔记与超长画像页。画像页阈值低得多:它只写结论,一条一行,
-    #    长出来的部分几乎一定是过程叙述或 AI 自己的推演混进去了
+    # 3. 超长笔记
     fat = []
     for p in notes:
         n = len(p.read_text(encoding="utf-8").splitlines())
         if n > MAX_NOTE_LINES:
             fat.append(f"{p.relative_to(ROOT).as_posix()}:{n} 行")
-    for p in sorted((ROOT / "Profile").glob("*.md")):
-        text = p.read_text(encoding="utf-8")
-        if fm(text).get("type") == "data":
-            continue
-        n = len(text.splitlines())
-        if n > MAX_PROFILE_LINES:
-            fat.append(f"{p.relative_to(ROOT).as_posix()}:{n} 行(画像页,阈值 {MAX_PROFILE_LINES})")
     section("笔记偏长,考虑瘦身或拆分", fat,
             "瘦身规则:保留用户原话/结论/⚠️张力,把 AI 的论证过程压成一句。手册型笔记可以豁免")
 
