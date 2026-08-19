@@ -401,13 +401,17 @@ addAction("＋", "新建笔记", "wb-newnote", newNote);
 const wbRoot = dv.container.closest(".workbench") ?? document;
 const mountDiaryBtn = () => {
   const well = [...wbRoot.querySelectorAll('.callout[data-callout="write"]')].find((el) =>
-    // 认 📔 而不是认标题文字:标题改过一次措辞(今日日记 → 今天有什么新鲜事呀),
-    // 认死文字的话按钮会静默不出现。write 类 callout 里只有日记井带这个 emoji
+    // 认 📔 而不是认标题文字:标题措辞改过一轮,认死文字的话按钮会静默不出现
+    // (不报错、就是不出来)。write 类 callout 里只有日记井带这个 emoji
     el.querySelector(".callout-title-inner")?.textContent.includes("📔")
   );
   if (!well) return false;
   const host = well.querySelector(".callout-content") ?? well;
   if (host.querySelector(".wb-diary-btn")) return true;
+  // 提示语和按钮一样走 JS 注入、不写进 markdown:日更会把井里的文字当成用户
+  // 手写的日记正文原样归档进 Diary/(见 Meta/WORKBENCH.md 归档流程第 2 条),
+  // 写进 markdown 的提示语每天都会被抄进当月文件里
+  host.prepend(host.createEl("div", { cls: "wb-diary-hint", text: "今天有什么新鲜事呀" }));
   // 不写"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
   // 两个入口叠在一起容易让人以为点了才能在上面的井里写
   const btn = host.createEl("button", { cls: "wb-diary-btn" });
@@ -681,6 +685,6 @@ if (!file) {
 > > [!note]- 💬 我的看法
 > > 我倾向于觉得光问"我现在爽不爽"靠不住,真正该看的是控制感:面对同一个以前会让你刷到停不下来的东西(同一个游戏、同一类短视频),现在能不能主动关掉,还是照样上头。阈值真的降低了,应该是先松动失控感,而不是爽感变淡——爽感变淡也可能只是因为你已经开始有意回避这类东西,不代表阈值真的变了。[推论]
 
-> [!write] 📔 今天有什么新鲜事呀
+> [!write] 📔 今日日记
 >
 >

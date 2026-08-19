@@ -433,6 +433,12 @@
 
 /* 整条虚线框而不是一颗小胶囊:井本来就是一片空白,小按钮飘在里面像个孤儿;
    整条同时也是"这块区域归日记管"的暗示。虚线=空槽,悬停实线+微微抬起表示可点 */
+.workbench .wb-diary-hint {
+  margin: 0 0 2px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
 .workbench .wb-diary-btn {
   display: flex;
   align-items: center;
