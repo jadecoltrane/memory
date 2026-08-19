@@ -89,6 +89,27 @@ def archived_pages() -> set:
     return {q.stem for q in d.rglob("*.md") if q.name != "README.md"} if d.is_dir() else set()
 
 
+def check_git_quotepath():
+    """脚本里调 git 却没加 core.quotepath=false —— 这类失败是无声的。
+
+    本库文件名基本全是中文,git 默认把路径转义成 "Notes/\346\200\235…"(带引号),
+    于是所有按路径前缀判断的逻辑一律失配:不抛异常、不报错,只是一条都匹配不上,
+    脚本照常跑完并输出"0 个"。靠人记得加参数守不住,交给这条机械检查。
+    """
+    d = ROOT / "Meta" / "scripts"
+    if not d.is_dir():
+        return
+    for q in sorted(d.glob("*.py")):
+        text = q.read_text(encoding="utf-8")
+        calls = re.findall(r"\[\s*[\"']git[\"'][^\]]*\]", text)
+        for call in calls:
+            if "quotepath" not in call and "quotepath" not in text:
+                warnings.append(
+                    f"{q.relative_to(ROOT).as_posix()}: 调 git 没加 "
+                    f"`-c core.quotepath=false`,中文路径会被转义成 \\346… 而静默失配")
+                break
+
+
 def check_archive_frontmatter():
     """手动拖进 Archive/ 的文件不会有 archived 字段 —— 这条把它捞出来。
 
@@ -277,6 +298,7 @@ def main():
     concept_names = collect_concept_names()
     archived = archived_pages()
     check_archive_frontmatter()
+    check_git_quotepath()
     for top in ["Notes", "Concepts", "Profile"]:
         d = ROOT / top
         if not d.is_dir():
