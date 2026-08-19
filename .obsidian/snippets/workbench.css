@@ -687,9 +687,15 @@
   color: var(--text-normal);
 }
 
-/* 这里原来用 CSS counter 编号,实测两道问题都显示 1:阅读视图给每个顶层块单独做了
-   隔离(contain / content-visibility 那一类),计数器作用域被逐块切断,每块都从头数。
-   改成数"前面有几个带 ask 的兄弟块",不依赖计数器 */
+/* 问题卡右上角的编号。这里坏过三次,每次都是因为编号依赖 DOM 结构:
+   ① CSS counter —— 阅读视图给每个顶层块做隔离,计数器作用域被逐块切断,每块从头数;
+   ② 只数 .markdown-preview-sizer 的兄弟块 —— 默认视图是 source,压根没匹配上;
+   ③ 补上 .cm-sizer 之后手机上还是恒为 1 —— 实时预览里 callout 挂在 .cm-content 下面,
+      不是 .cm-sizer 的直接子元素;而且 CodeMirror 会把滚出视口的行整个从 DOM 删掉,
+      "前面有几个兄弟"本身就会随滚动位置变。
+   所以编号改成从 callout metadata 读(生成时写 `> [!ask|2]`,Obsidian 落成
+   data-callout-metadata):**它和 DOM 结构、视图模式、虚拟滚动全都无关**。
+   下面数兄弟的规则留着兜底——万一哪天生成器忘了写 |N,退回旧行为,不至于没有数字。 */
 .workbench .callout[data-callout="ask"] {
   position: relative;
 }
@@ -708,13 +714,19 @@
 /* 两个容器都要写:阅读视图是 .markdown-preview-sizer,实时预览/源码模式是 .cm-sizer。
    只写前者的话,默认视图是 source 的人看到的两张卡都是 1(选择器压根没匹配上) */
 .workbench :is(.markdown-preview-sizer, .cm-sizer) > *:has(.callout[data-callout="ask"])
-  ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]::after {
+  ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]:not([data-callout-metadata])::after {
   content: "2";
 }
 .workbench :is(.markdown-preview-sizer, .cm-sizer) > *:has(.callout[data-callout="ask"])
   ~ *:has(.callout[data-callout="ask"])
-  ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]::after {
+  ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]:not([data-callout-metadata])::after {
   content: "3";
+}
+
+/* 写了 |N 就以它为准。放在兄弟规则之后,靠 :not([data-callout-metadata]) 分流,
+   两边互斥,不用比特异性 */
+.workbench .callout[data-callout="ask"][data-callout-metadata]::after {
+  content: attr(data-callout-metadata);
 }
 
 .workbench .callout a {
