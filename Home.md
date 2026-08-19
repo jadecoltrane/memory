@@ -408,10 +408,6 @@ const mountDiaryBtn = () => {
   if (!well) return false;
   const host = well.querySelector(".callout-content") ?? well;
   if (host.querySelector(".wb-diary-btn")) return true;
-  // 提示语和按钮一样走 JS 注入、不写进 markdown:日更会把井里的文字当成用户
-  // 手写的日记正文原样归档进 Diary/(见 Meta/WORKBENCH.md 归档流程第 2 条),
-  // 写进 markdown 的提示语每天都会被抄进当月文件里
-  host.prepend(host.createEl("div", { cls: "wb-diary-hint", text: "今天有什么新鲜事呀" }));
   // 不写"写日记":井本身就是写日记的地方,这条是另一条路(直接进当月文件),
   // 两个入口叠在一起容易让人以为点了才能在上面的井里写
   const btn = host.createEl("button", { cls: "wb-diary-btn" });

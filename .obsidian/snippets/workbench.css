@@ -433,12 +433,6 @@
 
 /* 整条虚线框而不是一颗小胶囊:井本来就是一片空白,小按钮飘在里面像个孤儿;
    整条同时也是"这块区域归日记管"的暗示。虚线=空槽,悬停实线+微微抬起表示可点 */
-.workbench .wb-diary-hint {
-  margin: 0 0 2px;
-  font-size: 0.9em;
-  color: var(--text-muted);
-}
-
 .workbench .wb-diary-btn {
   display: flex;
   align-items: center;
@@ -711,11 +705,13 @@
   opacity: 0.07;
   pointer-events: none;
 }
-.workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"])
+/* 两个容器都要写:阅读视图是 .markdown-preview-sizer,实时预览/源码模式是 .cm-sizer。
+   只写前者的话,默认视图是 source 的人看到的两张卡都是 1(选择器压根没匹配上) */
+.workbench :is(.markdown-preview-sizer, .cm-sizer) > *:has(.callout[data-callout="ask"])
   ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]::after {
   content: "2";
 }
-.workbench .markdown-preview-sizer > *:has(.callout[data-callout="ask"])
+.workbench :is(.markdown-preview-sizer, .cm-sizer) > *:has(.callout[data-callout="ask"])
   ~ *:has(.callout[data-callout="ask"])
   ~ *:has(.callout[data-callout="ask"]) .callout[data-callout="ask"]::after {
   content: "3";
