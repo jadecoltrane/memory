@@ -488,7 +488,6 @@
   border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
   box-shadow: var(--wb-shadow);
-  animation: wb-rise-in 0.35s var(--wb-ease) backwards;
 }
 
 .workbench .wb-panel-search {
@@ -822,65 +821,6 @@
   background: linear-gradient(90deg, var(--wb-accent-line), transparent);
 }
 
-@keyframes wb-rise-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.workbench .markdown-preview-sizer > *,
-.workbench .cm-sizer > * {
-  animation: wb-rise-in 0.5s var(--wb-ease) backwards;
-}
-.workbench .markdown-preview-sizer > *:nth-child(1),
-.workbench .cm-sizer > *:nth-child(1) { animation-delay: 0.02s; }
-.workbench .markdown-preview-sizer > *:nth-child(2),
-.workbench .cm-sizer > *:nth-child(2) { animation-delay: 0.08s; }
-.workbench .markdown-preview-sizer > *:nth-child(3),
-.workbench .cm-sizer > *:nth-child(3) { animation-delay: 0.14s; }
-.workbench .markdown-preview-sizer > *:nth-child(4),
-.workbench .cm-sizer > *:nth-child(4) { animation-delay: 0.20s; }
-.workbench .markdown-preview-sizer > *:nth-child(5),
-.workbench .cm-sizer > *:nth-child(5) { animation-delay: 0.26s; }
-.workbench .markdown-preview-sizer > *:nth-child(6),
-.workbench .cm-sizer > *:nth-child(6) { animation-delay: 0.32s; }
-.workbench .markdown-preview-sizer > *:nth-child(7),
-.workbench .cm-sizer > *:nth-child(7) { animation-delay: 0.38s; }
-.workbench .markdown-preview-sizer > *:nth-child(8),
-.workbench .cm-sizer > *:nth-child(8) { animation-delay: 0.44s; }
-.workbench .markdown-preview-sizer > *:nth-child(n+9),
-.workbench .cm-sizer > *:nth-child(n+9) { animation-delay: 0.5s; }
-@media (prefers-reduced-motion: reduce) {
-  .workbench .markdown-preview-sizer > *,
-  .workbench .cm-sizer > * {
-    animation: none !important;
-  }
-}
-
-/* dataviewjs 的卡片是页面渲染完之后才插进来的,那时上面那套入场动画早跑完了,
-   所以画作和随机重逢一直是"啪"地出现。给它们各挂一份,插入的那一刻才开始跑 */
-.workbench .wb-daily-painting,
-.workbench .wb-reunion {
-  animation: wb-rise-in 0.45s var(--wb-ease) backwards;
-}
-
-/* 滑到视口里才渐显。第 9 块往后打开时基本都在折叠线以下,原来那套 load 动画
-   早跑完了,滑下去只会看到它们已经杵在那儿。view() 是滚动驱动时间轴:
-   元素进视口的过程就是动画进度。不支持就整段跳过,不会把内容留在透明状态 */
-@supports (animation-timeline: view()) {
-  .workbench .markdown-preview-sizer > *:nth-child(n+9) {
-    animation: wb-rise-in 1s linear both;
-    animation-delay: 0s;
-    animation-timeline: view();
-    animation-range: entry 0% entry 55%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .workbench .wb-daily-painting,
-  .workbench .wb-reunion {
-    animation: none !important;
-  }
-}
-
 /* ---------- ✅ 每日习惯 ---------- */
 
 .workbench .wb-habits {
@@ -889,7 +829,6 @@
   border: 1px solid var(--wb-hairline);
   border-radius: var(--wb-radius);
   box-shadow: var(--wb-shadow-flat);
-  animation: wb-rise-in 0.45s var(--wb-ease) backwards;
 }
 .workbench .wb-habits-count {
   margin-left: auto;
@@ -969,6 +908,3 @@
 .workbench .wb-habit-grads:empty { display: none; }
 .workbench .wb-habit-grads-names { color: var(--text-muted); }
 
-@media (prefers-reduced-motion: reduce) {
-  .workbench .wb-habits { animation: none !important; }
-}

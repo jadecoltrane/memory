@@ -9,7 +9,7 @@
 **笔记面板**点分类卡打开的是 `Meta/笔记数据库.base`(Obsidian 原生 Bases,每次点开笔记面板都会重新生成,视图按 `Notes/` 当前的子文件夹实时同步)——这是生成产物,不是用户笔记,不要手动编辑,也不要把它当成笔记内容去索引/复核。格式保持现有 callout 语法(`[!today]` `[!draw]` `[!seed]` `[!ask]` `[!note]` `[!write]` `[!clash]`);frontmatter 保留 `cssclasses: workbench`,但每次**必须把 `generated:` 更新为当天日期**——横幅心跳报警靠它判断每日任务是否还活着(超 48 小时未更新显红),这是"系统静默挂掉"唯一的可见信号。云端日更由 workflow 前置 sed 步骤机械写入,AI 原样保留即可;只有人工/本地更新工作台时才需要手动改这个字段。
 
 
-**视觉基调**:由横幅画作在客户端用 canvas 取主色调自动算出(色相分桶投票,不用平均色——平均会把所有颜色互相抵消成灰)、写进 CSS 变量 `--wb-accent`,CSS 里再用 OKLCH 相对颜色语法派生锁定亮度的文字色/柔光底。
+**视觉基调**:由横幅画作在客户端用 canvas 取主色调自动算出(色相分桶投票,不用平均色——平均会把所有颜色互相抵消成灰)、写进 CSS 变量 `--wb-accent`,CSS 里再用 OKLCH 相对颜色语法派生锁定亮度的文字色/柔光底。**卡片不做入场渐显**(2026-08-19 用户要求):`wb-rise-in` 那套 keyframes、逐块延迟阶梯、滚动驱动的 `animation-timeline: view()` 已整体从 `workbench.css` 删除,别再加回来——悬停/按下的 transition 不在此列,保留。
 
 **🖼 每日画作**(横幅背景):每天生成时用执行器可用的网页搜索工具挑一幅著名画作(Claude 自动化使用 WebSearch/WebFetch),优先 Wikimedia Commons 上 `upload.wikimedia.org` 开头的直链图片(几百 KB 到 2MB 的中等分辨率版本,不要几十 MB 的原图),写入 frontmatter 三个字段:`painting-url`、`painting-title`(画名·作者)、`painting-intro`(一句话简介)。**链接必须是当次搜索/抓取真实确认可访问的**。选画不许与近半年重复(查重命令:`git log --since='180 days ago' --format= -p -- Home.md | grep '^+painting-title'`,输出仅每天一行画名,省 token 且永久封顶;不要跑裸的 `git log -p`),并在时代/地域/风格上轮换,不要连续几天同一风格。**2026-08-02 起:第一个候选验证失败(链接打不开、不是直链等)不算完事,换一幅候选继续试,最多尝试 3 幅**;3 幅都验证失败才保留前一天的值,不编造 URL——保留是最后的兜底,不是遇到第一次失败就退回的默认选项。
 
