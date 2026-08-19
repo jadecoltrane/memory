@@ -37,6 +37,11 @@ conv-*.jsonl
 .gc-prior-adjudication.md
 .gc-close-issue.txt
 
+# 每周选题运行时的临时文件(候选池 dump / 最近推过的名单 / issue 正文),同上
+.pick-candidates.txt
+.pick-history.txt
+.pick-issue.txt
+
 # macOS 系统文件
 .DS_Store
 conflict-files-obsidian-git.md

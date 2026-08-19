@@ -6,7 +6,7 @@
 
 **目录**:`Notes/` 收藏、`Concepts/` 概念枢纽、`Profile/` 画像、`Meta/` 规则与脚本、`Sources/` 导出原文与对照表(**原样未脱敏,仓库必须始终 private**)、`Archive/` 退役区、`Works/` 成品与草稿、`Diary/` 发生过的事(后两个和 Notes/ 平级:稿子和日记都不是笔记,不需要 tier 和 frontmatter)。`Sources/`、`Archive/`、`Works/` 不进索引/图谱/lint;**`Diary/` 只把最近一个月列进索引**(AI 要看得见、可据此分析;更早的月份索引里只留一行说明,需要时自己翻 `Diary/<年>/`),但不进图谱、不受 lint 管、**GC 绝对不许去重合并**。规则在各自 README。
 
-**六个 Actions 自动跑,AI 不用手动补**:索引重建、每周 GC、待裁决回复、工作台日更、lint 体检、每周备份(全量 bundle,不做异地镜像)。细节在各 `.github/workflows/*.yml` 文件头。另有两个不产出内容的:`auto-rerun.yml` 在日更/GC 失败时兜底重跑,`silent-loss.yml` 每次推 main 后查有没有大批记忆凭空消失(判据只看删除数和索引里解释不了的跌幅,不看是谁提交的),命中就开 issue。
+**七个 Actions 自动跑,AI 不用手动补**:索引重建、每周 GC、待裁决回复、工作台日更、lint 体检、每周备份(全量 bundle,不做异地镜像)、每周选题(周五 19:00 推一条可写的主题进 `Works/选题/`,规矩在 `Works/README.md`)。细节在各 `.github/workflows/*.yml` 文件头。另有两个不产出内容的:`auto-rerun.yml` 在日更/GC 失败时兜底重跑,`silent-loss.yml` 每次推 main 后查有没有大批记忆凭空消失(判据只看删除数和索引里解释不了的跌幅,不看是谁提交的),命中就开 issue。
 
 **找东西用 `python3 Meta/scripts/search_memory.py 查询词`**,别拿 grep 硬翻——它按相关度排序,还会顺着概念页的 aliases 扩展查询。
 

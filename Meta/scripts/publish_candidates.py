@@ -18,8 +18,14 @@
 
 概念页单独列一组:一个概念页的「定义 + 开放问题」本身就是一篇短文的骨架。
 
-用法:python3 Meta/scripts/publish_candidates.py [--all]
-      --all 连同已发布的一起列出,用来回看发过什么
+`Works/选题/` 是每周机器人推的选题卡,不算稿子——它引用来源笔记只是为了说明推荐理由,
+**不能当成"在写"**。否则机器人每推一条,候选池就少一条,推满一年池子自己空了,
+而用户一个字都没写。它要变成"在写",得由用户把文件 `git mv` 出这个目录(见 Works/README.md)。
+
+用法:python3 Meta/scripts/publish_candidates.py [--all|--sync|--count]
+      --all   连同已发布的一起列出,用来回看发过什么
+      --count 只吐 `notes=N concepts=M`,给 weekly-writing-pick.yml 判断池子空没空。
+              有这个口子是因为拿 grep 去匹配上面那些人读的标题,标题一改就静默失灵
 """
 
 import re
@@ -58,17 +64,25 @@ def hooks(text: str) -> list:
 
 REF = re.compile(r"(?:Notes|Concepts)/[^\s)）】」』,,;;、\]]+\.md")
 
+PICKS = "Works/选题"  # 机器人推的选题卡,不是稿子;理由见模块开头
+
+
+def works_md():
+    """Works/ 下算作「稿子」的文件 —— 排除 README 和机器人的选题卡。"""
+    works = ROOT / "Works"
+    if not works.exists():
+        return
+    for w in sorted(works.rglob("*.md")):
+        rel = w.relative_to(ROOT).as_posix()
+        if w.name == "README.md" or rel.startswith(PICKS + "/"):
+            continue
+        yield w, rel
+
 
 def drafted() -> dict:
     """Works/ 里每篇稿子引用了哪些笔记 —— 返回 {笔记路径: [稿子路径, ...]}。"""
     out = {}
-    works = ROOT / "Works"
-    if not works.exists():
-        return out
-    for w in sorted(works.rglob("*.md")):
-        if w.name == "README.md":
-            continue
-        rel = w.relative_to(ROOT).as_posix()
+    for w, rel in works_md():
         for ref in set(REF.findall(w.read_text(encoding="utf-8"))):
             out.setdefault(ref, []).append(rel)
     return out
@@ -83,17 +97,11 @@ def works_published() -> dict:
     返回 {笔记路径: (渠道日期, 稿子路径)} —— 让用户只在稿子那边标一次。
     """
     out = {}
-    works = ROOT / "Works"
-    if not works.exists():
-        return out
-    for w in sorted(works.rglob("*.md")):
-        if w.name == "README.md":
-            continue
+    for w, rel in works_md():
         text = w.read_text(encoding="utf-8")
         m = PUB.search(text)
         if not m:
             continue
-        rel = w.relative_to(ROOT).as_posix()
         for ref in set(REF.findall(text)):
             out.setdefault(ref, (m.group(1), rel))
     return out
@@ -116,21 +124,18 @@ def write_published(note: str, value: str) -> bool:
 
 def orphan_works() -> list:
     """没标任何来源笔记的稿子 —— 不是错,但值得看得见。"""
-    works = ROOT / "Works"
-    if not works.exists():
-        return []
-    return [w.relative_to(ROOT).as_posix() for w in sorted(works.rglob("*.md"))
-            if w.name != "README.md" and not REF.search(w.read_text(encoding="utf-8"))]
+    return [rel for w, rel in works_md() if not REF.search(w.read_text(encoding="utf-8"))]
 
 
 def main():
     show_all = "--all" in sys.argv
     do_sync = "--sync" in sys.argv
+    count_only = "--count" in sys.argv
 
     pending = {n: v for n, v in works_published().items()
                if not frontmatter((ROOT / n).read_text(encoding="utf-8")).get("published")
                and (ROOT / n).exists()}
-    if pending:
+    if pending and not count_only:
         print(f"\n🔁 稿子里标了已发、笔记还没同步({len(pending)} 篇)\n")
         for note, (value, src) in pending.items():
             done = write_published(note, value) if do_sync else False
@@ -175,6 +180,10 @@ def main():
         qs = [ln.strip()[2:] for ln in (rest[: nxt.start()] if nxt else rest).splitlines() if ln.startswith("- ")]
         if qs:
             concepts.append((p.relative_to(ROOT).as_posix(), qs))
+
+    if count_only:
+        print(f"notes={len(notes)} concepts={len(concepts)}")
+        return
 
     print(f"\n🧠 核心层里带冲突、还没发过的笔记({len(notes)} 篇)\n")
     for rel, hs in notes:

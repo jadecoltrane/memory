@@ -1,4 +1,4 @@
-# 兜底:工作台日更 / 每周 Memory GC 遇到 Claude OAuth 或 runner 的瞬时故障时自动重跑。
+# 兜底:工作台日更 / 每周 Memory GC / 每周选题 遇到 Claude OAuth 或 runner 的瞬时故障时自动重跑。
 # Claude 步骤不负责提交;待裁决 issue 按日期去重,所以重跑可安全恢复。
 # run_attempt < 3 防死循环。
 #
@@ -12,7 +12,7 @@ name: 失败自动重跑
 
 on:
   workflow_run:
-    workflows: ["工作台日更", "每周 Memory GC"]
+    workflows: ["工作台日更", "每周 Memory GC", "每周选题"]
     types: [completed]
 
 permissions:
