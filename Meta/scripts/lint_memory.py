@@ -159,6 +159,10 @@ def check_frontmatter(path: Path):
         if fm.get("type") != "concept":
             errors.append(f"{rel}: 概念页 frontmatter 必须是 type: concept")
     elif top == "Profile":
+        # Profile/ 下允许放 type: data 的数据文件(习惯打卡这类),它们不是画像页,
+        # 没有 updated 语义也不该被催更新——只有真画像页才吃下面两条
+        if fm.get("type") == "data":
+            return
         if fm.get("type") != "profile":
             errors.append(f"{rel}: 画像页 frontmatter 必须是 type: profile")
         if "updated" not in fm:

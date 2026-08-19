@@ -74,7 +74,10 @@ def main():
     # 1. 画像过期
     stale = []
     for p in sorted((ROOT / "Profile").glob("*.md")):
-        d = date_of(fm(p.read_text(encoding="utf-8")).get("updated", ""))
+        f = fm(p.read_text(encoding="utf-8"))
+        if f.get("type") == "data":
+            continue  # 数据文件(习惯打卡)天天被工作台写,updated 不是"这条结论多久没复核"
+        d = date_of(f.get("updated", ""))
         if d and (TODAY - d).days > PROFILE_STALE_DAYS:
             stale.append(f"{p.name}:{(TODAY - d).days} 天没动(updated: {d})")
     section("画像页可能过期", stale, "只是提醒去看一眼,没变化就把 updated 往前挪,不用硬改内容")
@@ -162,7 +165,10 @@ def main():
     # 5b. 画像正文里已经过期的时间承诺
     promises = []
     for p in sorted((ROOT / "Profile").glob("*.md")):
-        for line in p.read_text(encoding="utf-8").splitlines():
+        text = p.read_text(encoding="utf-8")
+        if fm(text).get("type") == "data":
+            continue  # 打卡记录里全是日期,逐行扫会把每一条流水都报成"过期承诺"
+        for line in text.splitlines():
             m = DEADLINE.search(line)
             if not m:
                 continue

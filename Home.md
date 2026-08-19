@@ -430,9 +430,9 @@ if (window.MutationObserver) {
 ```
 
 ```dataviewjs
-// ✅ 每日习惯:清单、频率、已练成、打卡记录全在 Meta/习惯打卡.md,纯 markdown。
+// ✅ 每日习惯:清单、频率、已练成、打卡记录全在 Profile/习惯打卡.md,纯 markdown。
 // 不用 localStorage——换设备就没了,而且 AI 看不见;工作台只是它的一个界面
-const HABITS_PATH = "Meta/习惯打卡.md";
+const HABITS_PATH = "Profile/习惯打卡.md";
 const DAY = 86400000;
 const d2s = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const TODAY = d2s(new Date());
