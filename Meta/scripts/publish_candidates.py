@@ -88,7 +88,10 @@ def drafted() -> dict:
     return out
 
 
-PUB = re.compile(r"^(?:published|已发)[::]\s*(.+?)\s*$", re.M)
+# 冒号后面只吃空格和 tab,不吃换行:原来写 \s* 时,一行空的 `published:` 会让它
+# 跨行吃到下一行,把 frontmatter 的结束符 `---` 当成渠道名,--sync 时静默写进
+# 来源笔记的 frontmatter。开头要求 \S 保证空值不匹配
+PUB = re.compile(r"^(?:published|已发)[::][ \t]*(\S.*?)[ \t]*$", re.M)
 
 
 def works_published() -> dict:
