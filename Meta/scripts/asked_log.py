@@ -3,17 +3,22 @@
 
 问题重复是靠"我记得问过"防不住的:每天的生成是一次无记忆的冷启动,
 上一期问了什么只有翻 Home.md 的 git 历史才知道,而问题正文是长段落、
-翻起来贵。所以把每道题压成一行(日期|编号|来源|主旨|状态)存进
+翻起来贵。所以把每道题压成一行(日期|编号|来源|轴|主旨|状态)存进
 Meta/问题台账.md,读一行就够判断重不重。
 
-两张网互补,单独任何一张都漏:
+三张网互补,单独任何一张都漏:
 - 来源窗口:同一个概念页/笔记 SOURCE_WINDOW_DAYS 天内不许再出题。
   防的是措辞完全不同、但绕着同一篇打转的题。
-- 主旨相似度:字符二元组 Dice 系数 ≥ SIM_THRESHOLD 判为同题。
+- 主旨相似度:字符 Dice 系数 ≥ SIM_THRESHOLD 判为同题。
   防的是换了来源、问的还是同一件事。
+- 轴:两道题可以一个字都不重叠、来源也不同,问的还是同一件事(实测:
+  "事后如释重负分不分得出真逃避" 和 "当下爽不爽还是交出去被检验更说明在往前走"
+  字面相似度只有 0.1,是同一个问题的两种问法)。字面比对到此为止,所以每道题
+  必须自报一个轴,同轴 AXIS_WINDOW_DAYS 天内不许再出,同轴的旧题一律打印出来
+  让出题人自己比。
 
 用法:
-  asked_log.py            打印近 90 天台账 + 当前禁用来源/禁用主旨(出题前必读)
+  asked_log.py            打印近 90 天台账 + 轴的冷热 + 禁用来源/封存主旨(出题前必读)
   asked_log.py --check    校验 Home.md 当期的两行台账(CI 兜底,不通过退出码 1)
 """
 
@@ -29,6 +34,11 @@ HOME = ROOT / "Home.md"
 
 LIST_WINDOW_DAYS = 90  # 打印和查重的回看窗口
 SOURCE_WINDOW_DAYS = 14  # 同一来源的冷却期
+# 轴的冷却期比来源短得多:一天两道、轴表十几个,按 7 天算槽位刚好卡死,
+# 5 天才留得出余量。轴不是用来卡死出题的,是用来把"又绕回这一片"变得看得见。
+AXIS_WINDOW_DAYS = 5
+AXIS_BUSY_30D = 3  # 近 30 天同轴到这个数就提醒(不阻断)
+AXIS_MAX_30D = 6  # 近 30 天同轴到这个数就阻断:轴表十几个还能吃掉六格,是真偏食了
 # 阈值按现有台账实测标定:真正重复的两道(2026-08-13/08-20 那对情绪分析题、
 # 08-04/08-06 那对天赋题)落在 0.49~0.61,不相干的最高只到 0.33。定在 0.45 是
 # 这两堆之间那道缝;抬高就漏、压低就开始误伤正常出题。
@@ -39,14 +49,36 @@ SIM_THRESHOLD = 0.45
 EXEMPT_SOURCES = ("自由题", "Diary")
 STATUSES = ("待答", "已答", "未答", "封存")
 
-ROW = re.compile(r"^-\s*(\d{4}-\d{2}-\d{2})\s*\|\s*(问题[12])\s*\|(.+?)\|(.+?)\|(.+?)$")
+ROW = re.compile(
+    r"^-\s*(\d{4}-\d{2}-\d{2})\s*\|\s*(问题[12])\s*\|(.+?)\|(.+?)\|(.+?)\|(.+?)$"
+)
+# 轴表:文件里「## 轴表」那节的 `- 轴名:说明` 行。轴名从文件读、不写死在这里,
+# 是为了让加轴这个动作必须落在台账上——出题时临时造一个轴名就绕开了同轴查重。
+AXIS_DEF = re.compile(r"^-\s*([^:：\n]+)[:：]")
 
 
 class Entry:
-    def __init__(self, date, num, source, gist, status, lineno):
+    def __init__(self, date, num, source, axis, gist, status, lineno):
         self.date, self.num = date, num
-        self.source, self.gist, self.status = source, gist, status
+        self.source, self.axis = source, axis
+        self.gist, self.status = gist, status
         self.lineno = lineno
+
+
+def axis_table() -> list:
+    if not LEDGER.exists():
+        return []
+    body = LEDGER.read_text(encoding="utf-8").split("## 轴表", 1)
+    if len(body) < 2:
+        return []
+    names = []
+    for line in body[1].splitlines():
+        if line.startswith("## ") or line.startswith("- 20"):
+            break
+        m = AXIS_DEF.match(line.strip())
+        if m:
+            names.append(m.group(1).strip())
+    return names
 
 
 def load() -> list:
@@ -61,15 +93,17 @@ def load() -> list:
         if not m:
             bad.append(f"{i}: {line.strip()[:60]}")
             continue
-        d, num, source, gist, status = m.groups()
+        d, num, source, axis, gist, status = m.groups()
         try:
             date = datetime.date.fromisoformat(d)
         except ValueError:
             bad.append(f"{i}: 日期不合法 {d}")
             continue
-        entries.append(Entry(date, num, source.strip(), gist.strip(), status.strip(), i))
+        entries.append(
+            Entry(date, num, source.strip(), axis.strip(), gist.strip(), status.strip(), i)
+        )
     if bad:
-        print("⚠️  台账里有解析不了的行(格式:- 日期 | 问题N | 来源 | 主旨 | 状态):")
+        print("⚠️  台账里有解析不了的行(格式:- 日期 | 问题N | 来源 | 轴 | 主旨 | 状态):")
         for b in bad:
             print(f"    {b}")
     return entries
@@ -135,6 +169,20 @@ def do_list(entries: list) -> None:
             if not exempt(s)
         }
     )
+    print(f"\n# 轴的冷热(挑定轴之后,把该轴下面那几道旧题逐条读一遍,读着像就换)")
+    for axis in axis_table():
+        same = [e for e in entries if e.axis == axis]
+        last = max((e.date for e in same), default=None)
+        d30 = len([e for e in same if (now - e.date).days < 30])
+        if last is None:
+            print(f"- {axis}:没问过")
+            continue
+        gap = (now - last).days
+        flag = "🚫 冷却中" if gap < AXIS_WINDOW_DAYS else ("⚠️ 近 30 天偏多" if d30 >= AXIS_BUSY_30D else "")
+        print(f"- {axis}:近 30 天 {d30} 次,最近 {last}({gap} 天前){' ' + flag if flag else ''}")
+        for e in sorted(same, key=lambda x: x.date)[-4:]:
+            print(f"    · {e.date} {e.gist}")
+
     print(f"\n# 禁用来源(近 {SOURCE_WINDOW_DAYS} 天出过题,今天不许再用)")
     print("\n".join(f"- {s}" for s in blocked) if blocked else "-(无)")
 
@@ -148,8 +196,9 @@ def do_list(entries: list) -> None:
         for e in pending:
             print(f"- 第 {e.lineno} 行:{e.date} {e.num} {e.gist}")
 
-    print(f"\n# 规矩:同一来源 {SOURCE_WINDOW_DAYS} 天内不重出;主旨和上面任何一条撞车都作废;")
-    print(f"#       轮不开就出 自由题 / Diary(不占冷却期);写完跑 asked_log.py --check")
+    print(f"\n# 规矩:同一来源 {SOURCE_WINDOW_DAYS} 天内不重出;同一个轴 {AXIS_WINDOW_DAYS} 天内不重出;")
+    print(f"#       主旨和上面任何一条撞车都作废;字面查重是下限不是上限,同轴旧题自己再比一遍;")
+    print(f"#       轮不开就出 自由题 / Diary(不占来源冷却期);写完跑 asked_log.py --check")
 
 
 def do_check(entries: list) -> int:
@@ -181,6 +230,33 @@ def do_check(entries: list) -> int:
                     f"{e.num} 来源 {s} 在 {last.date} 刚出过题({(now - last.date).days} 天前,"
                     f"冷却 {SOURCE_WINDOW_DAYS} 天):换个来源,或出自由题"
                 )
+
+    table = axis_table()
+    for e in cur:
+        if e.axis not in table:
+            errors.append(
+                f"{e.num} 的轴「{e.axis}」不在 Meta/问题台账.md 的轴表里:"
+                f"要么归到已有的轴,要么先把新轴加进轴表(别为了绕开同轴查重造新名)"
+            )
+            continue
+        same = [p for p in past if p.axis == e.axis]
+        recent = [p for p in same if (now - p.date).days < AXIS_WINDOW_DAYS]
+        if recent:
+            last = max(recent, key=lambda x: x.date)
+            errors.append(
+                f"{e.num} 的轴「{e.axis}」{last.date} 刚问过({(now - last.date).days} 天前,"
+                f"冷却 {AXIS_WINDOW_DAYS} 天):{last.gist}"
+            )
+        d30 = len([p for p in same if (now - p.date).days < 30]) + 1
+        if d30 >= AXIS_MAX_30D:
+            errors.append(f"{e.num} 的轴「{e.axis}」近 30 天已经是第 {d30} 道:换个轴,问得太偏食了")
+        elif d30 >= AXIS_BUSY_30D:
+            warnings.append(
+                f"{e.num} 的轴「{e.axis}」近 30 天第 {d30} 道:"
+                f"把同轴那几道旧题读一遍,确认这道真问的不是同一件事"
+            )
+    if len(cur) == 2 and cur[0].axis == cur[1].axis:
+        errors.append(f"今天两道题在同一个轴「{cur[0].axis}」上:两道题要问不同的方面")
 
     # 封存的不受窗口限制:那是"问透了"的结论,永久有效
     pool = [p for p in past if (now - p.date).days <= LIST_WINDOW_DAYS or p.status == "封存"]
