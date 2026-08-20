@@ -51,6 +51,7 @@ jobs:
             - 🖼 每日画作:用 WebSearch 挑一幅名画(优先 upload.wikimedia.org 直链,几百 KB 到 2MB),更新 frontmatter 的 painting-url/painting-title/painting-intro。**第一个候选验证失败(链接打不开、找不到真实直链等)就换一幅候选再试,最多尝试 3 幅**;3 幅都失败才保留前一天的值,不编造 URL——保留前一天是最后兜底,不是遇到第一次失败就退回的默认选项。**不许重复近半年用过的画**(先跑 `git log --since='180 days ago' --format= -p -- Home.md | grep '^+painting-title'`,输出只有每天一行画名,别跑裸的 git log -p),并在时代/地域/风格上轮换,不要连续几天同一风格
             - 生成前先分别处理上一期问题1、问题2 各自 ✍️ 区块里用户写的回答:哪道有回答就判断值不值得记——**只有值得留存的**才提炼进相关 Notes/ 笔记或概念页(不再无条件归档,也不再建 Notes/问答/ 按月文件),并在新一期 🎴 上方各生成一个 🥊 碰撞 callout 回应(两道都答了就两个)
             - ❓ 今天的问题现在是两道(问题1/问题2),分别嵌在 [!today]+ 折叠壳里(标题留空,不要写"今日内容"字样),每道各自的 [!ask]+[!note]-+回答区 三段结构独立成组,尽量来自不同概念/笔记。**问题卡写成 `[!ask|1]`、`[!ask|2]`**,右上角的编号从这个 metadata 读,漏了会两张都显示 1
+            - **出题前先跑 `python3 Meta/scripts/asked_log.py`**(近 90 天问过的题 + 禁用来源 + 封存主旨),**同一来源 14 天内不许再出题、主旨撞车的换掉**;轮不开就出 `自由题` 或从近 7 天 Diary/ 出题(这两类不占冷却期)。出完题往 `Meta/问题台账.md` 追加两行、把上一期两行的状态从 `待答` 结成 `已答`/`未答`/`封存`,然后跑 `python3 Meta/scripts/asked_log.py --check`,**不通过就换题重出**(后置体检会再跑一次,不通过整天日更失败)
             - 🌱 延伸写完后同步追加进对应概念页的延伸区(标注 [事实]/[推论]/[观点],注明未联网核查,禁止编造引用链接)
             - 📔 今日日记(页面最后那个 [!write] 井,井里保持空白——提示语由 dataviewjs 注入,别写进 markdown):**先读上一版里用户写的内容**,有就原文照抄追加进 `Diary/<年>/<年>-<月>.md`,段标题用**上一版 frontmatter 的 generated 日期**(不是今天),然后把新一期的井重新留空;空井跳过。不改写不提炼,归档了哪一天要写进 commit message。详细规则和错行排查见 Meta/WORKBENCH.md
             - 改动了 Concepts/、Notes/ 或 Diary/ 就运行 python3 Meta/scripts/build_memory_index.py 重建索引(后置步骤也会跑一次,这里是双保险)
@@ -61,10 +62,14 @@ jobs:
           claude_args: |
             --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch"
 
+      # 提问查重放在提交之前:重复的问题一旦推上去,用户第二天才看得见,而那时
+      # 台账已经把这道题记成"问过了",下一期反而会拿它当合法的去重依据。
+      # 拦在这里失败,auto-rerun.yml 会整轮重跑,新一轮生成时台账没变、题会换。
       - name: 重建索引并体检
         run: |
           python3 Meta/scripts/build_memory_index.py
           python3 Meta/scripts/lint_memory.py
+          python3 Meta/scripts/asked_log.py --check
 
       - name: 有变化就提交推送
         env:
