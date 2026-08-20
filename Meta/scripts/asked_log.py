@@ -24,6 +24,7 @@ Meta/问题台账.md,读一行就够判断重不重。
 
 import datetime
 import re
+import subprocess
 import sys
 import unicodedata
 from pathlib import Path
@@ -39,6 +40,10 @@ SOURCE_WINDOW_DAYS = 14  # 同一来源的冷却期
 AXIS_WINDOW_DAYS = 5
 AXIS_BUSY_30D = 3  # 近 30 天同轴到这个数就提醒(不阻断)
 AXIS_MAX_30D = 6  # 近 30 天同轴到这个数就阻断:轴表十几个还能吃掉六格,是真偏食了
+# 轴表是活的:库长出新主题就该加轴,种子那批只是从既有的题倒推出来的起步集合。
+# 但"加轴"同时也是绕开同轴查重最省事的路(每道题都起个新轴,就永远撞不上车),
+# 所以放开加、卡住加的速度:一个月新起三个轴以上,基本只可能是在绕路。
+AXIS_NEW_MAX_30D = 3
 # 阈值按现有台账实测标定:真正重复的两道(2026-08-13/08-20 那对情绪分析题、
 # 08-04/08-06 那对天赋题)落在 0.49~0.61,不相干的最高只到 0.33。定在 0.45 是
 # 这两堆之间那道缝;抬高就漏、压低就开始误伤正常出题。
@@ -54,7 +59,7 @@ ROW = re.compile(
 )
 # 轴表:文件里「## 轴表」那节的 `- 轴名:说明` 行。轴名从文件读、不写死在这里,
 # 是为了让加轴这个动作必须落在台账上——出题时临时造一个轴名就绕开了同轴查重。
-AXIS_DEF = re.compile(r"^-\s*([^:：\n]+)[:：]")
+AXIS_DEF = re.compile(r"^-\s*([^:：\n]+)[:：]\s*(.*)$")
 
 
 class Entry:
@@ -65,20 +70,55 @@ class Entry:
         self.lineno = lineno
 
 
-def axis_table() -> list:
+def axis_table() -> dict:
+    """轴名 -> (说明, 在台账里的行号)。行号是给 git blame 用的。"""
     if not LEDGER.exists():
-        return []
-    body = LEDGER.read_text(encoding="utf-8").split("## 轴表", 1)
-    if len(body) < 2:
-        return []
-    names = []
-    for line in body[1].splitlines():
+        return {}
+    text = LEDGER.read_text(encoding="utf-8")
+    if "## 轴表" not in text:
+        return {}
+    offset = text[: text.index("## 轴表")].count("\n") + 1
+    table = {}
+    # split 后的第一段是「## 轴表」这行的残余,所以从标题行本身的行号数起
+    for i, line in enumerate(text.split("## 轴表", 1)[1].splitlines(), start=offset):
         if line.startswith("## ") or line.startswith("- 20"):
             break
         m = AXIS_DEF.match(line.strip())
         if m:
-            names.append(m.group(1).strip())
-    return names
+            table[m.group(1).strip()] = (m.group(2).strip(), i)
+    return table
+
+
+def axis_added_on(table: dict) -> dict:
+    """每个轴是哪天进的表——问 git blame,不设"加入日期"字段。
+
+    字段要靠出题人自己填,而这里恰恰是他有动机填错的地方(把新起的轴写成老轴,
+    加轴限速就形同虚设)。blame 记的是这一行真正进仓库的时间,填不了。"""
+    if not table:
+        return {}
+    lines = sorted(v[1] for v in table.values())
+    # quotepath=false:台账的文件名是中文,不关的话 blame 输出里的路径会被转义
+    cmd = ["git", "-c", "core.quotepath=false", "blame", "--date=short", "-p",
+           f"-L{lines[0]},{lines[-1]}", "--", str(LEDGER.relative_to(ROOT))]
+    try:
+        out = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    if out.returncode != 0:
+        return {}  # 没有 git 历史(浅克隆、新仓库)就不做限速,别把日更卡死
+    added, cur = {}, None
+    for line in out.stdout.splitlines():
+        if line.startswith("author-time "):
+            cur = datetime.date.fromtimestamp(int(line.split()[1]))
+        elif line.startswith("\t") and cur:
+            m = AXIS_DEF.match(line[1:].strip())
+            if m and m.group(1).strip() in table:
+                added[m.group(1).strip()] = cur
+    # 起步那批轴是一次性倒推出来的,不算"新起的轴";只有后来加的才受限速管
+    if added:
+        founding = min(added.values())
+        added = {k: v for k, v in added.items() if v > founding}
+    return added
 
 
 def load() -> list:
@@ -183,6 +223,19 @@ def do_list(entries: list) -> None:
         for e in sorted(same, key=lambda x: x.date)[-4:]:
             print(f"    · {e.date} {e.gist}")
 
+    table = axis_table()
+    used = {e.axis for e in entries}
+    added = axis_added_on(table)
+    unused = [a for a in table if a not in used]
+    once = sorted({e.axis for e in entries if len([x for x in entries if x.axis == e.axis]) == 1})
+    fresh = sorted(k for k, v in added.items() if (now - v).days < 30)
+    print("\n# 轴表卫生(轴表是活的:库长出新主题就加轴,重了就合并——每周 GC 顺手看一眼)")
+    print(f"- 表里共 {len(table)} 个轴,近 30 天新加 {len(fresh)} 个"
+          f"{'(' + '、'.join(fresh) + ')' if fresh else ''},上限 {AXIS_NEW_MAX_30D}")
+    print(f"- 还没用过的轴:{'、'.join(unused) if unused else '(无)'}")
+    print(f"- 只用过一次的轴:{'、'.join(once) if once else '(无)'}"
+          "  ← 堆多了通常是在给同一件事换名字,GC 时合并")
+
     print(f"\n# 禁用来源(近 {SOURCE_WINDOW_DAYS} 天出过题,今天不许再用)")
     print("\n".join(f"- {s}" for s in blocked) if blocked else "-(无)")
 
@@ -232,13 +285,31 @@ def do_check(entries: list) -> int:
                 )
 
     table = axis_table()
+    added = axis_added_on(table)
+    fresh = [k for k, v in added.items() if (now - v).days < 30]
     for e in cur:
         if e.axis not in table:
             errors.append(
-                f"{e.num} 的轴「{e.axis}」不在 Meta/问题台账.md 的轴表里:"
-                f"要么归到已有的轴,要么先把新轴加进轴表(别为了绕开同轴查重造新名)"
+                f"{e.num} 的轴「{e.axis}」还不在 Meta/问题台账.md 的轴表里。"
+                f"库里长出新主题时加轴是正常的:先往《轴表》补一行(轴名 + 一句说明),再用它出题。"
+                f"但先确认它不是已有轴换个名——同轴查重全靠这一栏"
             )
             continue
+        if e.axis not in [p.axis for p in past]:  # 这个轴第一次被用来出题
+            for name, (desc, _) in table.items():
+                if name == e.axis:
+                    continue
+                sim = similarity(f"{e.axis}{table[e.axis][0]}", f"{name}{desc}")
+                if sim >= SIM_THRESHOLD:
+                    warnings.append(
+                        f"{e.num} 新用的轴「{e.axis}」和已有的「{name}」说明高度重合"
+                        f"(相似度 {sim:.2f}):确认这不是同一个轴换了名字,是的话合并掉"
+                    )
+            if len(fresh) >= AXIS_NEW_MAX_30D:
+                errors.append(
+                    f"近 30 天已经新起了 {len(fresh)} 个轴({'、'.join(fresh)}),"
+                    f"上限 {AXIS_NEW_MAX_30D}:这道题先归到已有的轴,轴表要动留给每周 GC 统一整理"
+                )
         same = [p for p in past if p.axis == e.axis]
         recent = [p for p in same if (now - p.date).days < AXIS_WINDOW_DAYS]
         if recent:
