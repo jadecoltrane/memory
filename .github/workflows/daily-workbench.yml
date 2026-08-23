@@ -56,7 +56,7 @@ jobs:
             - 📔 今日日记(页面最后那个 [!write] 井,井里保持空白——提示语由 dataviewjs 注入,别写进 markdown):**先读上一版里用户写的内容**,有就原文照抄追加进 `Diary/<年>/<年>-<月>.md`,段标题用**上一版 frontmatter 的 generated 日期**(不是今天),然后把新一期的井重新留空;空井跳过。不改写不提炼,归档了哪一天要写进 commit message。详细规则和错行排查见 Meta/WORKBENCH.md
             - 改动了 Concepts/、Notes/ 或 Diary/ 就运行 python3 Meta/scripts/build_memory_index.py 重建索引(后置步骤也会跑一次,这里是双保险)
             - 控制成本:只读 Meta/index.md 和选中的少数文件;抽卡去重优先看各篇 frontmatter 的 `last-surfaced:`(没有该字段的排最前),git log 只作兜底。**抽中的每篇都要写上 `last-surfaced: 当天日期`**
-            - 文件顶部 frontmatter 之后那一行 `🎴 … ❓ … #工作台` 是给 iOS 主屏小组件看的纯文本速览,由后置脚本机械重写,**原样保留、不要手改**
+            - 文件顶部 frontmatter 之后那五行(`🎴 …#工作台` 开头、末尾两行零宽空格占位)是给 iOS 主屏小组件看的纯文本速览,由后置脚本机械重写,**原样保留、不要手改**
             - ## 标题、所有 dataviewjs 区块(横幅、信息条、今日内容折叠壳外层结构、统计卡、🎲 随机重逢卡、✅ 每日习惯卡,含心跳报警)、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses;generated 已由前置步骤写好当天日期,原样保留。改动固定展示结构或视觉风格前保持克制:非用户明确要求就保留现有结构与视觉、不要自行加回或改动既有元素(历次否决/撤销过的方案可查 git 历史)
 
             只修改工作区文件,不要自行 commit 或 push;后续步骤会统一校验、提交并推送。
@@ -64,10 +64,10 @@ jobs:
             --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch"
 
       # iOS 主屏小组件只读原始文本、不跑插件,所以文件开头那段 dataviewjs 就是小组件上的一屏代码。
-      # 这一步把当天工作台压成一行人话写进 Home.md 顶部(页面里由 workbench.css 按行尾标签藏掉,视觉不变)。
+      # 这一步把当天工作台压成固定五行人话写进 Home.md 顶部(页面里由 workbench.css 整段藏掉,视觉不变)。
       # 放在生成之后、提交之前,而不是写进 prompt:小组件第一行带日期,是"日更还在跑"在手机上
       # 唯一看得见的信号,这类兜底不挂在 prompt 遵守上。
-      - name: 写入小组件速览行
+      - name: 写入小组件速览段
         run: python3 Meta/scripts/update_widget_block.py
 
       # 提问查重放在提交之前:重复的问题一旦推上去,用户第二天才看得见,而那时
