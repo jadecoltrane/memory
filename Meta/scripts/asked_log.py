@@ -84,7 +84,7 @@ def axis_table() -> dict:
         if line.startswith("## ") or line.startswith("- 20"):
             break
         m = AXIS_DEF.match(line.strip())
-        if m:
+        if m and "**" not in m.group(1) and "`" not in m.group(1):
             table[m.group(1).strip()] = (m.group(2).strip(), i)
     return table
 
