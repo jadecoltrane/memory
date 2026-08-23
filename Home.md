@@ -6,6 +6,11 @@ painting-title: 桑德罗·波提切利《维纳斯的诞生》(意大利文艺�
 painting-intro: 波提切利受美第奇家族赞助圈里新柏拉图主义思潮影响,用异教神话题材画维纳斯乘贝壳诞生海面的场景,是文艺复兴早期少见的大幅非宗教题材蛋彩画,现藏佛罗伦萨乌菲兹美术馆。
 ---
 
+🎴 8/23 关系变淡不是变质而是养分被提取完 #工作台
+· 笔记一开始给了两套解释关系变淡的说法,一套是…
+❓ 深度工作 · 神经可塑性
+​
+​
 ```dataviewjs
 const bar = dv.container.createEl("div", { cls: "wb-infobar" });
 const left = bar.createEl("div");

@@ -922,3 +922,22 @@
 .workbench .wb-habit-grads:empty { display: none; }
 .workbench .wb-habit-grads-names { color: var(--text-muted); }
 
+
+/* 📱 小组件速览段:文件开头那五行纯文本是给 iOS 主屏小组件读的(小组件跑在系统扩展
+   进程里,不加载插件也不套主题 CSS,只念笔记原始文本),页面里不该看见它。
+   末两行是零宽空格占位——小组件有多少空间就往下念多少,速览不占满一屏,剩下的空间
+   它就接着念 ```dataviewjs。
+   阅读视图整段是一个 <p>(行间没有空行,所以不会拆成多段),靠里面的 #工作台 标签认出来;
+   实时预览按行切 DOM,只能从带标签那行开始用 + .cm-line 一级级往下数——
+   **数四级 = update_widget_block.py 里的 WIDGET_LINES 减一,两边改一个必须改另一个**。
+   兄弟选择器只能往后数不能往前,所以标签固定在第一行。
+   另外 Home.md 里别再出现第二个标签:实时预览这条只认得出"这行有标签",认不出是哪个
+   (脚本里的 stray_tags 会拦,拦住就是当天日更失败)。 */
+.workbench .markdown-preview-sizer p:has(a.tag[href="#工作台"]),
+.workbench .cm-content > .cm-line:has(.cm-hashtag),
+.workbench .cm-content > .cm-line:has(.cm-hashtag) + .cm-line,
+.workbench .cm-content > .cm-line:has(.cm-hashtag) + .cm-line + .cm-line,
+.workbench .cm-content > .cm-line:has(.cm-hashtag) + .cm-line + .cm-line + .cm-line,
+.workbench .cm-content > .cm-line:has(.cm-hashtag) + .cm-line + .cm-line + .cm-line + .cm-line {
+  display: none;
+}
