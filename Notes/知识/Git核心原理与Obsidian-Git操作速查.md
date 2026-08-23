@@ -80,32 +80,6 @@ git checkout <commit哈希> -- 文件路径
 
 从指定历史 commit 把文件取出来放回工作区，再重新 commit 即可。
 
-## Obsidian Git 移动端图标速查
-
-```
-↑(commit)  ✓(stage all)  +(stage)  −(unstage)  ↑(push)  ↓(pull)
-                    🗂️(open folder)  🔄(refresh)
-```
-
-- **第一个 ↑**：commit，暂存区 → 本地仓库，不联网
-- **第五个 ↑**：push，本地仓库 → GitHub，要联网
-- **🔄**：refresh，重新扫描本地文件变化更新列表，不联网
-
-Vault backup 按钮 = `git add .` + `git commit` + `git push` 三步打包。
-
-## iOS 限制
-
-iOS 不允许 App 在后台持续监听文件变化，所以 Obsidian Git 无法实时更新 Changes 列表，需要手动点 🔄 刷新或在设置里开定时扫描。
-
-## Vault Backup 误删问题
-
-Obsidian Git 的 backup 是「把手机本地 vault 当前状态原样推上去」。如果 Claude 写了新文件推到 GitHub，但手机还没 pull，backup 就会把新文件当作「本地不存在」删掉。
-
-**解决方法**：每次打开 Obsidian 想写东西前先 pull，把远端新文件拉到本地，backup 才不会误删。
-
-## 为什么 GitHub 免费
-
-GitHub 存的是快照 + 内容寻址（相同内容只存一份），代码是纯文本压缩率极高，边际存储成本很低。商业模式是免费吸引开发者，向企业收费（Teams/Enterprise 才是主要收入）。
 
 ## 复核记录
 
