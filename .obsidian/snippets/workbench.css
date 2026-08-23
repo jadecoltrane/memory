@@ -922,3 +922,14 @@
 .workbench .wb-habit-grads:empty { display: none; }
 .workbench .wb-habit-grads-names { color: var(--text-muted); }
 
+
+/* 📱 小组件速览行:文件第一行那句纯文本是给 iOS 主屏小组件读的(小组件跑在系统扩展
+   进程里,不加载插件也不套主题 CSS,只念笔记原始文本),页面里不该看见它。
+   靠行尾的 #工作台 标签认出整行藏掉——所以 Home.md 里别再出现第二个标签,
+   实时预览那条选择器只认得出"这行有标签",认不出是哪个标签。
+   两个视图各写一条:阅读视图整行是一个 <p>,实时预览是一个 .cm-line。
+   速览行必须写成一行,原因也在这里:实时预览按行切 DOM,多行只有带标签那行会被藏掉。 */
+.workbench .markdown-preview-sizer p:has(a.tag[href="#工作台"]),
+.workbench .cm-content > .cm-line:has(.cm-hashtag) {
+  display: none;
+}
