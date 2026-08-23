@@ -10,11 +10,14 @@
 `Concepts/xxx.md` 纯文本路径(Works/ 引用笔记本来就是这个写法,见
 `Works/README.md`);笔记那侧也可以主动写一行 `draft: Works/xxx.md`,两边都认。
 
-筛选标准(三个都要满足):
+筛选标准:
 - tier: 核心 —— 只有自己的判断值得发,外部知识发出去没有辨识度
-- 有「开放问题」或 ⚠️ 张力标记 —— 写作定位是「从冲突开始,不要从观点开始」,
-  而张力/未解问题天生就是冲突形状的
 - 没在写、也没发过
+
+张力不再是硬门槛,只做排序:带「开放问题」或 ⚠️ 张力标记的排在前面、并挑出钩子,
+因为写作定位是「从冲突开始,不要从观点开始」,张力天生是冲突形状、最好起笔。
+没张力的核心笔记照样进池子(排在后面、不给钩子),只是选题卡里「冲突在哪」那栏会空,
+开头得自己找 —— 由用户手动决定要不要写。
 
 概念页单独列一组:一个概念页的「定义 + 开放问题」本身就是一篇短文的骨架。
 
@@ -163,9 +166,12 @@ def main():
         if where:
             writing.append((rel, where))
             continue
-        if fm.get("tier") != "核心" or not TENSION.search(text):
+        if fm.get("tier") != "核心":
             continue
-        notes.append((rel, hooks(text)))
+        notes.append((rel, hooks(text), bool(TENSION.search(text))))
+
+    # 带张力的排前面(有现成钩子、最好起笔),其余按路径。张力不再是门槛、只是优先级
+    notes.sort(key=lambda x: (not x[2], x[0]))
 
     for p in sorted((ROOT / "Concepts").glob("*.md")):
         text = p.read_text(encoding="utf-8")
@@ -188,9 +194,9 @@ def main():
         print(f"notes={len(notes)} concepts={len(concepts)}")
         return
 
-    print(f"\n🧠 核心层里带冲突、还没发过的笔记({len(notes)} 篇)\n")
-    for rel, hs in notes:
-        print(f"  {rel}")
+    print(f"\n🧠 核心层里还没发过的笔记({len(notes)} 篇,带 ⚠️ 的有现成冲突、优先写)\n")
+    for rel, hs, ten in notes:
+        print(f"  {'⚠️ ' if ten else '   '}{rel}")
         for h in hs:
             print(f"      ↳ {h[:110]}")
     print(f"\n💥 概念页的开放问题({len(concepts)} 页,一条就是一个选题)\n")
