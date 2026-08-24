@@ -8,6 +8,8 @@ source-mapped: 原文已不可得(2026-08-02 登记;导出文件未留存,该次
 checkable: true
 verified: false
 tags: [技术, 车机, Android, HMI, CAN]
+archived: 2026-08-24
+archived-reason: 归档候选(参考层 + verified: false + 入链 0 + 未被工作台抽中),issue #23 主人裁决归档
 ---
 
 # 车机技术基础——View、Android 框架、CAN 总线与网关隔离
