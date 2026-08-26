@@ -42,6 +42,18 @@ def norm(s):
     return re.sub(r"[\s·、,，.。《》〈〉\"'\-—]", "", s)
 
 
+def file_key(url):
+    """从任意形态的图片链接里取出 Commons 文件名,用来判断是不是同一幅画。
+
+    同一个文件会以三种形态出现:原图直链、/thumb/.../960px-xxx.jpg、
+    Special:FilePath/xxx?width=1280。只比 URL 字符串,这三种互相认不出来。
+    """
+    from urllib.parse import unquote
+    base = unquote(url.split("?")[0].rsplit("/", 1)[-1])
+    # Commons 里下划线和空格是同一个字符,直链用下划线、FilePath 用 %20
+    return re.sub(r"^\d+px-", "", base).replace("_", " ").lower()
+
+
 def dice(a, b):
     a, b = norm(a), norm(b)
     if not a or not b:
@@ -133,8 +145,8 @@ def main():
             # 同一天的那行是自己(重跑时台账里已经有了),不算重复
             if r["date"] == cur["date"]:
                 continue
-            if cur["url"] and r["url"] == cur["url"]:
-                hits.append((r, "URL 相同"))
+            if cur["url"] and file_key(r["url"]) == file_key(cur["url"]):
+                hits.append((r, "图片文件相同"))
             elif norm(r["name"]) == norm(cur["name"]):
                 hits.append((r, "画名相同"))
             elif cur["artist"] and norm(r["artist"]) == norm(cur["artist"]):

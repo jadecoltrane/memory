@@ -43,8 +43,12 @@ def read_pool():
         if not line.startswith("- "):
             continue
         f = [x.strip() for x in line[2:].split("|")]
-        if len(f) >= 8 and f[0] and f[6]:
-            rows.append({"name": f[0], "artist": f[1], "year": f[2], "movement": f[3],
+        # 文件头的格式说明那一行也以「- 」开头,靠「知名度必须是数字」把它挡掉
+        if len(f) >= 8 and f[0] and f[6] and f[5].isdigit():
+            # 显示名优先用中文维基条目名:Wikidata 的 zh 标签繁简混杂(「基督變容」),
+            # 而条目名通常是简体(「耶稣显圣容_(拉斐尔)」)。括号里的消歧后缀要去掉。
+            disp = re.sub(r"[_ ]?[((][^)）]*[)）]$", "", f[7].replace("_", " ")).strip() or f[0]
+            rows.append({"name": disp, "artist": f[1], "year": f[2], "movement": f[3],
                          "country": f[4], "sl": int(f[5] or 0), "file": f[6], "zh": f[7]})
     return rows
 
@@ -109,6 +113,7 @@ def recent_field(ledger_titles, pool, field, days, today):
 
 
 def main():
+    dry = "--dry-run" in sys.argv
     today = datetime.date.today().isoformat()
     pool, ledger = read_pool(), PL.read_ledger()
     if not pool:
@@ -149,6 +154,9 @@ def main():
             print(f"  跳过 {cand['name']}:图片验证失败({why})")
             continue
         title, intro = title_of(cand), intro_of(cand)
+        if dry:
+            print(f"[dry-run] {title}\n  {url}\n  {intro}\n  ({why},候选 {len(cands)} 幅)")
+            return 0
         s = HOME.read_text(encoding="utf-8")
         s = re.sub(r"^painting-url:.*$", "painting-url: " + url, s, count=1, flags=re.M)
         s = re.sub(r"^painting-title:.*$", "painting-title: " + title, s, count=1, flags=re.M)
