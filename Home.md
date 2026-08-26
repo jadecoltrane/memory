@@ -1,9 +1,9 @@
 ---
 cssclasses: workbench
 generated: 2026-08-26
-painting-url: https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Nighthawks_by_Edward_Hopper_1942.jpg/1280px-Nighthawks_by_Edward_Hopper_1942.jpg
-painting-title: 爱德华·霍普《夜游者》(美国写实主义,1942年)
-painting-intro: 深夜街角餐馆的冷光下,几个互不交谈的顾客各自坐着——霍普用大片沉默的几何色块,画出现代都市生活里触手可及却穿不透的孤独感。
+painting-url: https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Turner_-_Rain%2C_Steam_and_Speed_-_National_Gallery_file.jpg/1280px-Turner_-_Rain%2C_Steam_and_Speed_-_National_Gallery_file.jpg
+painting-title: 约瑟夫·透纳《雨、蒸汽和速度——大西部铁路》(英国浪漫主义,1844年)
+painting-intro: 一列蒸汽火车从雨雾里冲出来,轮廓几乎被光和水汽溶掉——透纳把「看得清」让位给「感觉到」,让这幅画成了印象派到来之前最早的一次预演。
 ---
 
 🎴 8/26 气场是减出来的 #工作台

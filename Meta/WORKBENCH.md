@@ -13,7 +13,7 @@
 
 **视觉基调**:由横幅画作在客户端用 canvas 取主色调自动算出(色相分桶投票,不用平均色——平均会把所有颜色互相抵消成灰)、写进 CSS 变量 `--wb-accent`,CSS 里再用 OKLCH 相对颜色语法派生锁定亮度的文字色/柔光底。**卡片不做入场渐显**:`wb-rise-in` 那套 keyframes、逐块延迟阶梯、滚动驱动的 `animation-timeline: view()` 已整体从 `workbench.css` 删除,别再加回来——悬停/按下的 transition 不在此列,保留。
 
-**🖼 每日画作**(横幅背景):每天生成时用执行器可用的网页搜索工具挑一幅著名画作(Claude 自动化使用 WebSearch/WebFetch),优先 Wikimedia Commons 上 `upload.wikimedia.org` 开头的直链图片(几百 KB 到 2MB 的中等分辨率版本,不要几十 MB 的原图),写入 frontmatter 三个字段:`painting-url`、`painting-title`(画名·作者)、`painting-intro`(一句话简介)。**链接必须是当次搜索/抓取真实确认可访问的**。选画不许与近半年重复(查重命令:`git log --since='180 days ago' --format= -p -- Home.md | grep '^+painting-title'`,输出仅每天一行画名,省 token 且永久封顶;不要跑裸的 `git log -p`),并在时代/地域/风格上轮换,不要连续几天同一风格。**第一个候选验证失败(链接打不开、不是直链等)不算完事,换一幅候选继续试,最多尝试 3 幅**;3 幅都验证失败才保留前一天的值,不编造 URL——保留是最后的兜底,不是遇到第一次失败就退回的默认选项。
+**🖼 每日画作**(横幅背景):每天生成时用执行器可用的网页搜索工具挑一幅著名画作(Claude 自动化使用 WebSearch/WebFetch),优先 Wikimedia Commons 上 `upload.wikimedia.org` 开头的直链图片(几百 KB 到 2MB 的中等分辨率版本,不要几十 MB 的原图),写入 frontmatter 三个字段:`painting-url`、`painting-title`(画名·作者)、`painting-intro`(一句话简介)。**链接必须是当次搜索/抓取真实确认可访问的**。选画不许与近半年重复:**选画前跑 `python3 Meta/scripts/painting_log.py`**(打印窗口内用过的画和画家),写完由 `--check` 机器校验、`--record` 记进 `Meta/画作台账.md`,两步都挂在工作流的体检步骤里,不通过整轮重跑。**不要再用 `git log` 查重**——`git log -- <路径>` 不跨改名,2026-08-16 把 `工作台.md` 改名成 `Home.md` 之后这条命令只看得见改名后那十天,静默空跑,半年内因此放进来七幅重复的。并在时代/地域/风格上轮换,不要连续几天同一风格。**第一个候选验证失败(链接打不开、不是直链等)不算完事,换一幅候选继续试,最多尝试 3 幅**;3 幅都验证失败才保留前一天的值,不编造 URL——保留是最后的兜底,不是遇到第一次失败就退回的默认选项。
 
 每日生成四个板块:
 
