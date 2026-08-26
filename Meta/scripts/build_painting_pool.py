@@ -19,6 +19,7 @@
 """
 
 import json
+import re
 import subprocess
 import sys
 import time
@@ -64,7 +65,67 @@ def band(lo, hi):
     return []
 
 
+def to_simplified(strings):
+    """把一批字符串转成简体。
+
+    Wikidata 的 zh 标签繁简混杂,而 `zh-hans` 只在条目真有简体标签时才生效
+    (实测「老彼得·布呂赫爾」照样是繁体)。zhconv/hanziconv 在有些环境编译不过,
+    所以借维基百科自己的字词转换(action=parse&variant=zh-cn)——**只在建池时调**,
+    日更那条路径不碰它,不给每天跑的工作流增加依赖。
+    """
+    out, step = [], 60
+    for i in range(0, len(strings), step):
+        chunk = strings[i:i + step]
+        r = subprocess.run(
+            ["curl", "-sS", "--max-time", "60", "-A", UA, "-G",
+             "https://zh.wikipedia.org/w/api.php",
+             "--data-urlencode", "action=parse", "--data-urlencode", "format=json",
+             "--data-urlencode", "contentmodel=wikitext", "--data-urlencode", "prop=text",
+             "--data-urlencode", "variant=zh-cn",
+             "--data-urlencode", "text=" + "\n".join(chunk)],
+            capture_output=True, text=True).stdout
+        try:
+            html = json.loads(r)["parse"]["text"]["*"]
+            got = [x for x in re.sub(r"<[^>]+>", "", html).split("\n") if x.strip()]
+        except Exception:
+            got = []
+        if len(got) == len(chunk):
+            out.extend(got)
+        elif len(chunk) == 1:
+            # 行数对不上就放弃这一条,宁可留繁体也不要错位串行
+            out.extend(chunk)
+        else:
+            # 二分重试:整批放弃会连累同批的几十条,拆开后失败范围收敛到单行
+            mid = len(chunk) // 2
+            out.extend(to_simplified(chunk[:mid]) + to_simplified(chunk[mid:]))
+        time.sleep(0.3)
+    return out
+
+
+def simplify_rows(fields):
+    """只转画名/画家/流派/国别四栏,文件名和维基标题是标识符,转了就打不开。"""
+    idx = [(r, c) for r in range(len(fields)) for c in (0, 1, 3, 4) if fields[r][c]]
+    conv = to_simplified([fields[r][c] for r, c in idx])
+    for (r, c), v in zip(idx, conv):
+        fields[r][c] = v
+    return fields
+
+
 def main():
+    if "--convert-only" in sys.argv:
+        # 只把现有池转成简体,不重新查 Wikidata(WDQS 慢且间歇失败,不值得为转换重跑)
+        text = POOL.read_text(encoding="utf-8")
+        head, body = text.split("\n- ", 1)
+        rows = [f for f in ([x.strip() for x in ln[2:].split("|")]
+                            for ln in ("- " + body).splitlines() if ln.startswith("- "))
+                # 文件头的格式说明那行也以「- 」开头,靠「知名度是数字」挡掉
+                if len(f) >= 8 and f[5].isdigit()]
+        rows = simplify_rows(rows)
+        POOL.write_text(head + "\n" + "\n".join("- " + " | ".join(f) for f in rows) + "\n",
+                        encoding="utf-8")
+        print(f"已转简体:{len(rows)} 幅")
+        return 0
+
     rows = {}
     for lo, hi in BANDS:
         got = band(lo, hi)
@@ -85,6 +146,8 @@ def main():
         return 1
 
     ordered = sorted(rows.values(), key=lambda x: -x[0])
+    print("转简体…", flush=True)
+    simplify_rows([f for _, f in ordered])
     head = f"""# 每日画作候选池
 
 `Meta/scripts/pick_painting.py` 每天从这里挑一幅,**机器读的文件,格式不能改**:

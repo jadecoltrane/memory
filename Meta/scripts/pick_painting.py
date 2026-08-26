@@ -18,6 +18,7 @@ import hashlib
 import json
 import re
 import subprocess
+import time
 import sys
 from pathlib import Path
 
@@ -79,11 +80,17 @@ def intro_of(cand):
     """中文维基第一段当简介;没有中文条目就用结构化字段拼一句,不留空。"""
     if cand["zh"]:
         from urllib.parse import quote
-        raw = curl(f"https://zh.wikipedia.org/api/rest_v1/page/summary/{quote(cand['zh'])}")
-        try:
-            text = json.loads(raw).get("extract", "").strip()
-        except Exception:
-            text = ""
+        text = ""
+        # 抓不到就只能退化成拼接的一句话,那是明显更差的结果,值得重试
+        for _ in range(3):
+            raw = curl(f"https://zh.wikipedia.org/api/rest_v1/page/summary/{quote(cand['zh'])}")
+            try:
+                text = json.loads(raw).get("extract", "").strip()
+            except Exception:
+                text = ""
+            if text:
+                break
+            time.sleep(2)
         text = re.sub(r"\s+", "", text)
         if len(text) > 30:
             # 截到第二个句号:第一句常常只是"《X》是一幅画",信息量不够
