@@ -41,6 +41,14 @@ jobs:
         run: |
           sed -i "s/^generated:.*/generated: $(TZ=Asia/Shanghai date +%F)/" Home.md
 
+      # 画作在 Claude 之前用纯脚本挑好,模型完全不参与:知名度是 sitelinks、
+      # 流派/国别是结构化字段、链接通不通是 HTTP 状态码、中文简介是维基第一段,
+      # 没有一处需要判断力。原来让模型 WebSearch 搜+验链接+写简介,一次几千 token。
+      # 挑不出来时保留前一天的画,不让整轮日更失败(其余板块和它无关)。
+      - name: 挑今日画作
+        continue-on-error: true
+        run: python3 Meta/scripts/pick_painting.py
+
       - name: Claude 生成今日工作台
         uses: anthropics/claude-code-action@v1
         with:
@@ -48,7 +56,6 @@ jobs:
           prompt: |
             当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 Meta/WORKBENCH.md,严格按那份文件的规则更新 Home.md 的三个 AI 板块(🎴 今日抽卡 / 🌱 今日延伸 / ❓ 今天的问题×2),以及横幅画作:
 
-            - 🖼 每日画作:用 WebSearch 挑一幅名画(优先 upload.wikimedia.org 直链,几百 KB 到 2MB),更新 frontmatter 的 painting-url/painting-title/painting-intro。**第一个候选验证失败(链接打不开、找不到真实直链等)就换一幅候选再试,最多尝试 3 幅**;3 幅都失败才保留前一天的值,不编造 URL——保留前一天是最后兜底,不是遇到第一次失败就退回的默认选项。**不许重复近半年用过的画**(先跑 `python3 Meta/scripts/painting_log.py`,它打印窗口内用过的画和画家;**不要再用 git log 查重**——`git log -- <路径>` 不跨改名,2026-08-16 那次改名之后它就是空跑),并在时代/地域/风格上轮换,不要连续几天同一风格
             - 生成前先分别处理上一期问题1、问题2 各自 ✍️ 区块里用户写的回答:哪道有回答就判断值不值得记——**只有值得留存的**才提炼进相关 Notes/ 笔记或概念页(不再无条件归档,也不再建 Notes/问答/ 按月文件),并在新一期 🎴 上方各生成一个 🥊 碰撞 callout 回应(两道都答了就两个)
             - ❓ 今天的问题现在是两道(问题1/问题2),分别嵌在 [!today]+ 折叠壳里(标题留空,不要写"今日内容"字样),每道各自的 [!ask]+[!note]-+回答区 三段结构独立成组,尽量来自不同概念/笔记。**问题卡写成 `[!ask|1]`、`[!ask|2]`**,右上角的编号从这个 metadata 读,漏了会两张都显示 1
             - **出题前先跑 `python3 Meta/scripts/asked_log.py`**(近 90 天问过的题 + 禁用来源 + 封存主旨),**同一来源 14 天内、同一个轴 5 天内不许再出题,主旨撞车的换掉**;轴只能用台账《轴表》里的词,挑定轴之后把 --list 打印出来的同轴旧题逐条读一遍,读着像同一件事就换(字面查重拦不住换套词问同一件事)。轮不开就出 `自由题` 或从近 7 天 Diary/ 出题(这两类不占来源冷却期)。出完题往 `Meta/问题台账.md` 追加两行(带轴)、把上一期两行的状态从 `待答` 结成 `已答`/`未答`/`封存`,然后跑 `python3 Meta/scripts/asked_log.py --check`,**不通过就换题重出**(后置体检会再跑一次,不通过整天日更失败)
