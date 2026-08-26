@@ -29,6 +29,7 @@ LEDGER = ROOT / "Meta" / "画作台账.md"
 HOME = ROOT / "Home.md"
 WINDOW_DAYS = 180
 SIM_THRESHOLD = 0.75
+RECENT_WITH_DATE = 14
 
 
 def norm(s):
@@ -107,11 +108,17 @@ def main():
     if arg == "":
         today = datetime.date.today().isoformat()
         window = recent(rows, today)
-        print(f"近 {WINDOW_DAYS} 天用过 {len(window)} 幅(共 {len(rows)} 幅),别再挑这些:")
-        for r in sorted(window, key=lambda x: x["date"], reverse=True):
+        window.sort(key=lambda x: x["date"], reverse=True)
+        print(f"近 {WINDOW_DAYS} 天用过 {len(window)} 幅(共 {len(rows)} 幅),画家和画都别再挑:")
+        # 最近这些要带日期:规则除了「半年不重复」还要求风格轮换,
+        # 判断「别连着几天同一风格」只用得上最近这十几天。再往前日期不影响决策
+        # (禁用是硬的),带上就是每行白付十来个字节 × 一百多行。
+        for r in window[:RECENT_WITH_DATE]:
             print(f"  {r['date']}  {r['artist']}《{r['name']}》")
-        artists = sorted({r["artist"] for r in window if r["artist"]})
-        print(f"\n窗口内出现过的画家({len(artists)}):{'、'.join(artists)}")
+        older = window[RECENT_WITH_DATE:]
+        if older:
+            print(f"\n更早(同样禁用,不带日期):" +
+                  "、".join(f"{r['artist']}《{r['name']}》" for r in older))
         return 0
 
     cur = read_home()
