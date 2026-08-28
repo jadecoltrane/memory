@@ -1,9 +1,9 @@
 ---
 cssclasses: workbench
 generated: 2026-08-28
-painting-url: https://commons.wikimedia.org/wiki/Special:FilePath/Raphael%2C%20The%20Alba%20Madonna%2C%20c.%201510%2C%20NGA%2026.jpg?width=1280
-painting-title: 拉斐尔·圣齐奥《阿尔瓦圣母》(文艺复兴全盛期、1510年)
-painting-intro: 《阿尔瓦圣母》是意大利文艺复兴全盛期艺术大师拉斐尔的一幅画作，绘制于1511年，圆形，原为木板油画，后改为布面油画。画中描绘了的圣母玛利亚、婴孩耶稣和施洗约翰，背景为典型的意大利乡村风光。
+painting-url: https://commons.wikimedia.org/wiki/Special:FilePath/Parmigianino%20-%20Madonna%20and%20Child%20with%20Angels%2C%20known%20as%20the%20Madonna%20with%20the%20Long%20Neck.jpg?width=1280
+painting-title: 帕尔米贾尼诺《长颈圣母》(风格主义、1600年)
+painting-intro: 《长颈圣母》又称《圣母子与天使和圣杰罗姆》，是意大利画家帕尔米贾尼诺于1535-1540年间在意大利创作的一幅风格主义油画，描绘了圣母子与天使的形象，自1948年起一直在乌菲兹美术馆展出。帕尔米家尼诺在1534年受委托为意大利帕尔马的弗朗切斯科·塔利亚费里墓葬教堂创作这幅作品，但直到他在1540年去世时仍未完成。
 ---
 
 🎴 8/28 找"能拿捏的男生"是自信不足的防御 #工作台
