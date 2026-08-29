@@ -1,9 +1,9 @@
 ---
 cssclasses: workbench
 generated: 2026-08-29
-painting-url: https://commons.wikimedia.org/wiki/Special:FilePath/Jean%20Auguste%20Dominique%20Ingres%20-%20The%20Spring%20-%20Google%20Art%20Project%202.jpg?width=1280
-painting-title: Paul Balze《泉》(新古典主义、1856年)
-painting-intro: 泉是法国画家让·奥古斯特·多米尼克·安格尔于1856年创作的一幅油画。现藏于法国巴黎的奧塞博物館。
+painting-url: https://commons.wikimedia.org/wiki/Special:FilePath/The%20Wounded%20Angel%20-%20Hugo%20Simberg.jpg?width=1280
+painting-title: 胡戈·辛贝里《受伤天使》(象征主义、1903年)
+painting-intro: 《受伤天使》是由芬兰画家胡戈·辛贝里创作于1903年的油画。油画中两个神情严肃的男孩用担架抬着一个天使女孩穿过荒野。
 ---
 
 🎴 8/29 温柔随和被反复试探边界 #工作台
