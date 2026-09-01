@@ -386,8 +386,7 @@
 .workbench .wb-cards {
   display: flex;
   flex-wrap: wrap;
-  /* stretch 而不是 center:胶囊按三分之一定宽之后,标签在窄屏上可能折成两行,
-     同一排的高度得跟着最高那颗走,否则会参差 */
+  /* stretch 而不是 center:同一排的胶囊高度跟着最高那颗走,数字位数不同也不参差 */
   align-items: stretch;
   gap: 8px;
   margin: 16px 0 18px;
@@ -398,15 +397,19 @@
    不用回来改数字 */
 .workbench .wb-card {
   display: flex;
-  align-items: baseline;
+  /* 数字一行、标签一行,不并排:并排时最宽的那颗要放下"🕸️ 506"加四个字的标签,
+     三分之一宽刚好差一点,标签就会折行、数字被 baseline 甩到第二行。竖排之后每行
+     只需要放下两者中较宽的那个,宽度余量翻倍,标签几个字都不会撑破 */
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 1px;
   flex: 0 0 calc(33.333% - 6px);
   min-width: 0;
   background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
   border-radius: 999px;
-  padding: 7px 9px;
+  padding: 8px 6px;
   box-shadow: var(--wb-shadow);
   cursor: pointer;
   transition: box-shadow 0.3s var(--wb-ease), transform 0.3s var(--wb-ease);
@@ -421,16 +424,18 @@
   box-shadow: var(--wb-shadow-flat);
   transform: translateY(0) scale(0.96);
 }
-/* 三颗一排之后每颗只剩三分之一宽,字号跟着收一档;不设 nowrap——真放不下时
-   让标签折行、胶囊变高,好过把字截掉 */
 .workbench .wb-card .wb-num {
-  font-size: 0.92em;
+  font-size: 1em;
   font-weight: 700;
   color: var(--wb-accent-text);
+  line-height: 1.25;
 }
+/* nowrap 是这里唯一的硬约束:标签一旦折行,胶囊高度就会和同排的对不齐 */
 .workbench .wb-card .wb-lbl {
-  font-size: 0.72em;
+  font-size: 0.74em;
   color: var(--text-muted);
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 .workbench .wb-card.is-active {
