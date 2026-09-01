@@ -386,30 +386,22 @@
 .workbench .wb-cards {
   display: flex;
   flex-wrap: wrap;
-  /* stretch 而不是 center:同一排的胶囊高度跟着最高那颗走,数字位数不同也不参差 */
-  align-items: stretch;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   margin: 16px 0 18px;
 }
-/* 每颗锁死在一行的三分之一,所以一行正好三颗、五颗胶囊排成两排。不给 flex-grow:
-   最后一排只有两颗时也保持三分之一宽,和上一排每颗一样宽、内边留白一样多;
-   摊满整行会让那两颗明显比上面的胖。基准写成百分比而不是固定像素,加减胶囊时
-   不用回来改数字 */
+/* flex: none —— 胶囊宽度跟着自己那几个字走,不定宽也不摊满。想让五颗排成两排靠的是
+   左右内边距收窄(15px → 10px)和间距收窄,不是把每颗锁死成三分之一:锁宽会让字多的
+   那两颗塞不下而折行,反而把胶囊撑高。上下内边距不动,高度和原来一样 */
 .workbench .wb-card {
   display: flex;
-  /* 数字一行、标签一行,不并排:并排时最宽的那颗要放下"🕸️ 506"加四个字的标签,
-     三分之一宽刚好差一点,标签就会折行、数字被 baseline 甩到第二行。竖排之后每行
-     只需要放下两者中较宽的那个,宽度余量翻倍,标签几个字都不会撑破 */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  flex: 0 0 calc(33.333% - 6px);
-  min-width: 0;
+  align-items: baseline;
+  gap: 5px;
+  flex: none;
   background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
   border-radius: 999px;
-  padding: 8px 6px;
+  padding: 7px 10px;
   box-shadow: var(--wb-shadow);
   cursor: pointer;
   transition: box-shadow 0.3s var(--wb-ease), transform 0.3s var(--wb-ease);
@@ -425,16 +417,14 @@
   transform: translateY(0) scale(0.96);
 }
 .workbench .wb-card .wb-num {
-  font-size: 1em;
+  font-size: 0.98em;
   font-weight: 700;
   color: var(--wb-accent-text);
-  line-height: 1.25;
 }
-/* nowrap 是这里唯一的硬约束:标签一旦折行,胶囊高度就会和同排的对不齐 */
+/* nowrap:胶囊是按内容定宽的,标签折行就意味着这一颗比同排的高,整排跟着参差 */
 .workbench .wb-card .wb-lbl {
-  font-size: 0.74em;
+  font-size: 0.78em;
   color: var(--text-muted);
-  line-height: 1.25;
   white-space: nowrap;
 }
 
