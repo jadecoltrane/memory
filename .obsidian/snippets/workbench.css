@@ -392,15 +392,16 @@
   gap: 8px;
   margin: 16px 0 18px;
 }
-/* 每颗占一行的三分之一,所以一行正好三颗、五颗胶囊排成两排。基准写成百分比而不是
-   固定像素,加减胶囊时不用回来改数字;最后一排不满三颗时靠 flex-grow 摊满整行,
-   不留豁口 */
+/* 每颗锁死在一行的三分之一,所以一行正好三颗、五颗胶囊排成两排。不给 flex-grow:
+   最后一排只有两颗时也保持三分之一宽,和上一排每颗一样宽、内边留白一样多;
+   摊满整行会让那两颗明显比上面的胖。基准写成百分比而不是固定像素,加减胶囊时
+   不用回来改数字 */
 .workbench .wb-card {
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: 4px;
-  flex: 1 1 calc(33.333% - 6px);
+  flex: 0 0 calc(33.333% - 6px);
   min-width: 0;
   background: var(--wb-surface);
   border: 1px solid var(--wb-hairline);
