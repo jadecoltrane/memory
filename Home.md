@@ -341,8 +341,27 @@ const conceptsPanel = (host) => {
 };
 
 const weekPanel = (host) => renderRows(host, [...weekNewPages].sort((a, b) => ctimeOf(b) - ctimeOf(a)), (pg) => fmt(ctimeOf(pg)));
-// 最近编辑固定只给 8 条,不设展开全部——这颗胶囊就是"最近"这个时间切片,不是需要看全的列表
-const recentPanel = (host) => renderRows(host, [...all].sort((a, b) => mtimeOf(b) - mtimeOf(a)).slice(0, 8), (pg) => fmt(mtimeOf(pg)));
+// 这颗胶囊切的是"今天"这一天,不是"最近 N 条"——按条数截会在改得多的那天把早上的挤掉,
+// 按当天零点截才保证一天之内动过的一条都不漏。右列给时刻不给日期:同一天里 09-01 每行都一样,
+// 时刻才分得出先后
+const startOfToday = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); })();
+const hhmm = (ms) => {
+  if (!ms) return "";
+  const d = new Date(ms);
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};
+const editedToday = all
+  .filter((pg) => mtimeOf(pg) >= startOfToday)
+  .sort((a, b) => mtimeOf(b) - mtimeOf(a));
+const recentPanel = (host) => {
+  // 空态要说清是"今天没动过"而不是"库里没内容",否则看起来像 Dataview 又漏索引了
+  if (!editedToday.length) {
+    host.createEl("div", { cls: "wb-panel-empty", text: "今天还没动过任何一条" });
+    return;
+  }
+  renderRows(host, editedToday, (pg) => hhmm(mtimeOf(pg)));
+  host.createEl("div", { cls: "wb-panel-caption", text: `🕘 今天编辑过 ${editedToday.length} 条` });
+};
 
 const bar = dv.container.createEl("div", { cls: "wb-cards" });
 const panel = dv.container.createEl("div", { cls: "wb-panel" });
@@ -379,7 +398,7 @@ linksCard.createEl("span", { cls: "wb-lbl", text: "双链" });
 linksCard.onclick = openGraph;
 
 addTab("🌱", weekNewPages.length, "本周新增", weekPanel);
-addTab("🕘", "", "最近编辑", recentPanel);
+addTab("🕘", editedToday.length, "今日编辑", recentPanel);
 
 const addAction = (glyph, label, cls, run) => {
   const card = bar.createEl("div", { cls: `wb-card ${cls}` });
