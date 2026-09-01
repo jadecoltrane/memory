@@ -147,17 +147,6 @@ renderReunion(reunionEl);
 // dv.pages() 读内存索引不重新扫盘;面板一律走 renderRows 默认 8 条上限,笔记再多也不会一次性铺出几百个 DOM 节点
 const open = (path) => app.workspace.openLinkText(path, "/", false);
 const openGraph = () => app.commands.executeCommandById("graph:open");
-const newNote = async () => {
-  const folder = "Notes";
-  if (!app.vault.getAbstractFileByPath(folder)) await app.vault.createFolder(folder);
-  let n = 1, path;
-  do { path = `${folder}/未命名笔记 ${n++}.md`; } while (app.vault.getAbstractFileByPath(path));
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const file = await app.vault.create(path, `---\ntype: note\ncreated: ${today}\n---\n\n`);
-  await app.workspace.getLeaf(true).openFile(file);
-};
-
 // 日记按 Diary/<年>/<年>-<月>.md 一月一个文件、每天一个 ## 段(见 Diary/README.md),
 // 所以这个按钮不新建文件,只保证当月文件和今天那段存在,然后把光标放到段末
 const newDiary = async () => {
@@ -399,26 +388,6 @@ linksCard.onclick = openGraph;
 
 addTab("🌱", weekNewPages.length, "本周新增", weekPanel);
 addTab("🕘", editedToday.length, "今日编辑", recentPanel);
-
-const addAction = (glyph, label, cls, run) => {
-  const card = bar.createEl("div", { cls: `wb-card ${cls}` });
-  const g = card.createEl("span", { cls: "wb-num wb-newnote-glyph", text: glyph });
-  card.createEl("span", { cls: "wb-lbl", text: label });
-  card.onclick = async () => {
-    if (card.classList.contains("is-busy")) return;
-    card.classList.add("is-busy");
-    const anim = g.animate(
-      [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
-      { duration: 450, easing: "ease" }
-    );
-    try { await anim.finished; } catch (_) { /* 动画被打断也照样执行 */ }
-    g.style.removeProperty("transform");
-    card.classList.remove("is-busy");
-    run();
-  };
-};
-
-addAction("＋", "新建笔记", "wb-newnote", newNote);
 
 // 「写日记」挂进页面最后那个 📔 日记井,而不是写进 markdown——日更每天会重写这个井,
 // 写进去的按钮会被当成用户手写的日记正文原文归档掉(见 Meta/WORKBENCH.md 归档流程第 2 条)
