@@ -342,47 +342,17 @@ const hhmm = (ms) => {
   const d = new Date(ms);
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
-
-// mtime 记的是"文件在磁盘上什么时候被写过",不是"人什么时候编辑过"——git 每次
-// checkout/pull 都会把被写到的文件刷成当下,一次拉取能让几十篇同时变成"今天编辑过"
-// (2026-09-02:仓库当天零提交,却有 35 篇的 mtime 全是 09:44)。
-// 判据用不了内容,只能用分布:人手动存文件,一分钟内存不下十几个;批量写入才会。
-// 阈值给得高一点,让"拉一个几篇文件的提交"这种真变更照常显示
-const BULK_WRITE_MIN = 15;
-const minuteOf = (ms) => Math.floor(ms / 60000);
-const touchedToday = all.filter((pg) => mtimeOf(pg) >= startOfToday);
-const bulkMinutes = new Set();
-{
-  const perMinute = new Map();
-  for (const pg of touchedToday) {
-    const k = minuteOf(mtimeOf(pg));
-    perMinute.set(k, (perMinute.get(k) ?? 0) + 1);
-  }
-  for (const [k, n] of perMinute) if (n >= BULK_WRITE_MIN) bulkMinutes.add(k);
-}
-const editedToday = touchedToday
-  .filter((pg) => !bulkMinutes.has(minuteOf(mtimeOf(pg))))
+const editedToday = all
+  .filter((pg) => mtimeOf(pg) >= startOfToday)
   .sort((a, b) => mtimeOf(b) - mtimeOf(a));
-const bulkHidden = touchedToday.length - editedToday.length;
-// 排掉的条数要说出来,不能默默扣:万一阈值判错了,至少看得见它扣了东西
-const bulkNote = bulkHidden
-  ? `另有 ${bulkHidden} 条的时间戳来自一次批量写入(多半是 git 拉取),不算编辑`
-  : "";
-
 const recentPanel = (host) => {
   // 空态要说清是"今天没动过"而不是"库里没内容",否则看起来像 Dataview 又漏索引了
   if (!editedToday.length) {
-    host.createEl("div", {
-      cls: "wb-panel-empty",
-      text: bulkNote ? `今天还没动过任何一条(${bulkNote})` : "今天还没动过任何一条",
-    });
+    host.createEl("div", { cls: "wb-panel-empty", text: "今天还没动过任何一条" });
     return;
   }
   renderRows(host, editedToday, (pg) => hhmm(mtimeOf(pg)));
-  host.createEl("div", {
-    cls: "wb-panel-caption",
-    text: `🕘 今天编辑过 ${editedToday.length} 条${bulkNote ? ";" + bulkNote : ""}`,
-  });
+  host.createEl("div", { cls: "wb-panel-caption", text: `🕘 今天编辑过 ${editedToday.length} 条` });
 };
 
 const bar = dv.container.createEl("div", { cls: "wb-cards" });
