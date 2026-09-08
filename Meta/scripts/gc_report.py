@@ -154,7 +154,7 @@ def main():
         n = len([l for l in (rest[:nxt.start()] if nxt else rest).splitlines() if l.startswith("- ")])
         if n >= OPEN_Q_BACKLOG:
             backlog.append(f"{p.stem}:{n} 条")
-    section("概念页开放问题积压", backlog, "挑一条丢进工作台碰撞,不要一次清空——问题区本来就只增不减")
+    section("概念页开放问题积压", backlog, "挑一条丢进工作台 📖 一读(对撞/反例都吃得下),不要一次清空——问题区本来就只增不减")
 
     # 5b. 画像正文里已经过期的时间承诺
     promises = []
