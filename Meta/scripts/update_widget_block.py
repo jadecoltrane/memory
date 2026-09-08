@@ -32,7 +32,7 @@ PAD = "​"  # 零宽空格:Obsidian 里不可见,小组件当空行,用来把�
 # 小组件小尺寸一行大约放得下 10 个汉字,三行内容加两行占位刚好铺满一屏
 LIMIT_DRAW = 20
 LIMIT_HINT = 22
-LIMIT_TOPIC = 7
+LIMIT_READ = 16  # 体裁两个字 + 分隔符之后还剩这么多位置
 
 
 def clean(text: str) -> str:
@@ -65,16 +65,12 @@ def draw_block(text: str) -> tuple[str, str] | None:
     return cue, cut(hint.group(1), LIMIT_HINT) if hint else ""
 
 
-def question_topic(body: str) -> str:
-    """取题目出自哪个概念:正文开头几乎都是"XX这个概念页提到一种说法:",前半截就是它。"""
-    body = re.sub(r"[((][^))]*[))]", "", clean(body))
-    m = re.match(
-        r"(.{2,12}?)(这[个篇])?(概念页|笔记)[里中]?(提到|讲到|说过|说)(过)?(一[种个条])?(说法|观点|判断)?[::,,]",
-        body,
-    )
-    if m:
-        return cut(m.group(1), LIMIT_TOPIC)
-    return cut(re.split(r"[,,。::]", body)[0], LIMIT_TOPIC)
+def read_line(text: str) -> str | None:
+    """一读那张卡取「体裁 · 标题」——标题是生成时就写好的一句话,不用再从正文里猜。"""
+    m = re.search(r"^> \[!read\][^\n]*?今日一读\s*·\s*([^\s·]+)\s*·\s*([^\n]+)$", text, re.M)
+    if not m:
+        return None
+    return f"📖 {m.group(1)} · {cut(m.group(2), LIMIT_READ)}"
 
 
 def build_lines(text: str, date: str) -> list[str] | None:
@@ -86,14 +82,9 @@ def build_lines(text: str, date: str) -> list[str] | None:
         if draw[1]:
             lines.append("· " + draw[1])
 
-    topics = []
-    for n in ("1", "2"):
-        ask = re.search(rf"^> \[!ask\|{n}\][^\n]*\n((?:^>.*\n)+?)(?=^> ?> |\Z)", text, re.M)
-        if ask:
-            body = " ".join(l.lstrip("> ").strip() for l in ask.group(1).splitlines())
-            topics.append(question_topic(body))
-    if topics:
-        lines.append("❓ " + " · ".join(topics))
+    read = read_line(text)
+    if read:
+        lines.append(read)
 
     if not lines:
         return None
@@ -120,7 +111,7 @@ def main() -> int:
 
     lines = build_lines(text, date)
     if lines is None:
-        print("✗ Home.md 里既找不到 🎴 抽卡也找不到 ❓ 问题卡,小组件速览没法生成", file=sys.stderr)
+        print("✗ Home.md 里既找不到 🎴 抽卡也找不到 📖 一读卡,小组件速览没法生成", file=sys.stderr)
         return 1
 
     fm = re.match(r"\A---\n.*?\n---\n", text, re.S)
