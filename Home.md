@@ -2,7 +2,7 @@
 cssclasses: workbench
 generated: 2026-09-09
 painting-url: https://commons.wikimedia.org/wiki/Special:FilePath/Gabrielle%20d%27Estr%C3%A9es%20et%20une%20de%20ses%20s%C5%93urs%20-%20Mus%C3%A9e%20du%20Louvre%20Peintures%20RF%201937%201.jpg?width=1280
-painting-title: http://www.wikidata.org/.well-known/genid/aff25ac9d91201867caca2ac3df7ceb8《加布丽埃勒·德斯特雷与她的一位妹妹》(枫丹白露画派、1594年)
+painting-title: 《加布丽埃勒·德斯特雷与她的一位妹妹》(枫丹白露画派、1594年)
 painting-intro: 《加布丽埃勒·德斯特雷与她的一位妹妹》是一位未知藝術家的繪畫，完成時間為1594年，這幅作品現藏於巴黎羅浮宮，通常被認為是楓丹白露畫派畫家的作品。
 ---
 
