@@ -137,8 +137,14 @@ def main():
             if not name or name.startswith("Q") and name[1:].isdigit():
                 continue
             zh = urllib.parse.unquote(g("zh").rsplit("/", 1)[-1]) if g("zh") else ""
+            # 作者是「未知/佚名」时,wikidata 把它建模成空白节点,creatorLabel 拿不到标签
+            # 就原样吐出 .well-known/genid/<hash> 这类 URI。不挡的话它会被当成画家名字
+            # 拼进标题(title_of 是 f"{artist}《{name}》"),渲染成一串链接
+            creator = g("creatorLabel")
+            if creator.startswith(("http://", "https://")):
+                creator = ""
             rows[name] = (int(g("sl") or 0), [
-                name, g("creatorLabel"), g("inception").lstrip("+")[:4],
+                name, creator, g("inception").lstrip("+")[:4],
                 g("movementLabel"), g("countryLabel"), g("sl"),
                 urllib.parse.unquote(g("image").rsplit("/", 1)[-1]), zh])
     if not rows:

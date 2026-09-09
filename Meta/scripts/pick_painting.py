@@ -103,7 +103,12 @@ def intro_of(cand):
 
 def title_of(cand):
     tail = "、".join(b for b in (cand["movement"], cand["year"] and cand["year"] + "年") if b)
-    return f"{cand['artist']}《{cand['name']}》" + (f"({tail})" if tail else "")
+    # 池子从 wikidata 重建,作者那一格可能是 URI(佚名作品的空白节点)。入池已经挡了一道,
+    # 这里再挡一道:外部源的脏形状不止一种,而拼错的后果是标题上挂一串链接,没有告警
+    artist = cand["artist"]
+    if artist.startswith(("http://", "https://")):
+        artist = ""
+    return f"{artist}《{cand['name']}》" + (f"({tail})" if tail else "")
 
 
 def recent_field(ledger_titles, pool, field, days, today):
