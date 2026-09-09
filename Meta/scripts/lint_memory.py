@@ -300,7 +300,7 @@ APPEND_SCAR = re.compile(
 # 抓不住的那一半在 CLAUDE.md:笔记的小标题和来源的段落一一对应,一个可疑词都不会留。
 SOURCE_POINTER = re.compile(r"(?:这|那|本)(?:段|次|场|条)对话|同一天的对话")
 
-# Profile/ 的规矩最严:只写结论本身,不写依据、日期、出处(CLAUDE.md「用户画像」)。
+# Profile/ 的规矩最严:只写结论本身,不写依据、日期、出处(CLAUDE.md「Profile/」)。
 # 这里只查日期,因为只有它是机器认得准的;依据和出处交给 GC 人工看
 BODY_DATE = re.compile(r"20\d{2}\s*[-/年]\s*\d{1,2}\s*[-/月]\s*\d{1,2}")
 
@@ -318,13 +318,13 @@ def check_append_scars(path: Path):
     if hits:
         warnings.append(
             f"{rel}: 正文有追加痕迹「{'」「'.join(hits)}」——补完要重读全文重排,"
-            f"不是在末尾接一段(CLAUDE.md「默认不写日期」)"
+            f"不是在末尾接一段(CLAUDE.md「只记内容」)"
         )
     ptrs = sorted(set(SOURCE_POINTER.findall(body)))
     if ptrs:
         warnings.append(
             f"{rel}: 正文指向一场读者看不到的会话「{'」「'.join(ptrs)}」——"
-            f"改成直接陈述,留判断本身、去掉它当初在回应谁(CLAUDE.md「每篇都要独立成篇」)"
+            f"改成直接陈述,留判断本身、去掉它当初在回应谁(CLAUDE.md「只记内容」)"
         )
 
 
