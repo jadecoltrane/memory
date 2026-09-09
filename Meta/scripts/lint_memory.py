@@ -170,6 +170,12 @@ def check_frontmatter(path: Path):
     elif top == "Notes":
         if "type" not in fm:
             warnings.append(f"{rel}: 还没有 frontmatter(手写笔记?等 GC 补齐)")
+        elif "created" not in fm:
+            # Home.md 的「本周新增」只认 frontmatter 的 created,而且故意不退回 file.ctime
+            # (clone/checkout 会把 ctime 整批刷成"刚才")。所以漏写 created 的后果是
+            # 这篇在统计里永远不存在——不报错、不断链、症状只是数字偏小,没人会去查。
+            # 这正是需要机器兜底的那类静默失败,所以报出来。
+            warnings.append(f"{rel}: 缺 created: YYYY-MM-DD,「本周新增」统计会看不见它")
 
 
 def collect_concept_names() -> dict:
