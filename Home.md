@@ -199,11 +199,13 @@ const all = [...notes.array(), ...concepts.array()];
 const edges = all.reduce((n, pg) => n + pg.file.outlinks.length, 0);
 // 只认 frontmatter 的 created,不退回 file.ctime:文件系统时间戳是 git 写文件那一刻,
 // 一次 clone 或 checkout 会把它整批刷成"刚才",拿它兜底等于把没写 created 的老笔记
-// 全算成本周新增(2026-09-02 就是这么虚报的)。没写 created 就不算新增——宁可少算,
+// 全算成新增(2026-09-02 就是这么虚报的)。没写 created 就不算新增——宁可少算,
 // 不能把"我不知道它什么时候建的"读成"它是今天建的"
 const ctimeOf = (pg) => pg.created?.ts ?? (pg.created ? new Date(String(pg.created)).getTime() : 0);
 const mtimeOf = (pg) => pg.file.mtime?.ts ?? 0;
-const weekNewPages = notes.array().filter(pg => {
+// 窗口是从此刻往回滚的 7×24 小时,不是日历周——所以标签叫「最近 7 天」而不是「本周新增」:
+// 周一早上看到的数字里大半是上周末写的,标成「本周」会让人以为自己这周写了一堆
+const recent7Pages = notes.array().filter(pg => {
   const t = ctimeOf(pg);
   return t > 0 && Date.now() - t < 7 * 864e5;
 });
@@ -332,7 +334,7 @@ const conceptsPanel = (host) => {
   });
 };
 
-const weekPanel = (host) => renderRows(host, [...weekNewPages].sort((a, b) => ctimeOf(b) - ctimeOf(a)), (pg) => fmt(ctimeOf(pg)));
+const recent7Panel = (host) => renderRows(host, [...recent7Pages].sort((a, b) => ctimeOf(b) - ctimeOf(a)), (pg) => fmt(ctimeOf(pg)));
 // 这颗胶囊切的是"今天"这一天,不是"最近 N 条"——按条数截会在改得多的那天把早上的挤掉,
 // 按当天零点截才保证一天之内动过的一条都不漏。右列给时刻不给日期:同一天里每行日期都一样,
 // 时刻才分得出先后
@@ -389,7 +391,7 @@ linksCard.createEl("span", { cls: "wb-num", text: `🕸️ ${edges}` });
 linksCard.createEl("span", { cls: "wb-lbl", text: "双链" });
 linksCard.onclick = openGraph;
 
-addTab("🌱", weekNewPages.length, "本周新增", weekPanel);
+addTab("🌱", recent7Pages.length, "最近 7 天", recent7Panel);
 addTab("🕘", editedToday.length, "今日编辑", recentPanel);
 
 // 「写日记」挂进页面最后那个 📔 日记井,而不是写进 markdown——日更每天会重写这个井,
