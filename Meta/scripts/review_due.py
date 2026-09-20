@@ -74,7 +74,9 @@ def due_notes() -> list:
             continue
         # 没写下次时间才用启发式:「用户裁决」和「结论支持」都算这一轮结束
         # (Meta/GC.md:存疑要一直查到用户裁决或转为支持),之后按 180 天再排
-        closed = ("支持" in last_body and "不支持" not in last_body) or any(
+        # 结论词必须锚定在这条记录的开头(格式是"- 日期:结论,依据..."),
+        # 否则"不再支持该理论"这类正文里的"支持"会被误判成结论本身
+        closed = last_body.strip().startswith("支持") or any(
             w in last_body for w in ("裁决", "完结", "修正", "已改正")
         )
         if closed:
