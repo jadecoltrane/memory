@@ -31,6 +31,10 @@ PROFILE_STALE_DAYS = 90   # 画像页多久没动就提一句
 MERGE_SHARED_CONCEPTS = 3 # 同文件夹内共享这么多概念 → 同族合并候选
 OPEN_Q_BACKLOG = 4        # 单个概念页开放问题堆到这个数 → 提示挑一条推进
 STALE_SURFACED_DAYS = 120 # 这么久没被工作台抽中过 → 列出来(不建议删,只是让它被看见)
+# 归档候选的成长期:工作台每天只抽几篇,一百多篇的库轮一圈要好几个月,所以
+# "还没被抽中过"对刚进库的笔记是默认状态、不是冷落。不设这个下限,这一档就会
+# 把每篇新写的参考层笔记在进库当周报成归档候选
+ARCHIVE_GRACE_DAYS = 60
 NAME_SIMILARITY = 0.5     # 概念名相似度超过这个 → 提示考虑 aliases 收编
 
 # profile 正文里的时间承诺。只认真正的截止表达——"(2026-07-25)"那种出处日期
@@ -112,17 +116,25 @@ def main():
         f = fm(corpus.get(p_, p_.read_text(encoding="utf-8")))
         if f.get("tier") != "参考" or str(f.get("verified", "")).lower() != "false":
             continue
+        born = date_of(f.get("created", ""))
+        age = (TODAY - born).days if born is not None else None
+        # 没轮到 ≠ 没人要:进库不满成长期的一律不报(缺 created 的按老笔记处理)
+        if age is not None and age < ARCHIVE_GRACE_DAYS:
+            continue
         seen = date_of(f.get("last-surfaced", ""))
-        if seen is not None and (TODAY - seen).days < 60:
+        if seen is not None and (TODAY - seen).days < ARCHIVE_GRACE_DAYS:
             continue
         # 还得没人在用它:入链 ≤1 才算真沉底。只靠"没被抽中过"会把整个参考层都报出来
         inbound = sum(1 for q, t in corpus.items() if q != p_ and p_.stem in t)
         if inbound > 1:
             continue
-        why = "还没被抽中过" if seen is None else f"上次露面 {seen}"
+        if seen is not None:
+            why = f"上次露面 {seen}"
+        else:
+            why = f"入库 {age} 天还没被抽中过" if age is not None else "还没被抽中过"
         arch.append(f"{p_.relative_to(ROOT).as_posix()}({why},入链 {inbound})")
     section("🗄 归档候选", arch,
-            "判据:参考层 + verified: false(来源没核实过)+ 长期没在工作台露面 + 入链 ≤1(没人在用)。"
+            f"判据:参考层 + verified: false(来源没核实过)+ 入库满 {ARCHIVE_GRACE_DAYS} 天且这么久没在工作台露面 + 入链 ≤1(没人在用)。"
             "⚠️ 这不是删除名单,也不要自行归档——把这几条写进待裁决 issue 问一句「这几条还要留在库里吗」")
 
     # 4. 同族合并候选
