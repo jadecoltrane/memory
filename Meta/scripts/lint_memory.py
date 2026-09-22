@@ -209,10 +209,21 @@ def check_note_links(path: Path):
         )
 
 
+def strip_review_log(text: str) -> str:
+    """砍掉 ## 复核记录 及其之后的内容。
+
+    复核记录是机器要读的字段,而且正是「某个概念因为证据不成立被退役」的留档处
+    ——那里提到的概念名恰恰是不该再挂链接的(挂上等于把已裁定作废的说法重新接回
+    图谱)。不砍这一段,每退役一个概念就永久多一条修不掉的警告。
+    """
+    i = text.find("\n## 复核记录")
+    return text if i == -1 else text[:i]
+
+
 def check_naked_concepts(path: Path, concept_names: dict):
     """已有概念页的名字在正文里裸文本反复出现,却一次双链都没打 → 图谱连不上。"""
     rel = path.relative_to(ROOT).as_posix()
-    text = path.read_text(encoding="utf-8")
+    text = strip_review_log(path.read_text(encoding="utf-8"))
     linked = {t.strip() for t in WIKILINK.findall(text)}
     stripped = WIKILINK.sub("", text)  # 去掉双链本身,只看裸文本
     for cpath, names in concept_names.items():
