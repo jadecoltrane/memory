@@ -32,7 +32,7 @@
 
 > 这不是洁癖。每次会话换一个新分支,**写在分支上但没推 main 的笔记,下一次会话从 main 起步时看不见**,于是永远留在那儿。而两道防线都盯不住这种漏法:`silent-loss.yml` 看的是删除数和索引跌幅,**从没进过 main 的东西两样都不触发**;`lint_memory.py` 不查 `Profile/` 的纯文本路径(Profile 本来就不进图谱)。**症状只有一个:某天发现一条引用指向不存在的文件。**
 
-读 `Meta/index.md`(每条记忆一行)和 `Profile/`;只按需打开相关文件,不要全量阅读。**`Profile/` 里 `type: data` 的是数据文件**(目前只有 `Profile/习惯打卡.md`):只看「习惯」「已练成」两段就够了,「记录」区是逐日流水、只增不减,要查具体某天再往下翻。
+读 `Meta/index.md`(每条记忆一行)和 `Profile/`;只按需打开相关文件,不要全量阅读。**`Profile/` 里 `type: data` 的是数据文件**,共同点是**只读顶上的汇总区,底下的流水区只增不减、要查再往下翻**:`Profile/习惯打卡.md` 看「习惯」「已练成」两段;`Profile/额度流水.md` 看「额度」区,**余额不在文件里,跑 `python3 Meta/scripts/budget_report.py` 现算**(手填的余额会和流水对不上且不报错)。
 
 ## 回答问题时
 
@@ -64,7 +64,7 @@
 - **只写结论本身,不写依据、日期、出处**——见开头「只记内容」那条。用户自己说过的原话要留(那是用户本人)。变了就地更新,不另开文件
 - **不做双链、不进图谱**:引用其他记忆用纯文本路径
 
-frontmatter:`type: profile`、`updated: YYYY-MM-DD`。**例外**:`Profile/` 下 `type: data` 的数据文件(习惯打卡)不算画像页——lint、gc_report、GC 都跳过它,读法见「开工时」那条。
+frontmatter:`type: profile`、`updated: YYYY-MM-DD`。**例外**:`Profile/` 下 `type: data` 的数据文件(习惯打卡、额度流水)不算画像页——lint、gc_report、GC 都跳过它(认 `type` 字段,不认路径,新建的自动生效),读法见「开工时」那条。
 
 ## Notes/ ——文章、知识点、用户自己写的东西
 
