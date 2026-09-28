@@ -5,6 +5,7 @@ expires: 2027-03-09
 created: 2026-09-09
 checkable: true
 verified: false
+last-surfaced: 2026-09-25
 tags: [AI, 大模型, 可解释性, 内省, 认知]
 source: 提炼自一段讲大模型工作原理的对话内容。四条关键证据已联网核查(Othello-GPT 世界模型与因果干预、押韵前规划、思维链不忠实、内省注入实验、高维外推);"高维插值"与"没有跨对话记忆"两处按核查结果改写
 ---
