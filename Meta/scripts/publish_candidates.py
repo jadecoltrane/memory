@@ -16,14 +16,10 @@
 
 张力不再是硬门槛,只做排序:带「开放问题」或 ⚠️ 张力标记的排在前面、并挑出钩子,
 因为写作定位是「从冲突开始,不要从观点开始」,张力天生是冲突形状、最好起笔。
-没张力的核心笔记照样进池子(排在后面、不给钩子),只是选题卡里「冲突在哪」那栏会空,
+没张力的核心笔记照样进池子(排在后面、不给钩子),只是没有现成的冲突钩子,
 开头得自己找 —— 由用户手动决定要不要写。
 
 概念页单独列一组:一个概念页的「定义 + 开放问题」本身就是一篇短文的骨架。
-
-`Works/选题/` 是每周机器人推的选题卡,不算稿子——它引用来源笔记只是为了说明推荐理由,
-**不能当成"在写"**。否则机器人每推一条,候选池就少一条,推满一年池子自己空了,
-而用户一个字都没写。它要变成"在写",得由用户把文件 `git mv` 出这个目录(见 Works/README.md)。
 
 用法:python3 Meta/scripts/publish_candidates.py [--all|--sync|--count]
       --all   连同已发布的一起列出,用来回看发过什么
@@ -67,17 +63,16 @@ def hooks(text: str) -> list:
 
 REF = re.compile(r"(?:Notes|Concepts)/[^\s)）】」』,,;;、\]]+\.md")
 
-PICKS = "Works/选题"  # 机器人推的选题卡,不是稿子;理由见模块开头
 
 
 def works_md():
-    """Works/ 下算作「稿子」的文件 —— 排除 README 和机器人的选题卡。"""
+    """Works/ 下算作「稿子」的文件 —— 排除 README。"""
     works = ROOT / "Works"
     if not works.exists():
         return
     for w in sorted(works.rglob("*.md")):
         rel = w.relative_to(ROOT).as_posix()
-        if w.name == "README.md" or rel.startswith(PICKS + "/"):
+        if w.name == "README.md":
             continue
         yield w, rel
 
