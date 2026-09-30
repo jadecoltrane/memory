@@ -27,7 +27,7 @@
 
 用法:python3 Meta/scripts/publish_candidates.py [--all|--sync|--count]
       --all   连同已发布的一起列出,用来回看发过什么
-      --count 只吐 `notes=N concepts=M`,给 weekly-writing-pick.yml 判断池子空没空。
+      --count 只吐 `notes=N concepts=M`,判断池子空没空。
               有这个口子是因为拿 grep 去匹配上面那些人读的标题,标题一改就静默失灵
 """
 
