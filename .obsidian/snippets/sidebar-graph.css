@@ -1,0 +1,6 @@
+/* 左栏下半的局部图谱面板:不要标签头,只留图谱本身。
+   Border 会把「选中的标签」画成带底色和阴影的方框,单标签的组永远是选中态,
+   于是那个图标一直顶着个大框、颜色也比上面那排深。整条隐藏掉最干净。 */
+body:not(.is-mobile) .mod-left-split .workspace-tabs:not(.mod-top) .workspace-tab-header-container {
+  display: none;
+}

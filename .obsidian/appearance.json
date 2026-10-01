@@ -4,7 +4,8 @@
     "quiet-notes",
     "claudian-ui",
     "workbench",
-    "file-tree"
+    "file-tree",
+    "sidebar-graph"
   ],
   "showRibbon": false,
   "theme": "system",
