@@ -416,7 +416,7 @@ linksCard.onclick = openGraph;
 
 addTab("🌱", recent7Pages.length, "最近 7 天", recent7Panel);
 addTab("🕘", editedToday.length, "今日编辑", recentPanel);
-addTab("👀", Math.min(recentViewed().length, RECENT_LIMIT), "最近浏览", viewedPanel);
+addTab("👀", "", "最近浏览", viewedPanel);
 
 // 「写日记」挂进页面最后那个 📔 日记井,而不是写进 markdown——日更每天会重写这个井,
 // 写进去的按钮会被当成用户手写的日记正文原文归档掉(见 Meta/WORKBENCH.md 归档流程第 2 条)
