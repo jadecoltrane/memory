@@ -360,10 +360,12 @@ const recentPanel = (host) => {
 // 最近浏览读 Obsidian 自己的最近打开列表(每台设备各记各的),不另存任何文件。
 // 要在点开面板那一刻现读:列表随时在变,建页面时读一次的话,面板里永远是刷新前的。
 // 只留 md、去掉 Home 自己(工作台是每次打开的起点,留着会永远占第一位)、
-// 在库里已经不存在的路径(改名/删除后列表里会残留)也要滤掉
+// 在库里已经不存在的路径(改名/删除后列表里会残留)也要滤掉。
+// 根目录的文件也不要:库里的内容都在文件夹下,根目录只有 Home 和规则文件,
+// 手机本地多出来的根目录同名副本(点了找不到目标的链接会新建)会因为一直没被重开而沉在末行
 const RECENT_LIMIT = 8;
 const recentViewed = () => (app.workspace.getLastOpenFiles?.() ?? [])
-  .filter((p) => p.toLowerCase().endsWith(".md") && p !== "Home.md")
+  .filter((p) => p.toLowerCase().endsWith(".md") && p.includes("/"))
   .map((p) => app.vault.getAbstractFileByPath(p))
   .filter(Boolean)
   .slice(0, RECENT_LIMIT);
