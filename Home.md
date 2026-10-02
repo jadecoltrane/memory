@@ -357,6 +357,29 @@ const recentPanel = (host) => {
   host.createEl("div", { cls: "wb-panel-caption", text: `🕘 今天编辑过 ${editedToday.length} 条` });
 };
 
+// 最近浏览读 Obsidian 自己的最近打开列表(每台设备各记各的),不另存任何文件。
+// 要在点开面板那一刻现读:列表随时在变,建页面时读一次的话,面板里永远是刷新前的。
+// 只留 md、去掉 Home 自己(工作台是每次打开的起点,留着会永远占第一位)、
+// 在库里已经不存在的路径(改名/删除后列表里会残留)也要滤掉
+const RECENT_LIMIT = 8;
+const recentViewed = () => (app.workspace.getLastOpenFiles?.() ?? [])
+  .filter((p) => p.toLowerCase().endsWith(".md") && p !== "Home.md")
+  .map((p) => app.vault.getAbstractFileByPath(p))
+  .filter(Boolean)
+  .slice(0, RECENT_LIMIT);
+const viewedPanel = (host) => {
+  const files = recentViewed();
+  if (!files.length) { host.createEl("div", { cls: "wb-panel-empty", text: "还没有浏览记录" }); return; }
+  const listEl = host.createEl("div");
+  for (const f of files) {
+    const row = listEl.createEl("div", { cls: "wb-panel-row" });
+    row.createEl("span", { cls: "wb-panel-row-title", text: f.basename });
+    // 右列给顶层文件夹:这份列表没有打开时刻,编辑时间又会把"看过"误读成"改过"
+    row.createEl("span", { cls: "wb-panel-row-date", text: f.path.split("/").length > 1 ? f.path.split("/")[0] : "" });
+    row.onclick = () => open(f.path);
+  }
+};
+
 const bar = dv.container.createEl("div", { cls: "wb-cards" });
 const panel = dv.container.createEl("div", { cls: "wb-panel" });
 panel.style.display = "none";
@@ -393,6 +416,7 @@ linksCard.onclick = openGraph;
 
 addTab("🌱", recent7Pages.length, "最近 7 天", recent7Panel);
 addTab("🕘", editedToday.length, "今日编辑", recentPanel);
+addTab("👀", Math.min(recentViewed().length, RECENT_LIMIT), "最近浏览", viewedPanel);
 
 // 「写日记」挂进页面最后那个 📔 日记井,而不是写进 markdown——日更每天会重写这个井,
 // 写进去的按钮会被当成用户手写的日记正文原文归档掉(见 Meta/WORKBENCH.md 归档流程第 2 条)
