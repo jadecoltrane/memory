@@ -3,9 +3,9 @@
 下面的 MIT 许可只覆盖**机制**:`Meta/scripts/` 里的脚本、`.github/workflows/`、
 `CLAUDE.md` 与 `Meta/` 下的规则文件、`Home.md` 里的工作台代码与 CSS。
 
-**不覆盖内容**:`Notes/` `Concepts/` `Profile/` `Diary/` `Works/` `Sources/`
-是本人的笔记、画像与私人记录,保留所有权利,且 `Sources/` 未脱敏——
-这个仓库必须始终 private。
+**不覆盖内容**:`Notes/` `Concepts/` `Profile/` `Diary/` `Works/`
+是本人的笔记、画像与私人记录,保留所有权利;git 历史里还留有未脱敏的
+对话原文——这个仓库必须始终 private。
 
 MIT License
 

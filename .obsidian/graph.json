@@ -1,6 +1,6 @@
 {
   "collapse-filter": false,
-  "search": "-path:Sources -path:Archive -path:Works -path:Diary -path:Profile -path:Meta -path:Home -path:CLAUDE -path:AGENTS",
+  "search": "-path:Archive -path:Works -path:Diary -path:Profile -path:Meta -path:Home -path:CLAUDE -path:AGENTS",
   "showTags": false,
   "showAttachments": false,
   "hideUnresolved": true,

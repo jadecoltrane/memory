@@ -10,7 +10,6 @@ sorting-spec: |
   /folders Archive
   /folders Meta
   /folders Profile
-  /folders Sources
   /:files
 ---
 

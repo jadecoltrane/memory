@@ -110,7 +110,7 @@ def main():
     corpus = {q: q.read_text(encoding="utf-8")
               for q in ROOT.rglob("*.md")
               if not any(x.startswith(".") for x in q.relative_to(ROOT).parts)
-              and q.relative_to(ROOT).parts[0] not in ("Archive", "Sources", "Meta")}
+              and q.relative_to(ROOT).parts[0] not in ("Archive", "Meta")}
     arch = []
     for p_ in notes:
         f = fm(corpus.get(p_, p_.read_text(encoding="utf-8")))
@@ -189,7 +189,7 @@ def main():
 
     # 5c. source 外链存活(默认跳过,--net 才真去访问)
     urls = {}
-    for p in notes + sorted((ROOT / "Sources").glob("*.md")):
+    for p in notes:
         f = fm(p.read_text(encoding="utf-8"))
         for v in (f.get("source", ""), f.get("原文位置", "")):
             for u in re.findall(r"https?://[^\s,,)]+", v):
@@ -244,40 +244,6 @@ def main():
                 close.append(f"{keys[i]} × {keys[j]}(相似度 {best:.2f})")
     section("概念名近义,考虑 aliases 收编", close,
             "像 ≠ 是同一个。真是同义 → 合并进一页的 aliases 并改写旧链接;是对立面/子集 → 什么都不做,在「相关概念」互相指一下就够")
-
-    # 6. sources 覆盖:笔记声称来自某次导出,却没有对应的对照表
-    # 只认对照表自己声明覆盖的日期(文件名 + frontmatter 的「对话日期」区间),
-    # 不能拿正文里随便出现的日期去匹配——那样任何一份表都会把全库都"覆盖"掉。
-    src_dates = set()
-    for p in (ROOT / "Sources").glob("*.md"):
-        if p.stem == "README":
-            continue
-        src_dates.update(re.findall(r"20\d{2}-\d{2}-\d{2}", p.stem))
-        rng = fm(p.read_text(encoding="utf-8")).get("对话日期", "")
-        ds = sorted(date_of(x) for x in re.findall(r"20\d{2}-\d{2}-\d{2}", rng))
-        if ds:
-            cur = ds[0]
-            while cur <= ds[-1]:
-                src_dates.add(cur.isoformat())
-                cur += datetime.timedelta(days=1)
-    missing = []
-    for p in notes:
-        f2 = fm(p.read_text(encoding="utf-8"))
-        s = f2.get("source", "")
-        # 只认真的有导出文件的(导出 / AI Exporter)。「与 Claude 的对话」是实时会话,
-        # 根本没有原文文件可对照,不该进这个名单。
-        if not re.search(r"导出|Exporter", s):
-            continue
-        if f2.get("source-mapped"):
-            continue  # 已登记(建了表,或原文已不可得)
-        ds = re.findall(r"20\d{2}-\d{2}-\d{2}", s)
-        if ds and not (set(ds) & src_dates):
-            missing.append(f"{p.relative_to(ROOT).as_posix()} ← source: {s[:60]}…")
-    section("笔记来自某次导出,但 Sources/ 里没有对照表", missing,
-            "按 Meta/RESOLVER.md「写 notes 的执行流程」第 3 条补一份。对照表是防选择性记录的防线,"
-            "它自己不能依赖「有人记得建」。原文已经找不到了 → 在该篇 frontmatter 加一行 "
-            "`source-mapped: 原文已不可得(登记日期)`,把「这段无法追溯」变成明写的事实,而不是永久告警")
-    print(f"   (现有对照表 {len([p for p in (ROOT / 'Sources').glob('*.md') if p.stem != 'README'])} 份)")
 
     # 7. 分层与出口
     tiers = defaultdict(int)

@@ -4,7 +4,7 @@
 
 **两条设计原则**:①**兜底优先**——可靠性相关的(失败告警、机器校验、边界情况、备份)必须**预先**设计;懒加载只用于内容组织,不用于安全网。②**省 token**——效果相当时选读写成本更低的,但不拿效果去换;精简不能牺牲可执行性。**本文件只放每次会话都用得上的规则;只在写入时才用的细则在 `Meta/RESOLVER.md`。**
 
-**目录**:`Notes/` 收藏、`Concepts/` 概念枢纽、`Profile/` 画像、`Meta/` 规则与脚本、`Sources/` 导出原文与对照表(**原样未脱敏,仓库必须始终 private**)、`Archive/` 退役区、`Works/` 成品与草稿、`Diary/` 发生过的事。`Sources/`、`Archive/`、`Works/` 不进索引/图谱/lint;`Diary/` 只把最近一个月列进索引,不进图谱、不受 lint 管、**GC 绝对不许去重合并**。规则在各自 README。
+**目录**:`Notes/` 收藏、`Concepts/` 概念枢纽、`Profile/` 画像、`Meta/` 规则与脚本、`Archive/` 退役区、`Works/` 成品与草稿、`Diary/` 发生过的事。`Archive/`、`Works/` 不进索引/图谱/lint;`Diary/` 只把最近一个月列进索引,不进图谱、不受 lint 管、**GC 绝对不许去重合并**。规则在各自 README。
 
 **Actions 自动跑,AI 不用手动补**(索引重建、GC、日更、lint、备份、大批删除告警等,细节在各 `.github/workflows/*.yml` 文件头)。
 

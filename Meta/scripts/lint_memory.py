@@ -70,8 +70,6 @@ def collect_pages():
         rel_parts = p.relative_to(ROOT).parts
         if any(part.startswith(".") for part in rel_parts):
             continue
-        if rel_parts[:2] == ("Sources", "raw"):
-            continue  # 导出原文不是记忆,不该成为可解析的链接目标(链进去就该报断链)
         rel = p.relative_to(ROOT).as_posix()[:-3]
         paths.add(rel)
         basenames.add(p.stem)

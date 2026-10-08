@@ -3,7 +3,6 @@ type: note
 tier: 方法
 created: 2026-07-22
 source: Gemini 对话导出(2026-07-22,经 AI Exporter 保存;神经科学内容均为 AI 转述,未交叉核实)
-source-mapped: 原文已不可得(2026-08-02 登记;导出文件未留存,该次记录无法逐轮追溯)
 checkable: true
 verified: false
 tags: [健康, 睡眠, 大脑, 神经科学]
