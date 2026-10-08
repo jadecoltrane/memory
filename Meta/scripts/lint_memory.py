@@ -169,11 +169,11 @@ def check_frontmatter(path: Path):
         if "type" not in fm:
             warnings.append(f"{rel}: 还没有 frontmatter(手写笔记?等 GC 补齐)")
         elif "created" not in fm:
-            # Home.md 的「最近 7 天」只认 frontmatter 的 created,而且故意不退回 file.ctime
+            # Home.md 的「最新笔记」只认 frontmatter 的 created,而且故意不退回 file.ctime
             # (clone/checkout 会把 ctime 整批刷成"刚才")。所以漏写 created 的后果是
-            # 这篇在统计里永远不存在——不报错、不断链、症状只是数字偏小,没人会去查。
+            # 这篇在「最新笔记」里永远不出现——不报错、不断链、症状只是列表里少一篇,没人会去查。
             # 这正是需要机器兜底的那类静默失败,所以报出来。
-            warnings.append(f"{rel}: 缺 created: YYYY-MM-DD,「最近 7 天」统计会看不见它")
+            warnings.append(f"{rel}: 缺 created: YYYY-MM-DD,「最新笔记」会看不见它")
 
 
 def collect_concept_names() -> dict:

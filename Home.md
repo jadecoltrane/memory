@@ -203,12 +203,13 @@ const edges = all.reduce((n, pg) => n + pg.file.outlinks.length, 0);
 // 不能把"我不知道它什么时候建的"读成"它是今天建的"
 const ctimeOf = (pg) => pg.created?.ts ?? (pg.created ? new Date(String(pg.created)).getTime() : 0);
 const mtimeOf = (pg) => pg.file.mtime?.ts ?? 0;
-// 窗口是从此刻往回滚的 7×24 小时,不是日历周——所以标签叫「最近 7 天」而不是「本周新增」:
-// 周一早上看到的数字里大半是上周末写的,标成「本周」会让人以为自己这周写了一堆
-const recent7Pages = notes.array().filter(pg => {
-  const t = ctimeOf(pg);
-  return t > 0 && Date.now() - t < 7 * 864e5;
-});
+// 「最新笔记」按 created 倒序取最新的若干篇,不设时间窗口:按窗口算的话,
+// 安静的一周数字是 0、面板是空的;按条数截,点开总能看到最近写了什么
+const LATEST_LIMIT = 20;
+const latestPages = notes.array()
+  .filter(pg => ctimeOf(pg) > 0)
+  .sort((a, b) => ctimeOf(b) - ctimeOf(a))
+  .slice(0, LATEST_LIMIT);
 const fmt = (ms) => {
   if (!ms) return "";
   const d = new Date(ms);
@@ -334,7 +335,7 @@ const conceptsPanel = (host) => {
   });
 };
 
-const recent7Panel = (host) => renderRows(host, [...recent7Pages].sort((a, b) => ctimeOf(b) - ctimeOf(a)), (pg) => fmt(ctimeOf(pg)));
+const latestPanel = (host) => renderRows(host, latestPages, (pg) => fmt(ctimeOf(pg)));
 // 这颗胶囊切的是"今天"这一天,不是"最近 N 条"——按条数截会在改得多的那天把早上的挤掉,
 // 按当天零点截才保证一天之内动过的一条都不漏。右列给时刻不给日期:同一天里每行日期都一样,
 // 时刻才分得出先后
@@ -416,7 +417,7 @@ linksCard.createEl("span", { cls: "wb-num", text: `🕸️ ${edges}` });
 linksCard.createEl("span", { cls: "wb-lbl", text: "双链" });
 linksCard.onclick = openGraph;
 
-addTab("🌱", recent7Pages.length, "最近 7 天", recent7Panel);
+addTab("🌱", "", "最新笔记", latestPanel);
 addTab("🕘", editedToday.length, "今日编辑", recentPanel);
 addTab("👀", "", "最近浏览", viewedPanel);
 
