@@ -203,9 +203,10 @@ const edges = all.reduce((n, pg) => n + pg.file.outlinks.length, 0);
 // 不能把"我不知道它什么时候建的"读成"它是今天建的"
 const ctimeOf = (pg) => pg.created?.ts ?? (pg.created ? new Date(String(pg.created)).getTime() : 0);
 const mtimeOf = (pg) => pg.file.mtime?.ts ?? 0;
-// 「最新笔记」按 created 倒序取最新的若干篇,不设时间窗口:按窗口算的话,
-// 安静的一周数字是 0、面板是空的;按条数截,点开总能看到最近写了什么
-const LATEST_LIMIT = 20;
+// 「最新笔记」按 created 倒序取最新的 8 篇,不设时间窗口:按窗口算的话,
+// 安静的一周数字是 0、面板是空的;按条数截,点开总能看到最近写了什么。
+// 只要 8 篇、不要「展开全部」——取够 8 篇正好等于 renderRows 的默认上限,按钮就不会出现
+const LATEST_LIMIT = 8;
 const latestPages = notes.array()
   .filter(pg => ctimeOf(pg) > 0)
   .sort((a, b) => ctimeOf(b) - ctimeOf(a))
