@@ -418,8 +418,8 @@ linksCard.createEl("span", { cls: "wb-num", text: `🕸️ ${edges}` });
 linksCard.createEl("span", { cls: "wb-lbl", text: "双链" });
 linksCard.onclick = openGraph;
 
-addTab("🌱", "", "最新笔记", latestPanel);
 addTab("🕘", editedToday.length, "今日编辑", recentPanel);
+addTab("🌱", "", "最新笔记", latestPanel);
 addTab("👀", "", "最近浏览", viewedPanel);
 
 // 「写日记」挂进页面最后那个 📔 日记井,而不是写进 markdown——日更每天会重写这个井,
