@@ -184,6 +184,9 @@ const pagesIn = (top) => {
   return dv.pages().where((p) => p.file.path.toLowerCase().startsWith(prefix));
 };
 const notes = pagesIn("Notes"), concepts = pagesIn("Concepts");
+// Works/ 的稿子算进笔记数、笔记面板、最新笔记和今日编辑;不进双链数和随机重逢(那两处只算想通的东西)。
+// README 是目录说明,不是稿子
+const works = pagesIn("Works").where((p) => p.file.path.toLowerCase() !== "works/readme.md");
 
 // Dataview 的索引偶尔会整批漏掉文件(外部批量改名/移动时最容易发生,2026-08-16 就整个
 // Notes/ 掉了),表现是笔记数变 0、随机重逢变白卡,而且不报任何错。跟 Obsidian 自己的
@@ -207,10 +210,16 @@ const mtimeOf = (pg) => pg.file.mtime?.ts ?? 0;
 // 安静的一周数字是 0、面板是空的;按条数截,点开总能看到最近写了什么。
 // 只要 8 篇、不要「展开全部」——取够 8 篇正好等于 renderRows 的默认上限,按钮就不会出现
 const LATEST_LIMIT = 8;
-const latestPages = notes.array()
+const latestPages = [...notes.array(), ...works.array()]
   .filter(pg => ctimeOf(pg) > 0)
   .sort((a, b) => ctimeOf(b) - ctimeOf(a))
   .slice(0, LATEST_LIMIT);
+// Works/ 默认不带 frontmatter,漏写 created 的稿子会从「最新笔记」里静默消失,所以当场点名
+const worksNoCreated = works.array().filter((pg) => ctimeOf(pg) === 0);
+if (worksNoCreated.length) dv.container.createEl("div", {
+  cls: "wb-heartbeat",
+  text: `⚠️ Works/ 里 ${worksNoCreated.length} 篇没写 created,不会出现在最新笔记:${worksNoCreated.map((pg) => pg.file.name).join("、")}`,
+});
 const fmt = (ms) => {
   if (!ms) return "";
   const d = new Date(ms);
@@ -245,21 +254,25 @@ const renderRows = (host, arr, rightOf, limit = 8) => {
 
 // 笔记数据库.base 是生成产物(不是用户笔记),每次打开笔记面板都重新整份重写,保证分类跟 Notes/ 实际子文件夹同步
 const NOTES_BASE_PATH = "Meta/笔记数据库.base";
+const WORKS_CAT = "Works";
 const buildNotesBase = async (catGroups) => {
   const esc1 = (s) => s.replace(/'/g, "''"); // YAML 单引号字符串里,单引号本身要写成两个单引号转义
   const esc2 = (s) => s.replace(/"/g, '\\"');
   const lines = ["views:"];
-  const pushView = (name, filterExpr) => {
+  // filterLines 是 filters: 下面那一层的 YAML 行(不含缩进),简单视图一行 and,全部笔记要嵌一层 or
+  const pushView = (name, filterLines) => {
     lines.push("  - type: table");
     lines.push(`    name: "${esc2(name)}"`);
     lines.push("    filters:");
-    lines.push("      and:");
-    lines.push(`        - '${esc1(filterExpr)}'`);
+    for (const l of filterLines) lines.push("      " + l);
   };
-  pushView("全部笔记", `file.inFolder("Notes")`);
+  const q = (expr) => `'${esc1(expr)}'`;
+  const notReadme = q(`file.path != "Works/README.md"`);
+  pushView("全部笔记", ["or:", `  - ${q(`file.inFolder("Notes")`)}`, "  - and:", `      - ${q(`file.inFolder("Works")`)}`, `      - ${notReadme}`]);
   for (const [name] of catGroups) {
+    if (name === WORKS_CAT) { pushView(name, ["and:", `  - ${q(`file.inFolder("Works")`)}`, `  - ${notReadme}`]); continue; }
     const filterExpr = name === "未分类" ? `file.folder == "Notes"` : `file.inFolder("Notes/${name}")`;
-    pushView(name, filterExpr);
+    pushView(name, ["and:", `  - ${q(filterExpr)}`]);
   }
   await app.vault.adapter.write(NOTES_BASE_PATH, lines.join("\n") + "\n");
 };
@@ -272,6 +285,7 @@ const notesPanel = async (host) => {
     if (!groups.has(cat)) groups.set(cat, []);
     groups.get(cat).push(pg);
   }
+  if (works.length) groups.set(WORKS_CAT, works.array());
   const sorted = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
   await buildNotesBase(sorted);
 
@@ -293,7 +307,7 @@ const notesPanel = async (host) => {
     const q = searchInput.value.trim().toLowerCase();
     resultHost.innerHTML = "";
     if (!q) return;
-    const hits = notes.array()
+    const hits = [...notes.array(), ...works.array()]
       .filter((pg) => pg.file.name.toLowerCase().includes(q))
       .sort((a, b) => mtimeOf(b) - mtimeOf(a));
     renderRows(resultHost, hits, (pg) => fmt(mtimeOf(pg)));
@@ -346,9 +360,7 @@ const hhmm = (ms) => {
   const d = new Date(ms);
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
-// Works/ 不进笔记数、双链、最新笔记(那几处都只算想通的东西),但「今天动过什么」得包括稿子:
-// 只认 Notes+Concepts 的话,当天写进 Works/ 的成品在这颗胶囊里看不见
-const editedToday = [...all, ...pagesIn("Works").array()]
+const editedToday = [...all, ...works.array()]
   .filter((pg) => mtimeOf(pg) >= startOfToday)
   .sort((a, b) => mtimeOf(b) - mtimeOf(a));
 const recentPanel = (host) => {
@@ -411,7 +423,7 @@ const addTab = (icon, num, lbl, render) => {
   };
 };
 
-addTab("📝", notes.length, "笔记", notesPanel);
+addTab("📝", notes.length + works.length, "笔记", notesPanel);
 addTab("🌿", concepts.length, "概念", conceptsPanel);
 
 // 双链不展开页内面板,直接跳转 Obsidian 原生图谱——图谱是独立可视化,塞进小面板意义不大
