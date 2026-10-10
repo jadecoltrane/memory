@@ -346,7 +346,9 @@ const hhmm = (ms) => {
   const d = new Date(ms);
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 };
-const editedToday = all
+// Works/ 不进笔记数、双链、最新笔记(那几处都只算想通的东西),但「今天动过什么」得包括稿子:
+// 只认 Notes+Concepts 的话,当天写进 Works/ 的成品在这颗胶囊里看不见
+const editedToday = [...all, ...pagesIn("Works").array()]
   .filter((pg) => mtimeOf(pg) >= startOfToday)
   .sort((a, b) => mtimeOf(b) - mtimeOf(a));
 const recentPanel = (host) => {
