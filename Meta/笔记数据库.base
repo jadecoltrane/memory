@@ -2,8 +2,11 @@ views:
   - type: table
     name: 全部笔记
     filters:
-      and:
+      or:
         - file.inFolder("Notes")
+        - and:
+            - file.inFolder("Works")
+            - file.path != "Works/README.md"
   - type: table
     name: 思考
     filters:
@@ -19,6 +22,12 @@ views:
     filters:
       and:
         - file.inFolder("Notes/练习")
+  - type: table
+    name: Works
+    filters:
+      and:
+        - file.inFolder("Works")
+        - file.path != "Works/README.md"
   - type: table
     name: 知识
     filters:
