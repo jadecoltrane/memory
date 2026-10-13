@@ -6,6 +6,7 @@ created: 2026-07-20
 source: 与 Claude(Fable 5)的对话(2026-07-20;神经科学与 AI 架构内容均为 AI 转述,未联网交叉核实)
 checkable: true
 verified: false
+last-surfaced: 2026-10-13
 tags: [记忆, 神经科学, AI, 认知]
 ---
 
