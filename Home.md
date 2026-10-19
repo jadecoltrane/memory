@@ -473,25 +473,25 @@ if (window.MutationObserver) {
 > **China's third-quarter economic growth quickens to 4.5% as exports surge, beating estimates**
 > 中国三季度 GDP 增速回升到 4.5%,出口拉动、好于预期 · [CNBC](https://www.cnbc.com/2026/10/19/chinas-economic-growth-quickens-to-4point6percent-as-exports-surge-stimulus-rolls-out.html)
 >
-> 国家统计局今天公布,三季度 GDP 同比增长 4.5%,比二季度的 4.3% 快,也略高于市场预期;前三季度累计 4.6%,落在今年 4.5%–5% 的目标区间里。拉动主要靠出口,九月社会消费品零售总额只增长约 1.1%,国内需求还是偏弱。对你:出口热、内需冷,国内车市卷价格的压力短期不会减,出海车型的分量会继续加重,你做过的出海合规适配经验会更值钱(推论)。
+> 国家统计局今天公布,三季度 GDP 同比增长 4.5%,比二季度的 4.3% 快,也略高于市场预期;前三季度累计 4.6%,落在今年 4.5%–5% 的目标区间里。拉动主要靠出口,九月社会消费品零售总额只增长约 1.1%,国内需求还是偏弱。对你:内需偏冷,物价短期涨不起来,商家促销会多一些(推论)。
 >
 > ---
 > **France hit by worst unrest in years as attempts to rein in government spending meet citizen ire**
 > 法国爆发多年来最严重的骚乱 · [CNBC](https://www.cnbc.com/2026/10/19/france-protests-worst-in-years-unrest-macron-.html)
 >
-> 据报道,上周末法国多地抗议油价、生活成本和公共服务变差,政府估计约 55 万人上街,部分演变成打砸抢,约 2400 人被捕;马克龙拒绝了内政部长的辞职,说要"毫不妥协"地回应,同时把民怨和海湾冲突推高油价联系在一起。对你:高油价正在点燃欧洲的社会情绪,这是欧洲看待电动车、看待中国车企的大背景之一(推论);近期如果有去法国的行程,留意交通和罢工。
+> 据报道,上周末法国多地抗议油价、生活成本和公共服务变差,政府估计约 55 万人上街,部分演变成打砸抢,约 2400 人被捕;马克龙拒绝了内政部长的辞职,说要"毫不妥协"地回应,同时把民怨和海湾冲突推高油价联系在一起。对你:近期如果有去法国的行程,留意交通和罢工。
 >
 > ---
 > **Putin reportedly suggests summit with Trump and Xi to decide fate of Ukraine**
 > 据报普京提议与特朗普、习近平开三方峰会决定乌克兰问题 · [CNBC](https://www.cnbc.com/2026/10/19/putin-trump-xi-ukraine-war-energy.html)
 >
-> 据报道,普京提出由俄、美、中三国领导人开峰会来决定乌克兰的前途;这目前只是媒体转述的说法,我只看了摘要。同一时间美乌关系紧张:特朗普为放宽对俄制裁辩护,还指责泽连斯基拖延战争。对你:中国如果被拉上乌克兰问题的谈判桌,中欧、中美关系都会跟着动,欧洲对中国车的关税和准入政策也可能随之调整(推论)。
+> 据报道,普京提出由俄、美、中三国领导人开峰会来决定乌克兰的前途;这目前只是媒体转述的说法,我只看了摘要。同一时间美乌关系紧张:特朗普为放宽对俄制裁辩护,还指责泽连斯基拖延战争。
 >
 > ---
 > **China's CXMT sees shares drop over 6% as investors look past chipmaker's profit turnaround**
 > 长鑫存储发布业绩预告后股价跌超 6% · [CNBC](https://www.cnbc.com/2026/10/19/china-cxmt-profit-outlook-shares.html)
 >
-> 国产内存芯片(DRAM)大厂长鑫存储公布前三季度业绩预告后,周一股价跌了 6% 多——标题的意思是,扭亏为盈没能让投资者买账。我只看了标题和摘要,具体数字没展开。对你:车机和座舱域控都大量用内存芯片,国产存储能不能站稳,关系到车企的芯片成本和供货安全(推论)。
+> 国产内存芯片(DRAM)大厂长鑫存储公布前三季度业绩预告后,周一股价跌了 6% 多——标题的意思是,扭亏为盈没能让投资者买账。我只看了标题和摘要,具体数字没展开。
 >
 > ---
 > **尊界V800「煞車門」：從產品安全之爭到「恨國」論戰**

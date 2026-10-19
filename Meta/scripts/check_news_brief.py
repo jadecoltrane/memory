@@ -13,7 +13,7 @@
   > **原文标题**
   > 中文标题 · [来源](https://...)
   >
-  > 据报道……对你:……
+  > 据报道……[对你:……]
   >
   > ---
   > (下一条)
@@ -24,6 +24,9 @@
 
 位置也查:用户要它排在 ✅ 每日习惯卡正上方,夹在两个 dataviewjs 块中间,
 AI 重写页面时最容易把它挪到底下和其他 callout 待在一起。
+
+「对你:」不强制:用户嫌每条都硬往车上扯。改成可省,另拦「对你」提到车的超过 1 条
+(汽车新闻只占 1 条,往车上接的也只能是它)。
 
 用法:check_news_brief.py   (读仓库根目录 Home.md)
 """
@@ -46,6 +49,7 @@ SOURCE_RE = re.compile(r"^.+ · \[[^\]]+\]\((https?://[^)\s]+)\)\s*$")
 URL_RE = re.compile(r"\]\((https?://[^)\s]+)\)")
 EMPTY_MARK = "今日未抓到"
 MAX_ITEMS = 5
+CAR_RE = re.compile(r"车|座舱|HMI|智驾|电池|出海")
 
 
 def feed_block(text: str) -> tuple[int, int, list[str]] | None:
@@ -92,9 +96,13 @@ def check_item(n: int, item: list[str]) -> list[str]:
     else:
         if any(p.startswith("**") for p in paras):
             errs.append(f"第 {n} 条正文段不能以粗体开头(CSS 会把它当成标题行)")
-        if not re.search(r"对你[::]", "\n".join(paras)):
-            errs.append(f"第 {n} 条正文里没有「对你:」那句影响解释")
     return errs
+
+
+def links_to_car(item: list[str]) -> bool:
+    """这条的「对你:」那句有没有往车/工作上接。"""
+    m = re.search(r"对你[::]([^\n]*)", "\n".join(item))
+    return bool(m and CAR_RE.search(m.group(1)))
 
 
 def previous_urls(text: str) -> set[str]:
@@ -135,6 +143,9 @@ def main() -> int:
             errs.append(f"简讯应为 1–{MAX_ITEMS} 条(平时 3–5 条),现在 {len(items)} 条")
         for i, it in enumerate(items, 1):
             errs += check_item(i, it)
+        car = [i for i, it in enumerate(items, 1) if links_to_car(it)]
+        if len(car) > 1:
+            errs.append(f"第 {car} 条的「对你」都扯到了车——只有那一条汽车新闻能往车上接,其余接不上就省掉(用户:不要强行关联)")
         if len(items) < 3:
             print(f"⚠ 简讯只有 {len(items)} 条(平时 3–5 条);搜不到就少写是对的,别硬凑")
 
