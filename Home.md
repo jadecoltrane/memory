@@ -469,6 +469,30 @@ if (window.MutationObserver) {
 }
 ```
 
+> [!feed] 📰 简讯
+> **Egypt pledges to back Saudi Arabia as Houthi strikes hit Saudi airports and oil sites**
+> 胡塞武装袭击沙特机场和石油设施,埃及表态支持沙特 · [AP via CSMonitor](https://www.csmonitor.com/News-Briefs#location-id-1224868)
+>
+> 据美联社报道,最近几天也门胡塞武装用无人机和导弹打了沙特的机场和石油设施,至少 19 人死亡;埃及国防委员会表示要支持沙特,塞西正在申请议会批准向海外派兵。报道说,也门内战因此重新升级。对你:中东产油区又多一处冲突点,油价短期不容易往下走(推论);油价高的时候,电动车"用车便宜"这个卖点更好讲。
+>
+> ---
+> **GAC acquires 50 per cent of FAW Toyota**
+> 广汽收购一汽丰田 50% 股权 · [electrive](https://www.electrive.com/2026/10/17/gac-acquires-50-per-cent-of-faw-toyota/)
+>
+> 据报道,广汽将接手一汽集团手里一汽丰田的一半股权,用增发 A 股来付,一汽因此成为广汽第二大股东。一汽丰田暂时还是独立公司,丰田之后打算让它和广汽丰田在研发、采购、生产、销售上结盟,先集中做电动化和智能化。背景是车市增速放缓、产能过剩、合资品牌被中国品牌挤压。对你:合资车企在合并、往"电动 + 智能"收拢,座舱研发由谁主导、用谁家的方案,接下来都会重新洗牌。
+>
+> ---
+> **Leapmotor launches A10s with LiDAR for about $13,800**
+> 零跑 A10s 上市,9.28 万元带激光雷达 · [CnEVPost](https://cnevpost.com/2026/10/18/leapmotor-launches-a10s/)
+>
+> 零跑 A10s 售价 9.28 万元,带激光雷达,座舱用高通 8295、智驾用 8650 芯片,支持城市、高速和"车位到车位"的导航辅助驾驶;它是 A10 的外观和舒适配置版,三电参数没变。A10 九月交付约 2.4 万辆,占零跑当月销量约四分之一。对你:激光雷达加城市辅助驾驶已经下探到 10 万元以内,第一次用这类功能的人会越来越多——"现在能不能用、什么时候该接管"怎么让新手一眼看懂,是 HMI 越来越躲不开的题。
+>
+> ---
+> **Li Auto to hold Power Day on October 20 to share latest EV tech advances**
+> 理想汽车 10 月 20 日办 Power Day · [CnEVPost](https://cnevpost.com/2026/10/19/li-auto-power-day-oct-20/)
+>
+> 理想明晚 19:30 开技术发布会,重点是自研电池往全系铺开(电芯由它和欣旺达五五合资的公司生产),具体技术指标还没透露。八天后(10 月 28 日)新款 i6 上市,用自研 5C 电池和自研智驾芯片。理想九月交付 3.18 万辆,同比降约 6%。对你:想看友商怎么把"电池、充电"这类硬参数讲给普通用户听,明晚的发布会可以留意一下。
+
 ```dataviewjs
 // ✅ 每日习惯:清单、频率、已练成、打卡记录全在 Profile/习惯打卡.md,纯 markdown。
 // 不用 localStorage——换设备就没了,而且 AI 看不见;工作台只是它的一个界面

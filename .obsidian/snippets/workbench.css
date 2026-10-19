@@ -691,7 +691,28 @@
   color: var(--text-normal);
 }
 
-.workbench .callout[data-callout="feed"] ol li { margin: 7px 0; line-height: 1.65; }
+/* 📰 简讯:每条 = 一段「**原文标题** 换行 中文标题 · 来源链接」+ 正文段,条与条之间 ---。
+   认结构不认类名:以粗体开头的段是标题行(check_news_brief.py 保证正文段不以粗体开头),
+   标题行整段压成小号灰字,只把粗体那句提回正文色、放大——和参考截图一致:黑标题、灰副标题、蓝来源 */
+.workbench .callout[data-callout="feed"] .callout-content > p:has(> strong:first-child) {
+  margin: 0 0 0.45em;
+  font-size: 0.9em;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.workbench .callout[data-callout="feed"] .callout-content > p > strong:first-child {
+  font-size: 1.14em;
+  color: var(--text-normal);
+}
+.workbench .callout[data-callout="feed"] .callout-content > p:not(:has(> strong:first-child)) {
+  margin-top: 0;
+  line-height: 1.75;
+}
+.workbench .callout[data-callout="feed"] hr {
+  margin: 1.1em 0;
+  border: none;
+  border-top: 1px solid var(--wb-hairline);
+}
 
 .workbench .callout[data-callout="note"] {
   background: var(--wb-surface);
