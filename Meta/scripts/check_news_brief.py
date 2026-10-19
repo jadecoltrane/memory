@@ -18,6 +18,10 @@
   > ---
   > (下一条)
 
+链接还要和 `.news-candidates.md`(fetch_news.py 拉的固定源 RSS)对账:
+简讯里每个链接都必须在清单里。清单不在时本地只警告;CI 里清单不在还写了链接,
+说明没走固定源,直接拦。
+
 位置也查:用户要它排在 ✅ 每日习惯卡正上方,夹在两个 dataviewjs 块中间,
 AI 重写页面时最容易把它挪到底下和其他 callout 待在一起。
 
@@ -26,6 +30,7 @@ AI 重写页面时最容易把它挪到底下和其他 callout 待在一起。
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -33,6 +38,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 HOME = ROOT / "Home.md"
+CANDIDATES = ROOT / ".news-candidates.md"
 
 TITLE_RE = re.compile(r"^> \[!feed\][+-]? 📰 简讯")
 HABITS_RE = re.compile(r"^```dataviewjs\n// ✅ 每日习惯", re.M)
@@ -136,6 +142,15 @@ def main() -> int:
         dup = [u for u in set(urls) if urls.count(u) > 1]
         if dup:
             errs.append(f"同一个链接出现了不止一次:{dup}")
+        if CANDIDATES.exists():
+            pool = CANDIDATES.read_text(encoding="utf-8")
+            outside = [u for u in urls if u not in pool]
+            if outside:
+                errs.append(f"这些链接不在今天的候选清单 .news-candidates.md 里(只许从清单挑):{outside}")
+        elif os.environ.get("GITHUB_ACTIONS") == "true":
+            errs.append("CI 里找不到 .news-candidates.md,简讯却写了链接——没走固定源")
+        else:
+            print("⚠ 本地没有 .news-candidates.md,跳过链接对账(先跑 fetch_news.py 才能对)")
         stale = set(urls) & previous_urls(text)
         if stale:
             errs.append(f"和上一期简讯撞了链接(天天同一批):{sorted(stale)}")

@@ -470,28 +470,34 @@ if (window.MutationObserver) {
 ```
 
 > [!feed] 📰 简讯
-> **Egypt pledges to back Saudi Arabia as Houthi strikes hit Saudi airports and oil sites**
-> 胡塞武装袭击沙特机场和石油设施,埃及表态支持沙特 · [AP via CSMonitor](https://www.csmonitor.com/News-Briefs#location-id-1224868)
+> **China's third-quarter economic growth quickens to 4.5% as exports surge, beating estimates**
+> 中国三季度 GDP 增速回升到 4.5%,出口拉动、好于预期 · [CNBC](https://www.cnbc.com/2026/10/19/chinas-economic-growth-quickens-to-4point6percent-as-exports-surge-stimulus-rolls-out.html)
 >
-> 据美联社报道,最近几天也门胡塞武装用无人机和导弹打了沙特的机场和石油设施,至少 19 人死亡;埃及国防委员会表示要支持沙特,塞西正在申请议会批准向海外派兵。报道说,也门内战因此重新升级。对你:中东产油区又多一处冲突点,油价短期不容易往下走(推论);油价高的时候,电动车"用车便宜"这个卖点更好讲。
->
-> ---
-> **GAC acquires 50 per cent of FAW Toyota**
-> 广汽收购一汽丰田 50% 股权 · [electrive](https://www.electrive.com/2026/10/17/gac-acquires-50-per-cent-of-faw-toyota/)
->
-> 据报道,广汽将接手一汽集团手里一汽丰田的一半股权,用增发 A 股来付,一汽因此成为广汽第二大股东。一汽丰田暂时还是独立公司,丰田之后打算让它和广汽丰田在研发、采购、生产、销售上结盟,先集中做电动化和智能化。背景是车市增速放缓、产能过剩、合资品牌被中国品牌挤压。对你:合资车企在合并、往"电动 + 智能"收拢,座舱研发由谁主导、用谁家的方案,接下来都会重新洗牌。
+> 国家统计局今天公布,三季度 GDP 同比增长 4.5%,比二季度的 4.3% 快,也略高于市场预期;前三季度累计 4.6%,落在今年 4.5%–5% 的目标区间里。拉动主要靠出口,九月社会消费品零售总额只增长约 1.1%,国内需求还是偏弱。对你:出口热、内需冷,国内车市卷价格的压力短期不会减,出海车型的分量会继续加重,你做过的出海合规适配经验会更值钱(推论)。
 >
 > ---
-> **Leapmotor launches A10s with LiDAR for about $13,800**
-> 零跑 A10s 上市,9.28 万元带激光雷达 · [CnEVPost](https://cnevpost.com/2026/10/18/leapmotor-launches-a10s/)
+> **France hit by worst unrest in years as attempts to rein in government spending meet citizen ire**
+> 法国爆发多年来最严重的骚乱 · [CNBC](https://www.cnbc.com/2026/10/19/france-protests-worst-in-years-unrest-macron-.html)
 >
-> 零跑 A10s 售价 9.28 万元,带激光雷达,座舱用高通 8295、智驾用 8650 芯片,支持城市、高速和"车位到车位"的导航辅助驾驶;它是 A10 的外观和舒适配置版,三电参数没变。A10 九月交付约 2.4 万辆,占零跑当月销量约四分之一。对你:激光雷达加城市辅助驾驶已经下探到 10 万元以内,第一次用这类功能的人会越来越多——"现在能不能用、什么时候该接管"怎么让新手一眼看懂,是 HMI 越来越躲不开的题。
+> 据报道,上周末法国多地抗议油价、生活成本和公共服务变差,政府估计约 55 万人上街,部分演变成打砸抢,约 2400 人被捕;马克龙拒绝了内政部长的辞职,说要"毫不妥协"地回应,同时把民怨和海湾冲突推高油价联系在一起。对你:高油价正在点燃欧洲的社会情绪,这是欧洲看待电动车、看待中国车企的大背景之一(推论);近期如果有去法国的行程,留意交通和罢工。
 >
 > ---
-> **Li Auto to hold Power Day on October 20 to share latest EV tech advances**
-> 理想汽车 10 月 20 日办 Power Day · [CnEVPost](https://cnevpost.com/2026/10/19/li-auto-power-day-oct-20/)
+> **Putin reportedly suggests summit with Trump and Xi to decide fate of Ukraine**
+> 据报普京提议与特朗普、习近平开三方峰会决定乌克兰问题 · [CNBC](https://www.cnbc.com/2026/10/19/putin-trump-xi-ukraine-war-energy.html)
 >
-> 理想明晚 19:30 开技术发布会,重点是自研电池往全系铺开(电芯由它和欣旺达五五合资的公司生产),具体技术指标还没透露。八天后(10 月 28 日)新款 i6 上市,用自研 5C 电池和自研智驾芯片。理想九月交付 3.18 万辆,同比降约 6%。对你:想看友商怎么把"电池、充电"这类硬参数讲给普通用户听,明晚的发布会可以留意一下。
+> 据报道,普京提出由俄、美、中三国领导人开峰会来决定乌克兰的前途;这目前只是媒体转述的说法,我只看了摘要。同一时间美乌关系紧张:特朗普为放宽对俄制裁辩护,还指责泽连斯基拖延战争。对你:中国如果被拉上乌克兰问题的谈判桌,中欧、中美关系都会跟着动,欧洲对中国车的关税和准入政策也可能随之调整(推论)。
+>
+> ---
+> **China's CXMT sees shares drop over 6% as investors look past chipmaker's profit turnaround**
+> 长鑫存储发布业绩预告后股价跌超 6% · [CNBC](https://www.cnbc.com/2026/10/19/china-cxmt-profit-outlook-shares.html)
+>
+> 国产内存芯片(DRAM)大厂长鑫存储公布前三季度业绩预告后,周一股价跌了 6% 多——标题的意思是,扭亏为盈没能让投资者买账。我只看了标题和摘要,具体数字没展开。对你:车机和座舱域控都大量用内存芯片,国产存储能不能站稳,关系到车企的芯片成本和供货安全(推论)。
+>
+> ---
+> **尊界V800「煞車門」：從產品安全之爭到「恨國」論戰**
+> 华为尊界 V800 刹车踏板断裂引发舆论战 · [BBC 中文](https://www.bbc.com/zhongwen/articles/cmje5y4254qdo/trad?at_medium=RSS&at_campaign=rss)
+>
+> 据 BBC 中文报道,尊界 V800 被曝刹车踏板断裂,争议很快从产品安全扩展到对"速成车"的质疑、中美汽车技术比较和民族品牌之争,官媒也下场评论。对你:这是开发周期压太短、在安全件上被放大的真实案例;用户一旦不信任车的安全,界面上说什么都救不回来——做 HMI 时,故障和安全提示要提前按最坏情况设计。
 
 ```dataviewjs
 // ✅ 每日习惯:清单、频率、已练成、打卡记录全在 Profile/习惯打卡.md,纯 markdown。
