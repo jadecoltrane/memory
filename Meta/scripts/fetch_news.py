@@ -6,8 +6,8 @@
 RSS 把标题、链接、发布时间、摘要都给好了——哪条是 48 小时内的是时间戳比较,
 不需要判断力,和挑画作同一个思路:机械的部分不交给模型。
 
-产物 `.news-candidates.md`(仓库根目录,不入库):按「国际/国内/财经/科技/汽车」分组,
-每条一行。Claude 只从这里挑、照摘要写,**链接只能用清单里的**——
+产物 `.news-candidates.md`(仓库根目录,不入库):按「国际/中国/财经/科技/汽车」分组,
+每条一行。Claude 只从这里挑(选中的再打开正文读),**链接只能用清单里的**——
 check_news_brief.py 会逐条对账,清单外的链接直接拦,编链接这条路就堵死了。
 
 某个源挂了只跳过它,不让整轮日更失败;全挂了退出码 1(工作流里 continue-on-error,
@@ -35,15 +35,17 @@ OUT = ROOT / ".news-candidates.md"
 FEEDS = {
     "国际": [
         ("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
+        ("BBC 中文", "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml"),
         ("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml"),
         ("NPR", "https://feeds.npr.org/1001/rss.xml"),
         ("DW", "https://rss.dw.com/rdf/rss-en-all"),
         ("France 24", "https://www.france24.com/en/rss"),
     ],
-    "国内": [
-        ("BBC 中文", "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml"),
-        ("SCMP", "https://www.scmp.com/rss/4/feed"),
-        ("Xinhua", "https://english.news.cn/rss/worldrss.xml"),
+    # 简讯固定要 1 条中国新闻,check_news_brief.py 认的就是这一组的链接,所以这组只放中国。
+    # BBC 中文多是国际新闻,挪去了国际;新华社 worldrss 最新一条停在 2018 年,已删。
+    "中国": [
+        ("SCMP China", "https://www.scmp.com/rss/4/feed"),
+        ("SCMP China Economy", "https://www.scmp.com/rss/318421/feed"),
     ],
     "财经": [
         ("CNBC", "https://www.cnbc.com/id/100003114/device/rss/rss.html"),

@@ -28,6 +28,9 @@ AI 重写页面时最容易把它挪到底下和其他 callout 待在一起。
 「对你:」讲这事对普通人意味着什么,每条必须有(用户靠它看懂国家大事)。
 它曾被写成"对你的工作/对车",每条都硬扯到车;所以另拦「对你」提到车的超过 1 条。
 
+用户要每期 4 条、其中固定 1 条中国的:清单「## 中国」那组有候选时,
+简讯里至少一个链接得来自那一组,一条都没有就拦。
+
 用法:check_news_brief.py   (读仓库根目录 Home.md)
 """
 
@@ -48,8 +51,14 @@ HABITS_RE = re.compile(r"^```dataviewjs\n// ✅ 每日习惯", re.M)
 SOURCE_RE = re.compile(r"^.+ · \[[^\]]+\]\((https?://[^)\s]+)\)\s*$")
 URL_RE = re.compile(r"\]\((https?://[^)\s]+)\)")
 EMPTY_MARK = "今日未抓到"
-MAX_ITEMS = 5
+MAX_ITEMS = 4
 CAR_RE = re.compile(r"汽车|车企|车市|车机|车型|电动车|新能源车|中国车|买车|座舱|HMI|智驾|出海")  # 行业词;「打车」这类日常出行不算
+
+
+def group_links(pool: str, group: str) -> set[str]:
+    """候选清单里某一组(## 标题)下的全部链接。"""
+    m = re.search(rf"^## {group}\n(.*?)(?=^## |\Z)", pool, re.M | re.S)
+    return set(re.findall(r"\| (https?://\S+) \|", m.group(1))) if m else set()
 
 
 def feed_block(text: str) -> tuple[int, int, list[str]] | None:
@@ -142,14 +151,14 @@ def main() -> int:
         print(f"⚠ 简讯今天是空的(写了「{EMPTY_MARK}」),放行")
     else:
         if not 1 <= len(items) <= MAX_ITEMS:
-            errs.append(f"简讯应为 1–{MAX_ITEMS} 条(平时 3–5 条),现在 {len(items)} 条")
+            errs.append(f"简讯应为 1–{MAX_ITEMS} 条(平时正好 4 条),现在 {len(items)} 条")
         for i, it in enumerate(items, 1):
             errs += check_item(i, it)
         car = [i for i, it in enumerate(items, 1) if links_to_car(it)]
         if len(car) > 1:
             errs.append(f"第 {car} 条的「对你」都扯到了车——「对你」讲的是对普通人的影响,别往车上扯(用户:不要强行关联)")
-        if len(items) < 3:
-            print(f"⚠ 简讯只有 {len(items)} 条(平时 3–5 条);搜不到就少写是对的,别硬凑")
+        if len(items) < MAX_ITEMS:
+            print(f"⚠ 简讯只有 {len(items)} 条(平时 4 条);搜不到就少写是对的,别硬凑")
 
         urls = URL_RE.findall(joined)
         dup = [u for u in set(urls) if urls.count(u) > 1]
@@ -160,6 +169,9 @@ def main() -> int:
             outside = [u for u in urls if u not in pool]
             if outside:
                 errs.append(f"这些链接不在今天的候选清单 .news-candidates.md 里(只许从清单挑):{outside}")
+            china = group_links(pool, "中国")
+            if china and not china & set(urls):
+                errs.append("没有中国的新闻:候选清单「## 中国」那组有候选,简讯里至少要有 1 条来自那组")
         elif os.environ.get("GITHUB_ACTIONS") == "true":
             errs.append("CI 里找不到 .news-candidates.md,简讯却写了链接——没走固定源")
         else:
