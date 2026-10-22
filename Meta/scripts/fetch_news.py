@@ -6,8 +6,8 @@
 RSS 把标题、链接、发布时间、摘要都给好了——哪条是 48 小时内的是时间戳比较,
 不需要判断力,和挑画作同一个思路:机械的部分不交给模型。
 
-产物 `.news-candidates.md`(仓库根目录,不入库):按「国际/国内/财经/科技/汽车」分组,
-每条一行。Claude 只从这里挑、照摘要写,**链接只能用清单里的**——
+产物 `.news-candidates.md`(仓库根目录,不入库):按「国际/中国/财经/科技/汽车」分组,
+每条一行。Claude 只从这里挑(选中的再打开正文读),**链接只能用清单里的**——
 check_news_brief.py 会逐条对账,清单外的链接直接拦,编链接这条路就堵死了。
 
 某个源挂了只跳过它,不让整轮日更失败;全挂了退出码 1(工作流里 continue-on-error,
@@ -31,28 +31,33 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 OUT = ROOT / ".news-candidates.md"
 
 # 固定来源。改这里就是改简讯的视野;每组几家互相补位,一家挂了不至于整组空掉。
+# 入选标准是两条都过:RSS 拉得到,而且 read_article.py 能从文章页抽出完整正文
+# (2026-10-21 实测:SCMP 只给导语、正文在付费墙后;NPR、CNBC、France 24、FT 整页 403;
+# The Verge 抽出来夹着大量订阅按钮文字——都删了。WebFetch 对卫报、DW、CNA 直接拒抓,
+# 所以读正文走 read_article.py,不走 WebFetch)。加新源前先用它试三篇。
 # 汽车组只占简讯 1 条(用户明确说过汽车别多),所以只留两家。
 FEEDS = {
     "国际": [
         ("BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"),
         ("Al Jazeera", "https://www.aljazeera.com/xml/rss/all.xml"),
-        ("NPR", "https://feeds.npr.org/1001/rss.xml"),
         ("DW", "https://rss.dw.com/rdf/rss-en-all"),
-        ("France 24", "https://www.france24.com/en/rss"),
+        ("德国之声中文", "https://rss.dw.com/rdf/rss-chi-all"),
+        ("CNA Asia", "https://www.channelnewsasia.com/rssfeeds/8395744"),
     ],
-    "国内": [
-        ("BBC 中文", "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml"),
-        ("SCMP", "https://www.scmp.com/rss/4/feed"),
-        ("Xinhua", "https://english.news.cn/rss/worldrss.xml"),
+    # 简讯固定要 1 条中国新闻,check_news_brief.py 认的就是这一组的链接,所以这组只放中国。
+    # 一家外媒视角、一家官方视角,互相补位。
+    "中国": [
+        ("Guardian China", "https://www.theguardian.com/world/china/rss"),
+        ("CGTN China", "https://www.cgtn.com/subscribe/rss/section/china.xml"),
     ],
     "财经": [
-        ("CNBC", "https://www.cnbc.com/id/100003114/device/rss/rss.html"),
-        ("CNBC World", "https://www.cnbc.com/id/100727362/device/rss/rss.html"),
-        ("Guardian", "https://www.theguardian.com/business/rss"),
+        ("Guardian Business", "https://www.theguardian.com/business/rss"),
+        ("BBC Business", "https://feeds.bbci.co.uk/news/business/rss.xml"),
+        ("CNA Business", "https://www.channelnewsasia.com/rssfeeds/8395954"),
     ],
     "科技": [
-        ("The Verge", "https://www.theverge.com/rss/index.xml"),
         ("Ars Technica", "https://feeds.arstechnica.com/arstechnica/index"),
+        ("BBC Tech", "https://feeds.bbci.co.uk/news/technology/rss.xml"),
     ],
     "汽车": [
         ("CnEVPost", "https://cnevpost.com/feed/"),
