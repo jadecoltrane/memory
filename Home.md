@@ -1,9 +1,9 @@
 ---
 cssclasses: workbench
 generated: 2026-10-24
-painting-url: https://commons.wikimedia.org/wiki/Special:FilePath/White%20on%20White%20%28Malevich%2C%201918%29.png?width=1280
-painting-title: 卡济米尔·谢韦里诺维奇·马列维奇《Suprematist Composition: White on White》(俄罗斯前卫艺术、1918年)
-painting-intro: 卡济米尔·谢韦里诺维奇·马列维奇的作品(俄罗斯前卫艺术、1918)。
+painting-url: "https://commons.wikimedia.org/wiki/Special:FilePath/White%20on%20White%20%28Malevich%2C%201918%29.png?width=1280"
+painting-title: "卡济米尔·谢韦里诺维奇·马列维奇《Suprematist Composition: White on White》(俄罗斯前卫艺术、1918年)"
+painting-intro: "卡济米尔·谢韦里诺维奇·马列维奇的作品(俄罗斯前卫艺术、1918)。"
 ---
 
 🎴 10/24 法国人不是不追求成功-换了计价单位,而那… #工作台

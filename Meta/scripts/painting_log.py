@@ -20,6 +20,7 @@
 """
 
 import datetime
+import json
 import re
 import sys
 from pathlib import Path
@@ -87,6 +88,27 @@ def read_ledger():
     return rows
 
 
+def frontmatter_problems():
+    """Home.md frontmatter 里会让 YAML 解析失败的裸值(只用标准库,CI 不装 PyYAML)。
+
+    一行坏掉整段属性都读不到,页面上只有一个「无效属性」,心跳还误报成"很久没更新"——
+    看着像日更没跑,其实是跑了但写坏了。所以不管哪一步写的 frontmatter,提交前都过一遍。
+    """
+    bad = []
+    for line in HOME.read_text(encoding="utf-8").splitlines()[1:40]:
+        if line.strip() == "---":
+            break
+        m = re.match(r"^([\w-]+):\s+(.+)$", line)
+        if not m:
+            continue
+        v = m.group(2).strip()
+        if v[0] in "\"'[{":
+            continue
+        if ": " in v or " #" in v or v.endswith(":") or v[0] in "&*!|>%@`":
+            bad.append(f"{m.group(1)}: {v[:60]}")
+    return bad
+
+
 def read_home():
     fm = {}
     for line in HOME.read_text(encoding="utf-8").splitlines()[1:40]:
@@ -94,7 +116,14 @@ def read_home():
             break
         m = re.match(r"^(generated|painting-url|painting-title):\s*(.*)$", line)
         if m:
-            fm[m.group(1)] = m.group(2).strip()
+            v = m.group(2).strip()
+            # pick_painting 把值写成 JSON/YAML 双引号字符串;老版本是裸写的,两种都认
+            if v.startswith('"'):
+                try:
+                    v = json.loads(v)
+                except ValueError:
+                    pass
+            fm[m.group(1)] = v
     artist, name = split_title(fm.get("painting-title", ""))
     return {
         "date": fm.get("generated", ""),
@@ -139,6 +168,12 @@ def main():
         return 1
 
     if arg == "--check":
+        bad = frontmatter_problems()
+        if bad:
+            print("✗ Home.md frontmatter 有裸值会让 YAML 解析失败(Obsidian 显示「无效属性」),加双引号:", file=sys.stderr)
+            for b in bad:
+                print(f"    {b}", file=sys.stderr)
+            return 1
         window = recent(rows, cur["date"])
         hits = []
         for r in window:

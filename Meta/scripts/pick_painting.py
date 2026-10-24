@@ -170,9 +170,13 @@ def main():
             print(f"[dry-run] {title}\n  {url}\n  {intro}\n  ({why},候选 {len(cands)} 幅)")
             return 0
         s = HOME.read_text(encoding="utf-8")
-        s = re.sub(r"^painting-url:.*$", "painting-url: " + url, s, count=1, flags=re.M)
-        s = re.sub(r"^painting-title:.*$", "painting-title: " + title, s, count=1, flags=re.M)
-        s = re.sub(r"^painting-intro:.*$", "painting-intro: " + intro, s, count=1, flags=re.M)
+        # 值一律写成双引号字符串(JSON 字符串就是合法的 YAML 双引号标量)。裸写时英文画名里的
+        # 「: 」会让整段 frontmatter 解析失败(2026-10-24 白上之白 "Suprematist Composition: White on White"),
+        # Obsidian 报「无效属性」,dv.current() 一个字段都读不到:横幅空白、心跳误报"很久没更新"。
+        # 替换串用 lambda:引号转义里的反斜杠不能让 re.sub 当模板转义吃掉
+        for key, val in (("painting-url", url), ("painting-title", title), ("painting-intro", intro)):
+            line = f"{key}: {json.dumps(val, ensure_ascii=False)}"
+            s = re.sub(rf"^{key}:.*$", lambda _m: line, s, count=1, flags=re.M)
         HOME.write_text(s, encoding="utf-8")
         print(f"✓ 今日画作:{title}  ({why},候选池 {len(cands)} 幅可选)")
         return 0
