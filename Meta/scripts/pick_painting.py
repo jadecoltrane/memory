@@ -28,6 +28,7 @@ import painting_log as PL  # noqa: E402  判据必须和机器校验共用一份
 ROOT = Path(__file__).resolve().parents[2]
 POOL = ROOT / "Meta" / "画作池.md"
 HOME = ROOT / "Home.md"
+SOURCES = ROOT / ".painting-sources.md"   # 给日更模型写导览的备料,不入库
 UA = "memory-repo-painting/1.0 (github.com/jadecoltrane/memory)"
 MOVEMENT_COOLDOWN = 6      # 天:同一流派
 COUNTRY_COOLDOWN = 4       # 天:同一国别
@@ -99,6 +100,50 @@ def intro_of(cand):
             return out or text[:160]
     bits = [b for b in (cand["country"], cand["movement"], cand["year"]) if b]
     return f"{cand['artist']}的作品" + ("(" + "、".join(bits) + ")" if bits else "") + "。"
+
+
+def wiki_extract(lang, title, limit):
+    from urllib.parse import urlencode
+    q = urlencode({"action": "query", "prop": "extracts", "explaintext": 1, "titles": title,
+                   "format": "json", "formatversion": 2, "redirects": 1})
+    try:
+        page = json.loads(curl(f"https://{lang}.wikipedia.org/w/api.php?{q}"))["query"]["pages"][0]
+        return page.get("extract", "").strip()[:limit]
+    except Exception:
+        return ""
+
+
+def write_sources(cand, title):
+    """给日更里写导览的模型备料:按图片文件名在 Wikidata 反查条目,拉中英文维基正文。
+
+    导览要讲背景、故事、流行解读,这些得有出处——不备料,模型只能凭记忆讲,
+    "AI 回忆被洗成事实"正是这个库最防的事。抓不到不拦流程,文件里写明没抓到,
+    模型就知道该在「资料」段标"模型知识,未核查"。
+    """
+    from urllib.parse import urlencode
+    parts = [f"# 今日画作资料\n\n画作:{title}\n画家:{cand['artist']}\n流派:{cand['movement'] or '未标'}\n"]
+    sitelinks = {}
+    try:
+        q = urlencode({"action": "query", "list": "search", "format": "json",
+                       "srsearch": f'haswbstatement:P18="{cand["file"]}"'})
+        hits = json.loads(curl(f"https://www.wikidata.org/w/api.php?{q}"))["query"]["search"]
+        if hits:
+            q = urlencode({"action": "wbgetentities", "ids": hits[0]["title"], "props": "sitelinks",
+                           "sitefilter": "zhwiki|enwiki", "format": "json"})
+            ent = next(iter(json.loads(curl(f"https://www.wikidata.org/w/api.php?{q}"))["entities"].values()))
+            sitelinks = {k: v["title"] for k, v in ent.get("sitelinks", {}).items()}
+    except Exception:
+        pass
+    zh_title = sitelinks.get("zhwiki") or cand["zh"]
+    got = False
+    for lang, t, limit in (("zh", zh_title, 4000), ("en", sitelinks.get("enwiki"), 8000)):
+        text = wiki_extract(lang, t, limit) if t else ""
+        if text:
+            got = True
+            parts.append(f"## {lang}.wikipedia:{t}\n\n{text}\n")
+    if not got:
+        parts.append("(没抓到维基正文。导览凭模型知识写,「资料」段写「模型知识,未联网核查」。)\n")
+    SOURCES.write_text("\n".join(parts), encoding="utf-8")
 
 
 def title_of(cand):
@@ -174,10 +219,17 @@ def main():
         # 「: 」会让整段 frontmatter 解析失败(2026-10-24 白上之白 "Suprematist Composition: White on White"),
         # Obsidian 报「无效属性」,dv.current() 一个字段都读不到:横幅空白、心跳误报"很久没更新"。
         # 替换串用 lambda:引号转义里的反斜杠不能让 re.sub 当模板转义吃掉
-        for key, val in (("painting-url", url), ("painting-title", title), ("painting-intro", intro)):
+        # painting-guide 清空:前一天的导览绝不能挂在新画下面。由日更里的模型照备料重写,
+        # 没写上 painting_guide.py --check 会拦住
+        for key, val in (("painting-url", url), ("painting-title", title), ("painting-intro", intro),
+                         ("painting-guide", "")):
             line = f"{key}: {json.dumps(val, ensure_ascii=False)}"
             s = re.sub(rf"^{key}:.*$", lambda _m: line, s, count=1, flags=re.M)
         HOME.write_text(s, encoding="utf-8")
+        try:
+            write_sources(cand, title)
+        except Exception as e:  # 备料是锦上添花,挂了不能连累已经挑好的画
+            print(f"  画作资料没备上:{e}", file=sys.stderr)
         print(f"✓ 今日画作:{title}  ({why},候选池 {len(cands)} 幅可选)")
         return 0
     print(f"连试 {MAX_TRIES} 幅图片都验证失败,保留前一天的画", file=sys.stderr)

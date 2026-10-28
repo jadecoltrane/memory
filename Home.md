@@ -4,6 +4,7 @@ generated: 2026-10-28
 painting-url: "https://commons.wikimedia.org/wiki/Special:FilePath/John%20Constable%20-%20Salisbury%20Cathedral%20from%20the%20Bishop%27s%20Grounds.jpg?width=1280"
 painting-title: "约翰·康斯特勃《Salisbury Cathedral from the Bishop's Grounds》(1823年)"
 painting-intro: "约翰·康斯特勃的作品(1823)。"
+painting-guide: "背景:康斯特勃是英国风景画家,一辈子几乎只画英格兰乡间。这幅是索尔兹伯里主教约翰·费舍尔 1820 年向他订的画,主教的侄子小费舍尔是康斯特勃最好的朋友,他常去索尔兹伯里住。画的就是主教自家花园望出去的大教堂——尖塔是全英国最高的。\n故事:画送到后主教不满意:教堂正上方那片乌云太暗了,他想要一片晴朗的天。康斯特勃答应重画一版亮天的,还没画完主教就在 1825 年去世了。于是这幅原作给了小费舍尔,晴天那版后来送给主教遗孀。今天你能在纽约弗里克收藏馆看到那张\"改过天\"的版本。\n怎么看:先看两边的大树——树干和枝叶在画面中间合拢成一道拱门,把教堂框在里面,跟哥特式教堂的尖拱窗遥相呼应。左下角拿手杖指着教堂的小人,常被认为就是主教夫妇。右下角牛在水边喝水,让庄严的教堂落进安静的田园日常里。常见解读是\"自然和信仰和谐共处\";那片主教嫌弃的乌云,恰恰是康斯特勃最在意的东西:真实的英国天空。\n画派:属于浪漫主义时期的英国风景画。在他之前,风景多是神话故事的布景,要画得理想化;康斯特勃坚持对着真实天气写生,专门画过大量云的习作。看这幅里云的明暗、树叶上星星点点的白色高光,就是他捕捉光线变化的办法——这种画法后来影响了法国画家,一路通向印象派。\n资料:V&A 博物馆藏品页、英文维基《Salisbury Cathedral from the Bishop's Grounds》、弗里克收藏馆藏品页(委托、乌云、改稿已联网核查);左下角人物身份、对法国画派的影响为模型知识,未联网核查"
 ---
 
 🎴 10/28 小红书写作定位-半知识型与从冲突开始而非… #工作台
@@ -66,6 +67,21 @@ const titleEl = caption.createEl("div", { cls: "wb-daily-painting-name", text: p
 titleEl.style.cssText = "font-weight:600; font-size:1.05em; line-height:1.4; margin-bottom:8px; position:static; background:none; text-shadow:none;";
 const introEl = caption.createEl("div", { cls: "wb-daily-painting-desc", text: p["painting-intro"] ?? "" });
 introEl.style.cssText = "font-size:0.92em; line-height:1.6; opacity:0.75; position:static; background:none; text-shadow:none;";
+// 导览默认收起:手机上卡片本来就占满一屏,展开与否由用户决定。每行「标签:正文」,标签加粗
+const guide = String(p["painting-guide"] ?? "").trim();
+if (guide) {
+  const det = caption.createEl("details", { cls: "wb-painting-guide" });
+  det.style.cssText = "margin-top:10px; font-size:0.9em; line-height:1.65; position:static;";
+  const sum = det.createEl("summary", { text: "📖 看懂这幅画" });
+  sum.style.cssText = "cursor:pointer; font-weight:600; color:var(--wb-accent-text); padding:4px 0;";
+  for (const row of guide.split("\n")) {
+    const m = row.match(/^([^::]+)[::](.*)$/);
+    const para = det.createEl("p");
+    para.style.cssText = `margin:8px 0 0; ${m && m[1] === "资料" ? "font-size:0.85em; opacity:0.6;" : ""}`;
+    if (m) { para.createEl("strong", { text: m[1] + " " }); para.appendText(m[2].trim()); }
+    else para.setText(row);
+  }
+}
 
 // 2026-08-16 删掉「按当天画作取主色调写进 --wb-accent」那段(canvas 采样 + 色相分桶投票)。
 // 用户要求胶囊固定用浅紫:强调色每天跟着画走,意味着整页配色每天赌一次运气,今天是土黄

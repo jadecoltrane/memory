@@ -53,3 +53,6 @@ conflict-files-obsidian-git.md
 # 有没有正常触发),不是记忆内容,别入库。
 __pycache__/
 *.pyc
+
+# 日更挑画时给导览备的料(pick_painting.py 生成),每天重拉,不入库
+.painting-sources.md
