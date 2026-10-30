@@ -55,11 +55,10 @@ jobs:
       - name: 拉简讯候选
         continue-on-error: true
         run: python3 Meta/scripts/fetch_news.py
-
-      - name: Claude 生成今日工作台
-        uses: anthropics/claude-code-action@v1
+      - name: Gemini 生成今日工作台
+        uses: google-github-actions/run-gemini-cli@v0
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          gemini_api_key: ${{ secrets.GEMINI }}
           prompt: |
             当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 Meta/WORKBENCH.md,严格按那份文件的规则更新 Home.md 的四个 AI 板块(📰 简讯 / 🎴 今日抽卡 / 🌱 今日延伸 / 📖 今日一读),以及横幅画作:
 
