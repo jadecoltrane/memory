@@ -3,7 +3,7 @@ type: note
 tier: 参考
 created: 2026-10-30
 checkable: true
-verified: false
+verified: true
 source: ChatGPT 自动化端到端测试，非真实用户记忆
 tags: [自动化测试]
 ---
