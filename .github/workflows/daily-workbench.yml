@@ -55,12 +55,11 @@ jobs:
       - name: 拉简讯候选
         continue-on-error: true
         run: python3 Meta/scripts/fetch_news.py
-      - name: Gemini 生成今日工作台
-        uses: google-github-actions/run-gemini-cli@v0
-        env:
-          GEMINI_CLI_TRUST_WORKSPACE: true
+
+      - name: Claude 生成今日工作台
+        uses: anthropics/claude-code-action@v1
         with:
-          gemini_api_key: ${{ secrets.GEMINI }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             当前目录就是个人记忆库仓库(jadecoltrane/memory)。读 Meta/WORKBENCH.md,严格按那份文件的规则更新 Home.md 的四个 AI 板块(📰 简讯 / 🎴 今日抽卡 / 🌱 今日延伸 / 📖 今日一读),以及横幅画作:
 
@@ -78,6 +77,8 @@ jobs:
             - ## 标题、所有 dataviewjs 区块(横幅、信息条、今日内容折叠壳外层结构、统计卡、🎲 随机重逢卡、✅ 每日习惯卡,含心跳报警)、callout 卡片语法全部原样保留;frontmatter 保留 cssclasses;generated 已由前置步骤写好当天日期,原样保留。改动固定展示结构或视觉风格前保持克制:非用户明确要求就保留现有结构与视觉、不要自行加回或改动既有元素(历次否决/撤销过的方案可查 git 历史)
 
             只修改工作区文件,不要自行 commit 或 push;后续步骤会统一校验、提交并推送。
+          claude_args: |
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch"
 
       # iOS 主屏小组件只读原始文本、不跑插件,所以文件开头那段 dataviewjs 就是小组件上的一屏代码。
       # 这一步把当天工作台压成固定五行人话写进 Home.md 顶部(页面里由 workbench.css 整段藏掉,视觉不变)。
